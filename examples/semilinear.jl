@@ -8,8 +8,8 @@ function semilinear(mesh::Mesh, L::AbstractMatrix, M::AbstractMatrix,
 
   res = Inf
   while res > tol
-    A = L + MinFEM.asmCubicDerivativeMatrix(mesh, y)
-    rhs = -L*y + M*s - MinFEM.asmCubicTerm(mesh, y)
+    A = L + asmCubicDerivativeMatrix(mesh, y)
+    rhs = -L*y + M*s - asmCubicTerm(mesh, y)
 
     if(BoundaryIndices != [])
       asmDirichletCondition(A, BoundaryIndices, rhs, zeros(mesh.nnodes))
