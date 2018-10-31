@@ -374,11 +374,12 @@ function asmCubicDerivativeMatrix(mesh::Mesh, y::AbstractVector)
   for el=1:mesh.nelems
     nodes = mesh.Triangles[el]
     y_quadratic = zeros(length(quadW))
-    y_quad = zeros(length(quadW))
-    for i=1:3
-      for (q, x) in enumerate(quadX)
-        y_quad[q] += y[nodes[i]]*Phi(i, x)
+    for (q, x) in enumerate(quadX)
+      y_quad = 0
+      for i=1:3
+        y_quad += y[nodes[i]]*Phi(i, x)
       end
+      y_quadratic[q] = y_quad^2
     end
 
     (detJ, J) = Jacobian(mesh, el)
@@ -386,7 +387,7 @@ function asmCubicDerivativeMatrix(mesh::Mesh, y::AbstractVector)
     for i=1:3
       for j=1:3
         for (q, x) in enumerate(quadX)
-          elemMat[i,j] += 3.0*y_quad[q]^2 * Phi(i, x) * Phi(j, x) * quadW[q] * detJ
+          elemMat[i,j] += 3.0* y_quadratic[q] * Phi(i, x) * Phi(j, x) * quadW[q] * detJ
         end
       end
     end
