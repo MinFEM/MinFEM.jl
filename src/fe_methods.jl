@@ -344,10 +344,12 @@ function asmCubicTerm(mesh::Mesh, y::AbstractVector)
     nodes = mesh.Triangles[el]
     (detJ, J) = Jacobian(mesh, el)
     y_cubic = zeros(length(quadW))
-    for i=1:3
-      for (q, x) in enumerate(quadX)
-        y_cubic[q] += (y[nodes[i]]*Phi(i, x))^3
+    for (q, x) in enumerate(quadX)
+      y_quad = 0
+      for i=1:3
+        y_quad += y[nodes[i]]*Phi(i, x)
       end
+      y_cubic[q] = y_quad^3
     end
 
     for i=1:3
