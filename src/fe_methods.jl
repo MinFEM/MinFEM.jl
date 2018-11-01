@@ -412,7 +412,7 @@ end
 Assembly of the second derivative of the cubic term of the standard semilinear elliptic equation 
 around the state y.
 """
-function asmCubicSecondDerivativeMatrix(mesh::Mesh, y::AbstractVector, p::AbstractVector)
+function asmCubicSecondDerivativeMatrix(mesh::Mesh, y::AbstractVector)
   D = Dict{Tuple{Int64,Int64}, Float64}()
 
   for el=1:mesh.nelems
