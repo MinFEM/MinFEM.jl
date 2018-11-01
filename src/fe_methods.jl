@@ -407,10 +407,10 @@ function asmCubicDerivativeMatrix(mesh::Mesh, y::AbstractVector)
 end
 
 """
-    asmCubicSecondDerivativeMatrix(mesh::Mesh, y::AbstractVector, p::AbstractVector)
+    asmCubicSecondDerivativeMatrix(mesh::Mesh, y::AbstractVector)
 
 Assembly of the second derivative of the cubic term of the standard semilinear elliptic equation 
-around the state (y,p).
+around the state y.
 """
 function asmCubicSecondDerivativeMatrix(mesh::Mesh, y::AbstractVector, p::AbstractVector)
   D = Dict{Tuple{Int64,Int64}, Float64}()
