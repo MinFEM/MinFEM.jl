@@ -135,14 +135,15 @@ function gradPhi(ii::Int64)
 end
 
 """
-    function asmDirichletCondition(SM, DI::Set{Int64}, rhs=[], bc=[]; qdim=1)
+    function asmDirichletCondition(SM, DI::Set{Int64}, rhs=[], bc=[]; qdim=1, insert=1.0)
 
 Modify a stiffness matrix and a right hand side according to the given Dirichlet conditions.
 DI has to be the set of node indices for which the condition should be active.
 For vector valued states either DI can be set to each component that should have a
 Dirichlet condtion or qdim is set, if all components should have the condition.
+The value insert is put as diagonal element. Usually you want a 1.0 here.
 """
-function asmDirichletCondition(SM, DI::Set{Int64}, rhs=[], bc=[]; qdim=1)
+function asmDirichletCondition(SM, DI::Set{Int64}, rhs=[], bc=[]; qdim=1, insert=1.0)
   if rhs != [] && bc != []
     for i in DI
       for d=1:qdim
@@ -163,7 +164,7 @@ function asmDirichletCondition(SM, DI::Set{Int64}, rhs=[], bc=[]; qdim=1)
       ii = qdim*(i-1)+d
       SM[ii, SM[ii,:].nzind] *= 0.0;
       SM[:, ii] *= 0.0;
-      SM[ii, ii] = 1.0;
+      SM[ii, ii] = insert;
     end
   end
 end
