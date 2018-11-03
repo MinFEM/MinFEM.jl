@@ -3,6 +3,21 @@
 
 ## A minimal finite element tool for demonstration and teaching.
 
+* The purpose of this package is to provide an easy and minimalistic introdcution to the finite element method.
+
+* We restrict ourselves to linear finite elements on two-dimensional, triangular grids.
+
+* This code imports meshes in GMSH v2 and v4 format and outputs VTK format for Paraview.
+
+First we need to add the MinFEM package to our Julia installation.
+Thus, hit the **]** key and type
+
+**add** https://github.com/msiebenborn/MinFEM.jl
+
+**test** MinFEM
+
+Also download the package from github to obtain the examples and meshes and navigate to the **examples** folder.
+
 Lets go through a code for the Poisson equaition on a unit square with homogeneous Dirichlet boundary conditions.
 
 First we have to load the package MinFEM and WriteVTK. The latter is used to write the results in a format suitable for Paraview. We then import a mesh file generated with GMSH.
@@ -12,7 +27,7 @@ First we have to load the package MinFEM and WriteVTK. The latter is used to wri
 using MinFEM
 using WriteVTK
 
-mesh = import_mesh("poisson.msh")
+mesh = import_mesh("../meshes/poisson.msh")
 
 ```
 
