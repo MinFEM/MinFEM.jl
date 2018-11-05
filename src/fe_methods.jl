@@ -432,8 +432,7 @@ function asmCubicSecondDerivativeMatrix(mesh::Mesh, y::AbstractVector, p::Abstra
     for i=1:3
       for j=1:3
         for (q, x) in enumerate(quadX)
-          elemMat[i,j] += 6.0 * y_quad[q] * p_quad[q] * Phi(i, x) * Phi(j, x)
-                          * quadW[q] * detJ
+          elemMat[i,j] += 6.0 * y_quad[q] * p_quad[q] * Phi(i, x) * Phi(j, x) * quadW[q] * detJ
         end
       end
     end
