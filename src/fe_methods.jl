@@ -408,20 +408,22 @@ function asmCubicDerivativeMatrix(mesh::Mesh, y::AbstractVector)
 end
 
 """
-    asmCubicSecondDerivativeMatrix(mesh::Mesh, y::AbstractVector)
+    asmCubicSecondDerivativeMatrix(mesh::Mesh, y::AbstractVector, p::AbstractVector)
 
 Assembly of the second derivative of the cubic term of the standard semilinear elliptic equation 
 around the state y.
 """
-function asmCubicSecondDerivativeMatrix(mesh::Mesh, y::AbstractVector)
+function asmCubicSecondDerivativeMatrix(mesh::Mesh, y::AbstractVector, p::AbstractVector)
   D = Dict{Tuple{Int64,Int64}, Float64}()
 
   for el=1:mesh.nelems
     nodes = mesh.Triangles[el]
     y_quad = zeros(length(quadW))
+    p_quad = zeros(length(quadW))
     for i=1:3
       for (q, x) in enumerate(quadX)
         y_quad[q] += y[nodes[i]]*Phi(i, x)
+        p_quad[q] += p[nodes[i]]*Phi(i, x)
       end
     end
 
@@ -430,7 +432,8 @@ function asmCubicSecondDerivativeMatrix(mesh::Mesh, y::AbstractVector)
     for i=1:3
       for j=1:3
         for (q, x) in enumerate(quadX)
-          elemMat[i,j] += 6.0*y_quad[q] * Phi(i, x) * Phi(j, x) * quadW[q] * detJ
+          elemMat[i,j] += 6.0 * y_quad[q] * p_quad[q] * Phi(i, x) * Phi(j, x)
+                          * quadW[q] * detJ
         end
       end
     end
