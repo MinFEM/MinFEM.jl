@@ -16,7 +16,7 @@ Thus, hit the **]** key and type
 
 **test** MinFEM
 
-Also download the package from github to obtain the examples and meshes and navigate to the **examples** folder.
+Also download the package from github to obtain the examples and meshes and navigate, within the julia console, to the **examples** folder.
 
 Lets go through a code for the Poisson equaition on a unit square with homogeneous Dirichlet boundary conditions.
 
