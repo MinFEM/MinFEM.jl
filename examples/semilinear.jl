@@ -27,13 +27,15 @@ mesh = import_mesh("../meshes/semilinear.msh")
 L = asmLaplacian(mesh)
 M = asmMassMatrix(mesh)
 
-f(x) = 100.0*x[1]*x[2]
+n=3
+m=2
+f(x) = ((n*pi)^2 + (m*pi)^2) *sin(n*x[1]*pi)*sin(m*x[2]*pi)
 s = evaluateMeshFunction(mesh, f)
 
-boundary = union!(mesh.Boundaries[1001].Nodes,
-                         mesh.Boundaries[1002].Nodes,
-                         mesh.Boundaries[1003].Nodes,
-                         mesh.Boundaries[1004].Nodes);
+boundary = union(mesh.Boundaries[1001].Nodes,
+                 mesh.Boundaries[1002].Nodes,
+                 mesh.Boundaries[1003].Nodes,
+                 mesh.Boundaries[1004].Nodes);
 
 y = semilinear(mesh, L, M, s, boundary);
 
