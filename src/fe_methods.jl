@@ -528,12 +528,12 @@ function computeGradient(mesh::Mesh, y::AbstractVector; qdim=1)
   grad = zeros(2*qdim*mesh.nelems)
   for el=1:mesh.nelems
     nodes = mesh.Triangles[el]
-    (detJ, J) = MinFEM.Jacobian(mesh, el)
+    (detJ, J) = Jacobian(mesh, el)
     
     for q=1:qdim
       g = view(grad, (1:2).+(2*qdim*(el-1) + 2*(q-1)))
       for i=1:3
-        g[:] += y[qdim*(nodes[i]-1)+q]*(J*MinFEM.gradPhi(i))
+        g[:] += y[qdim*(nodes[i]-1)+q]*(J*gradPhi(i))
       end
     end
   end
@@ -549,12 +549,12 @@ function asmGradient(mesh::Mesh; qdim=1)
   G = zeros(2*qdim*mesh.nelems, mesh.nnodes*qdim)
   for el=1:mesh.nelems
     nodes = mesh.Triangles[el]
-    (detJ, J) = MinFEM.Jacobian(mesh, el)
+    (detJ, J) = Jacobian(mesh, el)
     
     for q=1:qdim
       for i=1:3
         g = view(G, (1:2).+(2*qdim*(el-1) + 2*(q-1)), qdim*(nodes[i]-1)+q)
-        g[:] += J*MinFEM.gradPhi(i)
+        g[:] += J*gradPhi(i)
       end
     end
   end
