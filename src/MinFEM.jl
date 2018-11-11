@@ -16,6 +16,8 @@ export PDESystem,
        asmElasticity,
        asmDirichletCondition, 
        L2norm,
+       asmGradient,
+       computeGradient,
        Mesh, 
        import_mesh, 
        write_vtk_mesh
