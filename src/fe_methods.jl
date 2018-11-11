@@ -169,7 +169,7 @@ function asmDirichletCondition(SM, DI::Set{Int64}, rhs=[], bc=[]; qdim=1, insert
   end
 end
 
-function asmSparseMatrix(mesh::Mesh, D::Dict{Tuple{Int64,Int64}, Float64}; nrows=-1, ncols=-1)
+function asmSparseMatrix(D::Dict{Tuple{Int64,Int64}, Float64}; nrows=-1, ncols=-1)
   nn = length(D)
   II = zeros(Int64, nn)
   JJ = zeros(Int64, nn)
@@ -213,7 +213,7 @@ function asmLaplacian(mesh::Mesh)
     end
   end
 
-  return asmSparseMatrix(mesh, D)
+  return asmSparseMatrix(D)
 end
 
 """
@@ -251,7 +251,7 @@ function asmMassMatrix(mesh::Mesh; qdim=1)
     end
   end
 
-  return asmSparseMatrix(mesh, D)
+  return asmSparseMatrix(D)
 end
 
 
@@ -294,7 +294,7 @@ function asmBoundaryMassMatrix(mesh::Mesh, BoundaryEdges=Set{Int64}(-1); qdim=1)
     end
   end
 
-  return asmSparseMatrix(mesh,D,nrows=qdim*mesh.nnodes,ncols=qdim*mesh.nnodes)
+  return asmSparseMatrix(D,nrows=qdim*mesh.nnodes,ncols=qdim*mesh.nnodes)
 end
 
 
@@ -404,7 +404,7 @@ function asmCubicDerivativeMatrix(mesh::Mesh, y::AbstractVector)
     end
   end
 
-  return asmSparseMatrix(mesh, D)
+  return asmSparseMatrix(D)
 end
 
 """
@@ -448,7 +448,7 @@ function asmCubicSecondDerivativeMatrix(mesh::Mesh, y::AbstractVector, p::Abstra
     end
   end
 
-  return asmSparseMatrix(mesh, D)
+  return asmSparseMatrix(D)
 end
 
 """
@@ -516,7 +516,7 @@ function asmElasticity(mesh::Mesh, lambda::Float64, mu::Float64)
     end
   end
 
-  return asmSparseMatrix(mesh, D)
+  return asmSparseMatrix(D)
 end
 
 """
@@ -546,17 +546,38 @@ end
 Assembles the linear mapping from a state on the given mesh to the gradient.
 """
 function asmGradient(mesh::Mesh; qdim=1)
-  G = zeros(2*qdim*mesh.nelems, mesh.nnodes*qdim)
+  D = Dict{Tuple{Int64,Int64}, Float64}()
+
   for el=1:mesh.nelems
+    G = zeros(2*qdim, 3*qdim)
+
     nodes = mesh.Triangles[el]
     (detJ, J) = Jacobian(mesh, el)
     
     for q=1:qdim
       for i=1:3
-        g = view(G, (1:2).+(2*qdim*(el-1) + 2*(q-1)), qdim*(nodes[i]-1)+q)
+        g = view(G, [2*(q-1)+1, 2*(q-1)+2], qdim*(i-1)+q)
         g[:] += J*gradPhi(i)
       end
     end
+
+    for i=1:2
+      for j=1:3
+        for ic=1:qdim
+          for jc=1:qdim
+            ii = qdim*(el-1)+ic
+            jj = qdim*(nodes[j]-1)+jc
+            if(in((ii, jj), keys(D)))
+              D[(ii, jj)] += G[qdim*(i-1)+ic,qdim*(j-1)+jc]
+            else
+              D[(ii, jj)] = G[qdim*(i-1)+ic,qdim*(j-1)+jc]
+            end
+          end
+        end
+      end
+    end
   end
-  return G
+
+
+  return asmSparseMatrix(D)
 end
