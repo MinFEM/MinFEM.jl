@@ -565,7 +565,7 @@ function asmGradient(mesh::Mesh; qdim=1)
       for j=1:3
         for ic=1:qdim
           for jc=1:qdim
-            ii = qdim*(el-1)+ic
+            ii = 2*qdim*(el-1)+ic
             jj = qdim*(nodes[j]-1)+jc
             if(in((ii, jj), keys(D)))
               D[(ii, jj)] += G[qdim*(i-1)+ic,qdim*(j-1)+jc]
