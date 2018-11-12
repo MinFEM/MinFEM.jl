@@ -44,11 +44,13 @@ function assembly(S::PDESystem)
       end
       ii = length(vec_ind)
       m,n = size(S.A)
-      S.SystemMatrix = spzeros(n+ii, n+ii)
-      S.B = sparse(1:ii,collect(vec_ind),ones(ii),ii,m)
-      S.SystemMatrix[1:n, 1:n] = S.A
-      S.SystemMatrix[1:n, (n+1):end] = S.B'
-      S.SystemMatrix[(n+1):end, 1:n] = S.B
+#      S.SystemMatrix = spzeros(n+ii, n+ii)
+      S.B = getDirichletProjection(m, S.DI, qdim=S.qdim)
+#      S.SystemMatrix[1:n, 1:n] = S.A
+#      S.SystemMatrix[1:n, (n+1):end] = S.B'
+#      S.SystemMatrix[(n+1):end, 1:n] = S.B
+      S = [S.A              B';
+             B  spzeros(ii,ii)]
     else
       S.SystemMatrix = S.A
     end
@@ -78,6 +80,15 @@ function solve(S::PDESystem)
   end
   S.rhs = [S.b;S.bc[collect(vec_ind)]]
   S.state = (S.Factors\S.rhs)[1:length(S.b)]
+end
+
+function getDirichletProjection(nnodes:Int64, DI::Set{Int64};qdim=1)
+  vec_ind = Set{Int64}()
+  for d=1:qdim
+    union!(vec_ind, qdim*(collect(DI).-1).+d)
+  end
+  ii = length(vec_ind)
+  return sparse(1:ii,collect(vec_ind),ones(ii),ii,nnodes)
 end
 
 """
