@@ -1,4 +1,5 @@
 using MinFEM
+using LinearAlgebra
 
 function semilinear(mesh::Mesh, L::AbstractMatrix, M::AbstractMatrix,
                     s::AbstractVector, BoundaryIndices::Set{Int64}=[], tol=1e-10)
@@ -16,7 +17,6 @@ function semilinear(mesh::Mesh, L::AbstractMatrix, M::AbstractMatrix,
 
     y += pde.state
     res = norm(pde.state)
-    println(res)
   end
   return y
 end
