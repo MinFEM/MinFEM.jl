@@ -82,7 +82,7 @@ function solve(S::PDESystem)
   S.state = (S.Factors\S.rhs)[1:length(S.b)]
 end
 
-function getDirichletProjection(nnodes:Int64, DI::Set{Int64};qdim=1)
+function getDirichletProjection(nnodes::Int64, DI::Set{Int64};qdim=1)
   vec_ind = Set{Int64}()
   for d=1:qdim
     union!(vec_ind, qdim*(collect(DI).-1).+d)
