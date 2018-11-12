@@ -49,8 +49,8 @@ function assembly(S::PDESystem)
 #      S.SystemMatrix[1:n, 1:n] = S.A
 #      S.SystemMatrix[1:n, (n+1):end] = S.B'
 #      S.SystemMatrix[(n+1):end, 1:n] = S.B
-      S = [S.A             S.B';
-           S.B  spzeros(ii,ii)]
+      S.SystemMatrix = [S.A             S.B';
+                        S.B  spzeros(ii,ii)]
     else
       S.SystemMatrix = S.A
     end
