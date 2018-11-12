@@ -593,6 +593,5 @@ function asmGradient(mesh::Mesh; qdim=1)
     end
   end
 
-
   return asmSparseMatrix(D)
 end
