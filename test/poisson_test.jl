@@ -17,7 +17,7 @@ function solve_poisson(file_name::String)
                    mesh.Boundaries[1003].Nodes,
                    mesh.Boundaries[1004].Nodes)
 
-  pde = PDESystem(L, M*s, zeros(mesh.nnodes), boundary)
+  pde = PDESystem(A=L, b=M*s, bc=zeros(mesh.nnodes), DI=boundary)
 
   solve(pde)
 
