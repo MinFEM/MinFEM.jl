@@ -16,7 +16,7 @@ boundary = union(mesh.Boundaries[1001].Nodes,
                   mesh.Boundaries[1003].Nodes,
                   mesh.Boundaries[1004].Nodes)
 
-pde = PDESystem(L, M*s, zeros(mesh.nnodes), boundary)
+pde = PDESystem(A=L, b=M*s, bc=zeros(mesh.nnodes), DI=boundary)
 solve(pde)
 
 vtkfile = write_vtk_mesh(mesh, "poisson.vtu")

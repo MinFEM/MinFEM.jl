@@ -11,7 +11,7 @@ s = evaluateMeshFunction(mesh, f, region=mesh.Boundaries[1001].Nodes, qdim=2)
 
 boundary = mesh.Boundaries[1003].Nodes
 
-pde = PDESystem(L, Mb*s, zeros(2*mesh.nnodes), boundary, 2)
+pde = PDESystem(A=L, b=Mb*s, bc=zeros(2*mesh.nnodes), DI=boundary, qdim=2)
 solve(pde)
 
 vtkfile = write_vtk_mesh(mesh, "elasticity.vtu")

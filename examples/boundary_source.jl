@@ -12,8 +12,8 @@ s = evaluateMeshFunction(mesh, f, region=union(mesh.Boundaries[1003].Nodes,
 s = asmBoundarySource(mesh, s, union(mesh.Boundaries[1003].Edges,
                                      mesh.Boundaries[1004].Edges))
 
-pde = PDESystem(L, s, zeros(mesh.nnodes), union(mesh.Boundaries[1001].Nodes,
-                                                mesh.Boundaries[1002].Nodes))
+pde = PDESystem(A=L, b=s, bc=zeros(mesh.nnodes), DI=union(mesh.Boundaries[1001].Nodes,
+                                                          mesh.Boundaries[1002].Nodes))
 solve(pde)
 
 vtkfile = write_vtk_mesh(mesh, "boundary_source.vtu")

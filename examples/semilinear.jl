@@ -6,17 +6,17 @@ function semilinear(mesh::Mesh, L::AbstractMatrix, M::AbstractMatrix,
 
   y = zeros(mesh.nnodes)
 
+  pde = PDESystem(A=L, b=M*s, bc=zeros(mesh.nnodes), DI=BoundaryIndices)
+
   res = Inf
   while res > tol
-    A = L + asmCubicDerivativeMatrix(mesh, y)
-    rhs = -L*y + M*s - asmCubicTerm(mesh, y)
+    pde.A = L + asmCubicDerivativeMatrix(mesh, y)
+    pde.b = -L*y + M*s - asmCubicTerm(mesh, y)
+    refresh(pde)
+    solve(pde)
 
-    if(BoundaryIndices != [])
-      asmDirichletCondition(A, BoundaryIndices, rhs, zeros(mesh.nnodes))
-    end
-    dy = A\rhs
-    y += dy
-    res = L2norm(M, dy)
+    y += pde.state
+    res = norm(pde.state)
     println(res)
   end
   return y
@@ -27,9 +27,8 @@ mesh = import_mesh("../meshes/semilinear.msh")
 L = asmLaplacian(mesh)
 M = asmMassMatrix(mesh)
 
-n=3
-m=2
-f(x) = ((n*pi)^2 + (m*pi)^2) *sin(n*x[1]*pi)*sin(m*x[2]*pi)
+# y = 3*sin(x[1]*pi)*sin(x[2]*pi)
+f(x) = 3*2*pi^2*sin(x[1]*pi)*sin(x[2]*pi) + (3*sin(x[1]*pi)*sin(x[2]*pi))^3
 s = evaluateMeshFunction(mesh, f)
 
 boundary = union(mesh.Boundaries[1001].Nodes,
