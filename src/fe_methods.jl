@@ -31,8 +31,7 @@ quadW = [1.93963833059595e-02,
          6.36780850998851e-02,
          5.58144204830443e-02];
 
-PDESystem(A, b; bc=[], DI=Set{Int64}(), vec_ind=Set{Int64}(), qdim=1, Factors=[],SystemMatrix=[], B=[], state=[], rhs=[])
-=PDESystem(A, b, bc, DI, vec_ind, qdim, Factors, SystemMatrix, B, state, rhs)
+PDESystem(A, b; bc=[], DI=Set{Int64}(), vec_ind=Set{Int64}(), qdim=1, Factors=[],SystemMatrix=[], B=[], state=[], rhs=[])=PDESystem(A, b, bc, DI, vec_ind, qdim, Factors, SystemMatrix, B, state, rhs)
 #PDESystem(A,b) = PDESystem(A,b,[],Set{Int64}(),1,[],spzeros(0,0),spzeros(0,0),[],[])
 #PDESystem(A,b,bc,DI) = PDESystem(A,b,bc,DI,1,[],spzeros(0,0),spzeros(0,0),[],[])
 #PDESystem(A,b,bc,DI,qdim) = PDESystem(A,b,bc,DI,qdim,[],spzeros(0,0),spzeros(0,0),[],[])
