@@ -1,5 +1,6 @@
 using MinFEM
 using WriteVTK
+using LinearAlgebra
 
 function semilinear(mesh::Mesh, L::AbstractMatrix, M::AbstractMatrix,
                     s::AbstractVector, BoundaryIndices::Set{Int64}=[], tol=1e-10)
