@@ -31,9 +31,12 @@ quadW = [1.93963833059595e-02,
          6.36780850998851e-02,
          5.58144204830443e-02];
 
-PDESystem(A,b) = PDESystem(A,b,[],Set{Int64}(),1,[],spzeros(0,0),spzeros(0,0),[],[])
-PDESystem(A,b,bc,DI) = PDESystem(A,b,bc,DI,1,[],spzeros(0,0),spzeros(0,0),[],[])
-PDESystem(A,b,bc,DI,qdim) = PDESystem(A,b,bc,DI,qdim,[],spzeros(0,0),spzeros(0,0),[],[])
+PDESystem(A, b; bc=[], DI=Set{Int64}(), vec_ind=Set{Int64}(), qdim=1, Factors=[],
+                SystemMatrix=[], B=[], state=[], rhs=[])
+          = PDESystem(A,b,[],Set{Int64}(),Set{Int64}(),1,[],spzeros(0,0),spzeros(0,0),[],[])
+#PDESystem(A,b) = PDESystem(A,b,[],Set{Int64}(),1,[],spzeros(0,0),spzeros(0,0),[],[])
+#PDESystem(A,b,bc,DI) = PDESystem(A,b,bc,DI,1,[],spzeros(0,0),spzeros(0,0),[],[])
+#PDESystem(A,b,bc,DI,qdim) = PDESystem(A,b,bc,DI,qdim,[],spzeros(0,0),spzeros(0,0),[],[])
 
 function assembly(S::PDESystem)
   if S.Factors == []
@@ -44,12 +47,9 @@ function assembly(S::PDESystem)
       end
       ii = length(vec_ind)
       m,n = size(S.A)
-#      S.SystemMatrix = spzeros(n+ii, n+ii)
       S.B = getDirichletProjection(m, S.DI, qdim=S.qdim)
-#      S.SystemMatrix[1:n, 1:n] = S.A
-#      S.SystemMatrix[1:n, (n+1):end] = S.B'
-#      S.SystemMatrix[(n+1):end, 1:n] = S.B
-      S.SystemMatrix = [S.A             S.B';
+
+      S.SystemMatrix = [S.A            S.B';
                         S.B  spzeros(ii,ii)]
     else
       S.SystemMatrix = S.A
@@ -60,6 +60,7 @@ end
 
 function refresh(S::PDESystem)
   S.Factors = []
+  assembly(S)
 end
 
 """
@@ -81,6 +82,12 @@ function solve(S::PDESystem)
   S.rhs = [S.b;S.bc[collect(vec_ind)]]
   S.state = (S.Factors\S.rhs)[1:length(S.b)]
 end
+
+"""
+    getDirichletProjection(nnodes::Int64, DI::Set{Int64};qdim=1)
+
+Build the projection onto the Dirichlet nodes.
+"""
 
 function getDirichletProjection(nnodes::Int64, DI::Set{Int64};qdim=1)
   vec_ind = Set{Int64}()

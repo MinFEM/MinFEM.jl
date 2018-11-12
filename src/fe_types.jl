@@ -55,8 +55,11 @@ mutable struct PDESystem
   "Dirichlet boundary values"
   bc::Vector{Float64}
 
-  "Dirichlet indices"
+  "Dirichlet nodes"
   DI::Set{Int64}
+
+  "Dirichlet indices, in case of qdim!=1"
+  vec_ind::Set{Int64}
 
   "dimension of vector-valued state"
   qdim::Int64
