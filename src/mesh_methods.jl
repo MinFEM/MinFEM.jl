@@ -208,3 +208,14 @@ end
 function GetBoundaryNodes(mesh::Mesh, marker::Int64)
   return collect(mesh.Boundaries[marker].Nodes)
 end
+
+function getCellVolumes(mesh::Mesh)
+  nelems = mesh.nelems
+  v = zeros(nelems)
+  for el=1:nelems
+    nodes = mesh.Triangles[el]
+    (detJ, J) = Jacobian(mesh, el)
+    v[el] = sum(quadW)*detJ
+  end
+  return v
+end
