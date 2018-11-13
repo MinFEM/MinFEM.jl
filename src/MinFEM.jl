@@ -21,6 +21,7 @@ export PDESystem,
        computeGradient,
        Mesh, 
        import_mesh, 
+       getCellVolumes,
        write_vtk_mesh
 
 include("fe_types.jl")
