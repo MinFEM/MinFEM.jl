@@ -38,11 +38,11 @@ PDESystem(A, b, bc, DI, vec_ind, qdim, Factors, SystemMatrix, B, state, rhs)
 function assembly(S::PDESystem)
   if S.Factors == []
     if S.DI != Set{Int64}()
-      vec_ind = Set{Int64}()
+      S.vec_ind = Set{Int64}()
       for d=1:S.qdim
-        union!(vec_ind, S.qdim*(collect(S.DI).-1).+d)
+        union!(S.vec_ind, S.qdim*(collect(S.DI).-1).+d)
       end
-      ii = length(vec_ind)
+      ii = length(S.vec_ind)
       m,n = size(S.A)
       S.B = getDirichletProjection(m, S.DI, qdim=S.qdim)
 
@@ -72,11 +72,7 @@ Finally the system is solved via matrix factorization.
 """
 function solve(S::PDESystem)
   assembly(S)
-  vec_ind = Set{Int64}()
-  for d=1:S.qdim
-    union!(vec_ind, S.qdim*(collect(S.DI).-1).+d)
-  end
-  S.rhs = [S.b;S.bc[collect(vec_ind)]]
+  S.rhs = [S.b;S.bc[collect(S.vec_ind)]]
   S.state = (S.Factors\S.rhs)[1:length(S.b)]
 end
 
