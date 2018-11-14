@@ -13,7 +13,9 @@ First we need to add the MinFEM package to our Julia installation.
 Thus, hit the **]** key and type
 
 **add** https://github.com/msiebenborn/MinFEM.jl
+
 **add** WriteVTK
+
 **test** MinFEM
 
 Also download the package from github to obtain the examples and meshes and navigate, within the julia console, to the **examples** folder.
