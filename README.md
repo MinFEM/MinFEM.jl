@@ -51,10 +51,12 @@ The next step is to set up a PDESystem structure, which holds all necessary info
 
 
 ```julia
-pde = PDESystem(L, M*s, zeros(mesh.nnodes), union(mesh.Boundaries[1001].Nodes,
-                                                  mesh.Boundaries[1002].Nodes,
-                                                  mesh.Boundaries[1003].Nodes,
-                                                  mesh.Boundaries[1004].Nodes))
+boundary = union(mesh.Boundaries[1001].Nodes,
+                  mesh.Boundaries[1002].Nodes,
+                  mesh.Boundaries[1003].Nodes,
+                  mesh.Boundaries[1004].Nodes)
+
+pde = PDESystem(A=L, b=M*s, bc=zeros(mesh.nnodes), DI=boundary)
 ```
 
 Note that the mesh is designed to have four physical boundaries identified by the indices 1001-1004.
