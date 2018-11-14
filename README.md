@@ -13,7 +13,7 @@ First we need to add the MinFEM package to our Julia installation.
 Thus, hit the **]** key and type
 
 **add** https://github.com/msiebenborn/MinFEM.jl
-
+**add** WriteVTK
 **test** MinFEM
 
 Also download the package from github to obtain the examples and meshes and navigate, within the julia console, to the **examples** folder.
@@ -52,9 +52,9 @@ The next step is to set up a PDESystem structure, which holds all necessary info
 
 ```julia
 boundary = union(mesh.Boundaries[1001].Nodes,
-                  mesh.Boundaries[1002].Nodes,
-                  mesh.Boundaries[1003].Nodes,
-                  mesh.Boundaries[1004].Nodes)
+                 mesh.Boundaries[1002].Nodes,
+                 mesh.Boundaries[1003].Nodes,
+                 mesh.Boundaries[1004].Nodes)
 
 pde = PDESystem(A=L, b=M*s, bc=zeros(mesh.nnodes), DI=boundary)
 ```
