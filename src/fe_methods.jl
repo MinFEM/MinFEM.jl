@@ -180,7 +180,7 @@ function asmDirichletCondition(SM, DI::Set{Int64}, rhs=[], bc=[]; qdim=1, insert
   end
 end
 
-function asmSparseMatrix(D::Dict{Tuple{Int64,Int64}, Float64}; nrows=-1, ncols=-1)
+function asmSparseMatrix(D::Dict{Tuple{Int64,Int64}, Float64}; nrows=0, ncols=0)
   nn = length(D)
   II = zeros(Int64, nn)
   JJ = zeros(Int64, nn)

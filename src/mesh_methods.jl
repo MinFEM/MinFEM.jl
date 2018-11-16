@@ -191,8 +191,8 @@ function write_vtk_mesh(mesh::Mesh, file_name::String)
 end
 
 function Jacobian(v1::Array{Float64,1}, v2::Array{Float64,1}, v3::Array{Float64,1})
-  J = inv([v2-v1 v3-v1]')
-  return 1.0/det(J), J
+  J = [v2-v1 v3-v1]
+  return det(J), inv(J)'
 end
 
 function Jacobian(mesh::Mesh, elem::Int64)
