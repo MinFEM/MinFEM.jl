@@ -33,7 +33,7 @@ quadW = [1.93963833059595e-02,
 
 PDESystem(;A=spzeros(0,0), b=[], bc=[], DI=Set{Int64}(), vec_ind=Set{Int64}(), qdim=1, Factors=[],
           SystemMatrix=spzeros(0,0), B=spzeros(0,0), state=[], rhs=[]) =
-PDESystem(A, b, bc, DI, vec_ind, qdim, Factors, SystemMatrix, B, state, rhs)
+            PDESystem(A, b, bc, DI, vec_ind, qdim, Factors, SystemMatrix, B, state, rhs)
 
 function assembly(S::PDESystem)
   if S.Factors == []
@@ -72,7 +72,7 @@ Finally the system is solved via matrix factorization.
 """
 function solve(S::PDESystem)
   assembly(S)
-  S.rhs = [S.b;S.bc[collect(S.vec_ind)]]
+  S.rhs = [S.b; S.B*S.bc]
   S.state = (S.Factors\S.rhs)[1:length(S.b)]
 end
 
@@ -154,7 +154,7 @@ For vector valued states either DI can be set to each component that should have
 Dirichlet condtion or qdim is set, if all components should have the condition.
 The value insert is put as diagonal element. Usually you want a 1.0 here.
 """
-function asmDirichletCondition(SM, DI::Set{Int64}, rhs=[], bc=[]; qdim=1, insert=1.0)
+function asmDirichletCondition(SM, DI::Set{Int64}; rhs=[], bc=[], qdim=1, insert=1.0)
   if rhs != [] && bc != []
     for i in DI
       for d=1:qdim
@@ -233,6 +233,45 @@ end
 Assemble a mass matrix for all elements of the given mesh.
 """
 function asmMassMatrix(mesh::Mesh; qdim=1)
+
+  AA = zeros(Float64, qdim^2 * mesh.nelems * 3^2)
+  II = zeros(Int64, length(AA))
+  JJ = zeros(Int64, length(AA))
+  n = 0
+
+  for el=1:mesh.nelems
+    nodes = mesh.Triangles[el]
+    (detJ, J) = Jacobian(mesh, el)
+    elemMat = zeros(3,3)
+    for i=1:3
+      for j=1:3
+        for (q, x) in enumerate(quadX)
+          elemMat[i,j] += Phi(i, x) * Phi(j, x) * quadW[q] * detJ
+        end
+      end
+    end
+
+    for d=1:qdim
+      for i=1:3
+        for j=1:3
+          n = n+1
+          II[n] = qdim*(nodes[i]-1)+d
+          JJ[n] = qdim*(nodes[j]-1)+d
+          AA[n] = elemMat[i,j]
+        end
+      end
+    end
+  end
+
+  return sparse(II[1:n],JJ[1:n],AA[1:n])
+end
+
+"""
+    asmMassMatrix(mesh::Mesh; qdim=1)
+
+Assemble a mass matrix for all elements of the given mesh.
+"""
+function __asmMassMatrix(mesh::Mesh; qdim=1)
   D = Dict{Tuple{Int64,Int64}, Float64}()
 
   for el=1:mesh.nelems
