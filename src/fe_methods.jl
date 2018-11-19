@@ -77,18 +77,18 @@ function solve(S::PDESystem)
 end
 
 """
-    getDirichletProjection(nnodes::Int64, DI::Set{Int64};qdim=1)
+    getDirichletProjection(jj::Int64, DI::Set{Int64};qdim=1)
 
-Build the projection onto the Dirichlet nodes.
+Build the projection onto the Dirichlet nodes where the input jj is understood as qdim*nnodes.
 """
 
-function getDirichletProjection(nnodes::Int64, DI::Set{Int64};qdim=1)
+function getDirichletProjection(jj::Int64, DI::Set{Int64}; qdim=1)
   vec_ind = Set{Int64}()
   for d=1:qdim
     union!(vec_ind, qdim*(collect(DI).-1).+d)
   end
   ii = length(vec_ind)
-  return sparse(1:ii,collect(vec_ind),ones(ii),ii,nnodes)
+  return sparse(1:ii, collect(vec_ind), ones(ii), ii, jj)
 end
 
 """
@@ -194,12 +194,7 @@ function asmSparseMatrix(D::Dict{Tuple{Int64,Int64}, Float64}; nrows=0, ncols=0)
 end
 
 
-"""
-    asmLaplacian(mesh::Mesh)
-
-Assemble the Laplacian stiffness matrix for all elements in the mesh.
-"""
-function asmLaplacian(mesh::Mesh)
+function __asmLaplacian(mesh::Mesh)
   D = Dict{Tuple{Int64,Int64}, Float64}()
 
   for el=1:mesh.nelems
@@ -225,6 +220,42 @@ function asmLaplacian(mesh::Mesh)
   end
 
   return asmSparseMatrix(D)
+end
+
+"""
+    asmLaplacian(mesh::Mesh)
+
+Assemble the Laplacian stiffness matrix for all elements in the mesh.
+"""
+function asmLaplacian(mesh::Mesh)
+
+  AA = zeros(Float64, mesh.nelems * 3^2)
+  II = zeros(Int64, length(AA))
+  JJ = zeros(Int64, length(AA))
+  n = 0
+
+  for el=1:mesh.nelems
+    nodes = mesh.Triangles[el]
+    (detJ, J) = Jacobian(mesh, el)
+    elemMat = zeros(3,3)
+    for i=1:3
+      for j=1:3
+        elemMat[i,j] += (J*gradPhi(i))'*(J*gradPhi(j))
+      end
+    end
+    elemMat *= sum(quadW)*detJ
+
+    for i=1:3
+      for j=1:3
+        n = n+1
+        II[n] = nodes[i]
+        JJ[n] = nodes[j]
+        AA[n] = elemMat[i,j]
+      end
+    end
+  end
+
+  return sparse(II[1:n],JJ[1:n],AA[1:n])
 end
 
 """
@@ -266,11 +297,6 @@ function asmMassMatrix(mesh::Mesh; qdim=1)
   return sparse(II[1:n],JJ[1:n],AA[1:n])
 end
 
-"""
-    asmMassMatrix(mesh::Mesh; qdim=1)
-
-Assemble a mass matrix for all elements of the given mesh.
-"""
 function __asmMassMatrix(mesh::Mesh; qdim=1)
   D = Dict{Tuple{Int64,Int64}, Float64}()
 
@@ -311,6 +337,45 @@ end
 Assemble a mass matrix for the given set of boundary edges.
 """
 function asmBoundaryMassMatrix(mesh::Mesh, BoundaryEdges=Set{Int64}(-1); qdim=1)
+
+  AA = zeros(Float64, qdim^2 * mesh.nelems * 3^2)
+  II = zeros(Int64, length(AA))
+  JJ = zeros(Int64, length(AA))
+  n = 0
+
+
+  if(in(-1, BoundaryEdges))
+    BoundaryEdges = 1:mesh.nedges
+  end
+
+  for el in BoundaryEdges
+    edge = mesh.Edges[el]
+    detJ = EdgeJacobian(mesh, el)
+    elemMat = zeros(2,2)
+    for i=1:2
+      for j=1:2
+        for (q, x) in enumerate(quad1DX)
+          elemMat[i,j] += PhiEdge(i, x) * PhiEdge(j, x) * quad1DW[q] * detJ
+        end
+      end
+    end
+
+    for d=1:qdim
+      for i=1:2
+        for j=1:2
+          n = n+1
+          II[n] = qdim*(edge[i]-1)+d
+          JJ[n] = qdim*(edge[j]-1)+d
+          AA[n] = elemMat[i,j]
+        end
+      end
+    end
+  end
+
+  return sparse(II[1:n],JJ[1:n],AA[1:n], qdim*mesh.nnodes, qdim*mesh.nnodes)
+end
+
+function __asmBoundaryMassMatrix(mesh::Mesh, BoundaryEdges=Set{Int64}(-1); qdim=1)
   D = Dict{Tuple{Int64,Int64}, Float64}()
 
   if(in(-1, BoundaryEdges))
@@ -420,7 +485,11 @@ end
 Assembly of the linearization of the cubic term of the standard semilinear elliptic equation.
 """
 function asmCubicDerivativeMatrix(mesh::Mesh, y::AbstractVector)
-  D = Dict{Tuple{Int64,Int64}, Float64}()
+
+  AA = zeros(Float64, mesh.nelems * 3^2)
+  II = zeros(Int64, length(AA))
+  JJ = zeros(Int64, length(AA))
+  n = 0
 
   for el=1:mesh.nelems
     nodes = mesh.Triangles[el]
@@ -445,16 +514,15 @@ function asmCubicDerivativeMatrix(mesh::Mesh, y::AbstractVector)
 
     for i=1:3
       for j=1:3
-        if(in((nodes[i], nodes[j]), keys(D)))
-          D[(nodes[i], nodes[j])] += elemMat[i,j]
-        else
-          D[(nodes[i], nodes[j])] = elemMat[i,j]
-        end
+        n = n+1
+        II[n] = nodes[i]
+        JJ[n] = nodes[j]
+        AA[n] = elemMat[i,j]
       end
     end
   end
 
-  return asmSparseMatrix(D)
+  return sparse(II[1:n],JJ[1:n],AA[1:n])
 end
 
 """
@@ -464,7 +532,11 @@ Assembly of the second derivative of the cubic term of the standard semilinear e
 around the state y.
 """
 function asmCubicSecondDerivativeMatrix(mesh::Mesh, y::AbstractVector, p::AbstractVector)
-  D = Dict{Tuple{Int64,Int64}, Float64}()
+
+  AA = zeros(Float64, mesh.nelems * 3^2)
+  II = zeros(Int64, length(AA))
+  JJ = zeros(Int64, length(AA))
+  n = 0
 
   for el=1:mesh.nelems
     nodes = mesh.Triangles[el]
@@ -489,16 +561,15 @@ function asmCubicSecondDerivativeMatrix(mesh::Mesh, y::AbstractVector, p::Abstra
 
     for i=1:3
       for j=1:3
-        if(in((nodes[i], nodes[j]), keys(D)))
-          D[(nodes[i], nodes[j])] += elemMat[i,j]
-        else
-          D[(nodes[i], nodes[j])] = elemMat[i,j]
-        end
+        n = n+1
+        II[n] = nodes[i]
+        JJ[n] = nodes[j]
+        AA[n] = elemMat[i,j]
       end
     end
   end
 
-  return asmSparseMatrix(D)
+  return sparse(II[1:n],JJ[1:n],AA[1:n])
 end
 
 """
@@ -526,9 +597,12 @@ end
 Assembly of the linear elasticity stiffness matrix for constant coefficients lambda and mu.
 """
 function asmElasticity(mesh::Mesh, lambda::Float64, mu::Float64)
-  D = Dict{Tuple{Int64,Int64}, Float64}()
-
   qdim = 2
+
+  AA = zeros(Float64, qdim^2 * mesh.nelems * 3^2)
+  II = zeros(Int64, length(AA))
+  JJ = zeros(Int64, length(AA))
+  n = 0
 
   for el=1:mesh.nelems
     nodes = mesh.Triangles[el]
@@ -553,20 +627,17 @@ function asmElasticity(mesh::Mesh, lambda::Float64, mu::Float64)
       for j=1:3
         for ic=1:qdim
           for jc=1:qdim
-            ii = qdim*(nodes[i]-1)+ic
-            jj = qdim*(nodes[j]-1)+jc
-            if(in((ii, jj), keys(D)))
-              D[(ii, jj)] += elemMat[qdim*(i-1)+ic,qdim*(j-1)+jc]
-            else
-              D[(ii, jj)] = elemMat[qdim*(i-1)+ic,qdim*(j-1)+jc]
-            end
+            n = n+1
+            II[n] = qdim*(nodes[i]-1)+ic
+            JJ[n] = qdim*(nodes[j]-1)+jc
+            AA[n] = elemMat[qdim*(i-1)+ic,qdim*(j-1)+jc]
           end
         end
       end
     end
   end
 
-  return asmSparseMatrix(D)
+  return sparse(II[1:n],JJ[1:n],AA[1:n])
 end
 
 """
@@ -596,7 +667,11 @@ end
 Assembles the linear mapping from a state on the given mesh to the gradient.
 """
 function asmGradient(mesh::Mesh; qdim=1)
-  D = Dict{Tuple{Int64,Int64}, Float64}()
+
+  AA = zeros(Float64, qdim^2 * mesh.nelems * 3 * 2)
+  II = zeros(Int64, length(AA))
+  JJ = zeros(Int64, length(AA))
+  n = 0
 
   for el=1:mesh.nelems
     G = zeros(2*qdim, 3*qdim)
@@ -615,18 +690,15 @@ function asmGradient(mesh::Mesh; qdim=1)
       for j=1:3
         for ic=1:qdim
           for jc=1:qdim
-            ii = 2*qdim*(el-1)+qdim*(i-1)+ic
-            jj = qdim*(nodes[j]-1)+jc
-            if(in((ii, jj), keys(D)))
-              D[(ii, jj)] += G[qdim*(i-1)+ic,qdim*(j-1)+jc]
-            else
-              D[(ii, jj)] = G[qdim*(i-1)+ic,qdim*(j-1)+jc]
-            end
+            n=n+1
+            II[n] = 2*qdim*(el-1)+qdim*(i-1)+ic
+            JJ[n] = qdim*(nodes[j]-1)+jc
+            AA[n] = G[qdim*(i-1)+ic,qdim*(j-1)+jc]
           end
         end
       end
     end
   end
 
-  return asmSparseMatrix(D)
+  return sparse(II[1:n],JJ[1:n],AA[1:n], 2*qdim*mesh.nelems, qdim*mesh.nnodes)
 end
