@@ -4,7 +4,7 @@ using WriteVTK
 mesh = import_mesh("../meshes/poisson.msh")
 
 L = asmElasticity(mesh,1.0,1.0)
-Mb = asmBoundaryMassMatrix(mesh, mesh.Boundaries[1001].Edges, qdim=2)
+Mb = asmBoundaryMassMatrix(mesh, Edges=mesh.Boundaries[1001].Edges, qdim=2)
 
 f(x) = [0.1,0.0]
 s = evaluateMeshFunction(mesh, f, region=mesh.Boundaries[1001].Nodes, qdim=2)

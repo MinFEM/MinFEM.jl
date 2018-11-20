@@ -5,7 +5,7 @@ function solve_elasticity(file_name::String)
   mesh = import_mesh(file_name)
 
   L = asmElasticity(mesh,1.0,1.0)
-  Mb = asmBoundaryMassMatrix(mesh, mesh.Boundaries[1001].Edges, qdim=2)
+  Mb = asmBoundaryMassMatrix(mesh, Edges=mesh.Boundaries[1001].Edges, qdim=2)
 
   f(x) = [x[1]; x[2]]
   s = evaluateMeshFunction(mesh, f, region=mesh.Boundaries[1001].Nodes, qdim=2)

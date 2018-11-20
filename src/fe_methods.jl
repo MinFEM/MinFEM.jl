@@ -332,11 +332,11 @@ end
 
 
 """
-    asmBoundaryMassMatrix(mesh::Mesh, BoundaryEdges=Set{Int64}(-1); qdim=1)
+    asmBoundaryMassMatrix(mesh::Mesh; Edges=Set{Int64}(), qdim=1)
 
 Assemble a mass matrix for the given set of boundary edges.
 """
-function asmBoundaryMassMatrix(mesh::Mesh, BoundaryEdges=Set{Int64}(-1); qdim=1)
+function asmBoundaryMassMatrix(mesh::Mesh; Edges=Set{Int64}(), qdim=1)
 
   AA = zeros(Float64, qdim^2 * mesh.nelems * 3^2)
   II = zeros(Int64, length(AA))
@@ -344,11 +344,11 @@ function asmBoundaryMassMatrix(mesh::Mesh, BoundaryEdges=Set{Int64}(-1); qdim=1)
   n = 0
 
 
-  if(in(-1, BoundaryEdges))
-    BoundaryEdges = 1:mesh.nedges
+  if(isempty(Edges))
+    Edges = 1:mesh.nedges
   end
 
-  for el in BoundaryEdges
+  for el in Edges
     edge = mesh.Edges[el]
     detJ = EdgeJacobian(mesh, el)
     elemMat = zeros(2,2)
