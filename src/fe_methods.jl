@@ -441,7 +441,7 @@ function asmBoundarySource(mesh::Mesh, S::Array{Float64,1}, BoundaryEdges=Set{In
 end
 
 """
-    L2norm(mesh::Mesh, Mass::SparseMatrixCSC{Float64,Int64}, v::AbstractVector; qdim=1)
+    L2norm(Mass::SparseMatrixCSC{Float64,Int64}, v::AbstractVector; qdim=1)
 
 Computes the L2 norm of a vector v according to the mass matrix Mass.
 """
