@@ -297,40 +297,6 @@ function asmMassMatrix(mesh::Mesh; qdim=1)
   return sparse(II[1:n],JJ[1:n],AA[1:n])
 end
 
-function __asmMassMatrix(mesh::Mesh; qdim=1)
-  D = Dict{Tuple{Int64,Int64}, Float64}()
-
-  for el=1:mesh.nelems
-    nodes = mesh.Triangles[el]
-    (detJ, J) = Jacobian(mesh, el)
-    elemMat = zeros(3,3)
-    for i=1:3
-      for j=1:3
-        for (q, x) in enumerate(quadX)
-          elemMat[i,j] += Phi(i, x) * Phi(j, x) * quadW[q] * detJ
-        end
-      end
-    end
-
-    for d=1:qdim
-      for i=1:3
-        for j=1:3
-          ii = qdim*(nodes[i]-1)+d
-          jj = qdim*(nodes[j]-1)+d
-          if(in((ii, jj), keys(D)))
-            D[(ii, jj)] += elemMat[i,j]
-          else
-            D[(ii, jj)] = elemMat[i,j]
-          end
-        end
-      end
-    end
-  end
-
-  return asmSparseMatrix(D)
-end
-
-
 """
     asmBoundaryMassMatrix(mesh::Mesh; Edges=Set{Int64}(), qdim=1)
 
@@ -374,44 +340,6 @@ function asmBoundaryMassMatrix(mesh::Mesh; Edges=Set{Int64}(), qdim=1)
 
   return sparse(II[1:n],JJ[1:n],AA[1:n], qdim*mesh.nnodes, qdim*mesh.nnodes)
 end
-
-function __asmBoundaryMassMatrix(mesh::Mesh, BoundaryEdges=Set{Int64}(-1); qdim=1)
-  D = Dict{Tuple{Int64,Int64}, Float64}()
-
-  if(in(-1, BoundaryEdges))
-    BoundaryEdges = 1:mesh.nedges
-  end
-
-  for el in BoundaryEdges
-    edge = mesh.Edges[el]
-    detJ = EdgeJacobian(mesh, el)
-    elemMat = zeros(2,2)
-    for i=1:2
-      for j=1:2
-        for (q, x) in enumerate(quad1DX)
-          elemMat[i,j] += PhiEdge(i, x) * PhiEdge(j, x) * quad1DW[q] * detJ
-        end
-      end
-    end
-
-    for d=1:qdim
-      for i=1:2
-        for j=1:2
-          ii = qdim*(edge[i]-1)+d
-          jj = qdim*(edge[j]-1)+d
-          if(in((ii, jj), keys(D)))
-            D[(ii, jj)] += elemMat[i,j]
-          else
-            D[(ii, jj)] = elemMat[i,j]
-          end
-        end
-      end
-    end
-  end
-
-  return asmSparseMatrix(D,nrows=qdim*mesh.nnodes,ncols=qdim*mesh.nnodes)
-end
-
 
 """
     asmBoundarySource(mesh::Mesh, S::Array{Float64,1}, BoundaryEdges=Set{Int64}(-1); qdim=1)
