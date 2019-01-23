@@ -12,15 +12,15 @@
 First we need to add the MinFEM package to our Julia installation.
 Thus, hit the **]** key and type
 
-**add** https://github.com/msiebenborn/MinFEM.jl
-
-**add** WriteVTK
-
-**test** MinFEM
+```
+add https://github.com/msiebenborn/MinFEM.jl
+add WriteVT
+test MinFEM
+```
 
 Also download the package from github to obtain the examples and meshes and navigate, within the julia console, to the **examples** folder.
 
-Lets go through a code for the Poisson equaition on a unit square with homogeneous Dirichlet boundary conditions.
+Lets go through a code for the Poisson equation on a unit square with homogeneous Dirichlet boundary conditions.
 
 First we have to load the package MinFEM and WriteVTK. The latter is used to write the results in a format suitable for Paraview. We then import a mesh file generated with GMSH.
 
