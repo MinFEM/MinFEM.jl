@@ -14,7 +14,7 @@ Thus, hit the **]** key and type
 
 ```
 add https://github.com/msiebenborn/MinFEM.jl
-add WriteVT
+add WriteVTK
 test MinFEM
 ```
 
