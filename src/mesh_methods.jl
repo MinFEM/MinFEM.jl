@@ -1,3 +1,77 @@
+"""
+    unit_square(n::Int64)
+
+Set up a n-by-n quasi-uniform mesh for the unit square.
+"""
+function unit_square(n::Int64)
+  if(n<2)
+    n = 2
+  end
+  nnodes = n*n
+  nedges = 4*(n-1)
+  nelems = 2*(n-1)*(n-1)
+  h = 1/(n-1)
+
+  Nodes = Array{Array{Float64, 1}, 1}(undef, nnodes)
+  Edges = Array{Array{Int64,1},1}(undef, nedges)
+  Triangles = Array{Array{Int64,1},1}(undef, nelems)
+  Volumes = Dict{Int64,Set{Int64}}()
+  Boundaries = Dict{Int64, Boundary}()
+  Boundaries[1001] = Boundary(Set{Int64}(), Set{Int64}())
+  Boundaries[1002] = Boundary(Set{Int64}(), Set{Int64}())
+  Boundaries[1003] = Boundary(Set{Int64}(), Set{Int64}())
+  Boundaries[1004] = Boundary(Set{Int64}(), Set{Int64}())
+
+  k = 1
+  for i=1:n
+    for j=1:n
+      Nodes[k] = [(j-1)*h; (i-1)*h]
+      k = k+1
+    end
+  end
+
+  k = 1
+  for i=1:n-1
+    for j=1:n-1
+      Triangles[k] = [(i-1)*n + j; (i-1)*n + j + 1; i*n + j]
+      k = k+1
+
+      Triangles[k] = [(i-1)*n + j + 1; i*n + j + 1; i*n + j]
+      k = k+1
+    end
+  end
+
+  for j=1:n
+    push!(Boundaries[1001].Nodes, j)
+    push!(Boundaries[1002].Nodes, j + (n-1)*n)
+    push!(Boundaries[1003].Nodes, (j-1)*n+1)
+    push!(Boundaries[1004].Nodes, (j-1)*n+n)
+  end
+
+  k = 1
+  for j=1:n-1
+    Edges[k] =  [j, j+1];
+    push!(Boundaries[1001].Edges, k)
+    k = k+1
+
+    Edges[k] =  [j+1 + (n-1)*n, j + (n-1)*n];
+    push!(Boundaries[1002].Edges, k)
+    k = k+1
+
+    Edges[k] =  [j*n+1, (j-1)*n+1];
+    push!(Boundaries[1003].Edges, k)
+    k = k+1
+
+    Edges[k] =  [(j-1)*n+n, j*n+n];
+    push!(Boundaries[1004].Edges, k)
+    k = k+1
+  end
+
+  Volumes[10001] = Set{Int64}(1:nnodes)
+
+  return Mesh(nnodes, nelems, nedges, Nodes, Triangles, Edges, Boundaries, Volumes)
+end
+
 function import_mesh(file_name::String)
   f = open(file_name)
 

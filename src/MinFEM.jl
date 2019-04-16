@@ -20,7 +20,8 @@ export PDESystem,
        asmGradient,
        computeGradient,
        Mesh, 
-       import_mesh, 
+       import_mesh,
+       unit_square,
        getCellVolumes,
        write_vtk_mesh
 
