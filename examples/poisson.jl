@@ -1,7 +1,7 @@
 using MinFEM
 using WriteVTK
 
-mesh = import_mesh("../meshes/poisson.msh")
+mesh = unit_square(100)
 
 L = asmLaplacian(mesh)
 M = asmMassMatrix(mesh)
