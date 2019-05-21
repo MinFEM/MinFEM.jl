@@ -78,11 +78,16 @@ function import_mesh(file_name::String)
   while(!eof(f) && (l=readline(f)) != "\$MeshFormat")
   end
   l=readline(f)
-  if(parse(Int, l[1]) == 2)
+  a = split(l, " ")
+  version = parse(Float64, a[1])
+  if(version >= 2.0 && version <3.0)
     mesh = import_mesh2(f)
-  end
-  if(parse(Int, l[1]) == 4)
+  elseif(version >= 4.1 && version <5.0)
     mesh = import_mesh4(f)
+  else
+    print("Unsupported mesh format: "*string(parse(Float64, a[1])))
+    print("msh2 is recommended: "*string(parse(Float64, a[1])))
+    return
   end
   close(f)
   return mesh
@@ -160,7 +165,17 @@ function import_mesh4(f::IOStream)
   numTags = [parse(Int64, a[1]), parse(Int64, a[2]),
              parse(Int64, a[3]), parse(Int64, a[4])]
 
-  for i=1:4
+  # Point tags
+  for j=1:numTags[1]
+    l=readline(f)
+    a=split(l, " ")
+    if(parse(Int64, a[4])!=0)
+      tags[1][parse(Int64, a[1])] = parse(Int64, a[5])
+    end
+  end
+
+  # Curve, Surface, Volume tags
+  for i=2:4
     for j=1:numTags[i]
       l=readline(f)
       a=split(l, " ")
@@ -180,16 +195,26 @@ function import_mesh4(f::IOStream)
   Nodes = Array{Array{Float64, 1}, 1}(undef, nnodes)
   NodeNumbering = Dict{Int64, Int64}()
   n=1
+  m=1
   for i=1:blocks
     l = readline(f)
     a = split(l, " ")
     nodesInBlock = parse(Int64, a[4])
+
+    # The node numbers
     for j=1:nodesInBlock
       l = readline(f)
       a = split(l, " ")
-      Nodes[n] = [parse(Float64, a[2]), parse(Float64, a[3])]
       NodeNumbering[parse(Int64, a[1])] = n
       n+=1
+    end
+
+    # The actual coordinates
+    for j=1:nodesInBlock
+      l = readline(f)
+      a = split(l, " ")
+      Nodes[m] = [parse(Float64, a[1]), parse(Float64, a[2])]
+      m+=1
     end
   end
 
@@ -205,8 +230,8 @@ function import_mesh4(f::IOStream)
   for i=1:blocks
     l = readline(f)
     a = split(l, " ")
-    elemEntitiy = parse(Int64, a[1])
-    elemDim = parse(Int64, a[2])
+    elemDim = parse(Int64, a[1])
+    elemEntitiy = parse(Int64, a[2])
     elemType = parse(Int64, a[3])
     elemsInBlock = parse(Int64, a[4])
     for j=1:elemsInBlock
