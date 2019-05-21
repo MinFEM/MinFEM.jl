@@ -85,8 +85,8 @@ function import_mesh(file_name::String)
   elseif(version >= 4.1 && version <5.0)
     mesh = import_mesh4(f)
   else
-    print("Unsupported mesh format: "*string(parse(Float64, a[1])))
-    print("msh2 is recommended: "*string(parse(Float64, a[1])))
+    println("Unsupported mesh format: " * string(parse(Float64, a[1])))
+    println("msh2 is recommended.")
     return
   end
   close(f)
