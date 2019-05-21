@@ -18,19 +18,22 @@ add WriteVTK
 test MinFEM
 ```
 
-Also download the package from github to obtain the examples and meshes and navigate, within the julia console, to the **examples** folder.
-
 Lets go through a code for the Poisson equation on a unit square with homogeneous Dirichlet boundary conditions.
 
-First we have to load the package MinFEM and WriteVTK. The latter is used to write the results in a format suitable for Paraview. We then import a mesh file generated with GMSH.
-
+First we have to load the package MinFEM and WriteVTK. The latter is used to write the results in a format suitable for Paraview. We then generate a uniform, triangular 30x30 mesh for the unit square.
 
 ```julia
 using MinFEM
 using WriteVTK
 
-mesh = import_mesh("../meshes/poisson.msh")
+mesh = unit_square(30)
 
+```
+
+As an alternative: Download the package from github to obtain the examples and meshes and navigate, within the julia console, to the **examples** folder. Then import one of the mesh files generated with GMSH.
+
+```julia
+mesh = import_mesh("../meshes/poisson.msh")
 ```
 
 The next step is to assemble the matrices which discretize the weak formulation:
