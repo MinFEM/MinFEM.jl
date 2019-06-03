@@ -1,5 +1,5 @@
 
-<center><img src="logo/fem.png" alt="fem" width="400"/></center>
+<center><img src="https://user-images.githubusercontent.com/44394955/58797326-085dd580-8600-11e9-958c-b1698e1d370e.png" alt="fem" width="400"/></center>
 
 ## A minimal finite element tool for demonstration and teaching.
 
