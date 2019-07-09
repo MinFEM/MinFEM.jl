@@ -1,7 +1,7 @@
 using MinFEM
 using WriteVTK
 
-function parabolic(;theta=1.0)
+function parabolic(;T, tsteps, theta=1.0)
   mesh = unit_square(100)
 
   boundary = union(mesh.Boundaries[1001].Nodes,
@@ -12,8 +12,6 @@ function parabolic(;theta=1.0)
   L = asmLaplacian(mesh)
   M = asmMassMatrix(mesh)
 
-  tsteps = 10
-  T = 1.0
   dt = (T-0)/tsteps
 
   source(x) = 1.0
@@ -31,7 +29,7 @@ function parabolic(;theta=1.0)
     end
 
     #M*(u_new - u)/dt + L(theta*u_new + (1.0-theta)*u) = M*f
-    pde = PDESystem(A=(M + theta*dt*L), b=(M*(f+u) - (1.0-theta)*dt*L*u), bc=zeros(mesh.nnodes), DI=boundary)
+    pde = PDESystem(A=(M + theta*dt*L), b=(M - (1.0-theta)*dt*L)*u + dt*M*f, bc=zeros(mesh.nnodes), DI=boundary)
     solve(pde)
 
     u = copy(pde.state)
@@ -42,5 +40,5 @@ function parabolic(;theta=1.0)
   end
 
 end
-parabolic(theta=0.5)
+parabolic(T=0.001, tsteps=10, theta=1.0)
 
