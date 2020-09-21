@@ -319,11 +319,11 @@ function open_vtk_file(mesh::Mesh, file_name::String)
   return vtk_grid(file_name, points, cells)
 end
 
-function write_point_data(vtkfile, data::Vector, data_name::String)
+function write_point_data(vtkfile, data, data_name::String)
   vtk_point_data(vtkfile, data, data_name)
 end
 
-function write_cell_data(vtkfile, data::Vector, data_name::String)
+function write_cell_data(vtkfile, data, data_name::String)
   vtk_cell_data(vtkfile, data, data_name)
 end
 
