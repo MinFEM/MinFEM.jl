@@ -321,9 +321,9 @@ function open_vtk_file(mesh::Mesh, file_name::String)
     points[:,i] = copy(p)
   end
 
-  cells = Array{MeshCell,1}(undef, mesh.nelems)
+  cells = Array{WriteVTK.MeshCell,1}(undef, mesh.nelems)
   for (i,t) in enumerate(mesh.Triangles)
-    cells[i] = WriteVTK.MeshCell(VTKCellTypes.VTK_TRIANGLE, t)
+    cells[i] = WriteVTK.MeshCell(WriteVTK.VTKCellTypes.VTK_TRIANGLE, t)
   end
 
   return WriteVTK.vtk_grid(file_name, points, cells)

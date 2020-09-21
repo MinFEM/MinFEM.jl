@@ -1,6 +1,6 @@
 using MinFEM
 
-function parabolic(;T, tsteps, theta=1.0)
+function parabolic(;T::Float64, tsteps::Int, theta=1.0)
   mesh = unit_square(100)
 
   boundary = union(mesh.Boundaries[1001].Nodes,
@@ -24,8 +24,7 @@ function parabolic(;T, tsteps, theta=1.0)
 
     # in first timestep additional output of u0
     if i==1
-      vtkfile = open_vtk_file(mesh,
-                               "parabolic_"*lpad(string(0), 3, '0')*".vtu")
+      vtkfile = open_vtk_file(mesh, "parabolic_"*lpad(string(0), 3, '0')*".vtu")
       write_point_data(vtkfile, u, "u")
       save_vtk_file(vtkfile)
     end
