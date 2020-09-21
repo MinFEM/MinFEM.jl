@@ -1,5 +1,4 @@
 using MinFEM
-using WriteVTK
 using LinearAlgebra
 
 function semilinear(mesh::Mesh, L::AbstractMatrix, M::AbstractMatrix,

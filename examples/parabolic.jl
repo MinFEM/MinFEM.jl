@@ -1,5 +1,4 @@
 using MinFEM
-using WriteVTK
 
 function parabolic(;T, tsteps, theta=1.0)
   mesh = unit_square(100)

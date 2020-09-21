@@ -1,5 +1,4 @@
 using MinFEM
-using WriteVTK
 
 mesh = unit_square(100)
 

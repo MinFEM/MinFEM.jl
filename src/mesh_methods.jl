@@ -313,20 +313,20 @@ function open_vtk_file(mesh::Mesh, file_name::String)
 
   cells = Array{MeshCell,1}(undef, mesh.nelems)
   for (i,t) in enumerate(mesh.Triangles)
-    cells[i] = MeshCell(VTKCellTypes.VTK_TRIANGLE, t)
+    cells[i] = WriteVTK.MeshCell(VTKCellTypes.VTK_TRIANGLE, t)
   end
 
-  return vtk_grid(file_name, points, cells)
+  return WriteVTK.vtk_grid(file_name, points, cells)
 end
 
 function write_point_data(vtkfile, data, data_name::String)
-  vtk_point_data(vtkfile, data, data_name)
+  WriteVTK.vtk_point_data(vtkfile, data, data_name)
 end
 
 function write_cell_data(vtkfile, data, data_name::String)
-  vtk_cell_data(vtkfile, data, data_name)
+  WriteVTK.vtk_cell_data(vtkfile, data, data_name)
 end
 
 function save_vtk_file(vtkfile)
-  vtk_save(vtkfile)
+  WriteVTK.vtk_save(vtkfile)
 end

@@ -1,5 +1,4 @@
 using MinFEM
-using WriteVTK
 
 mesh = import_mesh("../meshes/rounded.msh")
 
