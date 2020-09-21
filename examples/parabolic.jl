@@ -25,10 +25,10 @@ function parabolic(;T, tsteps, theta=1.0)
 
     # in first timestep additional output of u0
     if i==1
-      vtkfile = write_vtk_mesh(mesh,
+      vtkfile = open_vtk_file(mesh,
                                "parabolic_"*lpad(string(0), 3, '0')*".vtu")
-      vtk_point_data(vtkfile, u, "u")
-      vtk_save(vtkfile)
+      write_point_data(vtkfile, u, "u")
+      save_vtk_file(vtkfile)
     end
 
     # we have to solve the following equation depending on theta
@@ -39,9 +39,9 @@ function parabolic(;T, tsteps, theta=1.0)
 
     u = copy(pde.state)
 
-    vtkfile = write_vtk_mesh(mesh, "parabolic_"*lpad(string(i), 3, '0')*".vtu")
-    vtk_point_data(vtkfile, u, "u")
-    vtk_save(vtkfile)
+    vtkfile = open_vtk_file(mesh, "parabolic_"*lpad(string(i), 3, '0')*".vtu")
+    write_point_data(vtkfile, u, "u")
+    save_vtk_file(vtkfile)
   end
 
 end

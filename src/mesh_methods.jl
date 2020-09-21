@@ -275,20 +275,6 @@ function import_mesh4(f::IOStream)
   return Mesh(nnodes, length(Triangles), length(Edges), Nodes, _Triangles, _Edges, Boundaries, Volumes)
 end
 
-function write_vtk_mesh(mesh::Mesh, file_name::String)
-  points = zeros(Float64, length(mesh.Nodes[1]), length(mesh.Nodes))
-  for (i,p) in enumerate(mesh.Nodes)
-    points[:,i] = copy(p)
-  end
-
-  cells = Array{MeshCell,1}(undef, mesh.nelems)
-  for (i,t) in enumerate(mesh.Triangles)
-    cells[i] = MeshCell(VTKCellTypes.VTK_TRIANGLE, t)
-  end
-
-  return vtk_grid(file_name, points, cells)
-end
-
 function Jacobian(v1::Array{Float64,1}, v2::Array{Float64,1}, v3::Array{Float64,1})
   J = [v2-v1 v3-v1]
   return det(J), inv(J)'
@@ -317,4 +303,30 @@ function getCellVolumes(mesh::Mesh)
     v[el] = sum(quadW)*detJ
   end
   return v
+end
+
+function open_vtk_file(mesh::Mesh, file_name::String)
+  points = zeros(Float64, length(mesh.Nodes[1]), length(mesh.Nodes))
+  for (i,p) in enumerate(mesh.Nodes)
+    points[:,i] = copy(p)
+  end
+
+  cells = Array{MeshCell,1}(undef, mesh.nelems)
+  for (i,t) in enumerate(mesh.Triangles)
+    cells[i] = MeshCell(VTKCellTypes.VTK_TRIANGLE, t)
+  end
+
+  return vtk_grid(file_name, points, cells)
+end
+
+function write_point_data(vtkfile, data::Vector, data_name::String)
+  vtk_point_data(vtkfile, data, data_name)
+end
+
+function write_cell_data(vtkfile, data::Vector, data_name::String)
+  vtk_cell_data(vtkfile, data, data_name)
+end
+
+function save_vtk_file(vtkfile)
+  vtk_save(vtkfile)
 end

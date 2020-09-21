@@ -16,8 +16,8 @@ pde = PDESystem(A=L, b=s, bc=zeros(mesh.nnodes), DI=union(mesh.Boundaries[1001].
                                                           mesh.Boundaries[1002].Nodes))
 solve(pde)
 
-vtkfile = write_vtk_mesh(mesh, "boundary_source.vtu")
-vtk_point_data(vtkfile, pde.state, "y")
-vtk_point_data(vtkfile, s, "s")
-vtk_save(vtkfile)
+vtkfile = open_vtk_file(mesh, "boundary_source.vtu")
+write_point_data(vtkfile, pde.state, "y")
+write_point_data(vtkfile, s, "s")
+save_vtk_file(vtkfile)
 

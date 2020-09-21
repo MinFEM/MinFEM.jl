@@ -19,8 +19,8 @@ boundary = union(mesh.Boundaries[1001].Nodes,
 pde = PDESystem(A=L, b=M*s, bc=zeros(mesh.nnodes), DI=boundary)
 solve(pde)
 
-vtkfile = write_vtk_mesh(mesh, "poisson.vtu")
-vtk_point_data(vtkfile, pde.state, "Y")
-vtk_point_data(vtkfile, s, "S")
-vtk_save(vtkfile)
+vtkfile = open_vtk_file(mesh, "poisson.vtu")
+write_point_data(vtkfile, pde.state, "Y")
+write_point_data(vtkfile, s, "S")
+save_vtk_file(vtkfile)
 

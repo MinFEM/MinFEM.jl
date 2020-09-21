@@ -1,6 +1,6 @@
 module MinFEM
 
-using SparseArrays, LinearAlgebra, WriteVTK
+using WriteVTK, SparseArrays, LinearAlgebra
 
 export PDESystem, 
        solve, 
@@ -23,7 +23,10 @@ export PDESystem,
        import_mesh,
        unit_square,
        getCellVolumes,
-       write_vtk_mesh
+       open_vtk_file,
+       save_vtk_file,
+       write_point_data,
+       write_cell_data
 
 include("fe_types.jl")
 include("mesh_methods.jl")

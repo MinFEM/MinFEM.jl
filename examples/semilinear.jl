@@ -39,7 +39,7 @@ boundary = union(mesh.Boundaries[1001].Nodes,
 
 y = semilinear(mesh, L, M, s, boundary);
 
-vtkfile = write_vtk_mesh(mesh, "semilinear.vtu")
-vtk_point_data(vtkfile, y, "y")
-vtk_point_data(vtkfile, s, "s")
-vtk_save(vtkfile)
+vtkfile = open_vtk_file(mesh, "semilinear.vtu")
+write_point_data(vtkfile, y, "y")
+write_point_data(vtkfile, s, "s")
+save_vtk_file(vtkfile)

@@ -1,5 +1,5 @@
 using MinFEM
-using WriteVTK
+#using WriteVTK
 
 mesh = import_mesh("../meshes/poisson.msh")
 
@@ -14,8 +14,8 @@ boundary = mesh.Boundaries[1003].Nodes
 pde = PDESystem(A=L, b=Mb*s, bc=zeros(2*mesh.nnodes), DI=boundary, qdim=2)
 solve(pde)
 
-vtkfile = write_vtk_mesh(mesh, "elasticity.vtu")
-vtk_point_data(vtkfile, [reshape(pde.state, 2, mesh.nnodes); zeros(1,mesh.nnodes)], "Y")
-vtk_point_data(vtkfile, s, "S")
-vtk_save(vtkfile)
+vtkfile = open_vtk_file(mesh, "elasticity.vtu")
+write_point_data(vtkfile, [reshape(pde.state, 2, mesh.nnodes); zeros(1,mesh.nnodes)], "Y")
+write_point_data(vtkfile, s, "S")
+save_vtk_file(vtkfile)
 
