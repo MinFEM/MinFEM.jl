@@ -72,6 +72,11 @@ function unit_square(n::Int64)
   return Mesh(nnodes, nelems, nedges, Nodes, Triangles, Edges, Boundaries, Volumes)
 end
 
+"""
+  function import_mesh(file_name::String)
+
+Import a gmsh file of version 2 or 4.
+"""
 function import_mesh(file_name::String)
   f = open(file_name)
 
@@ -305,6 +310,11 @@ function getCellVolumes(mesh::Mesh)
   return v
 end
 
+"""
+  function open_vtk_file(mesh::Mesh, file_name::String)
+
+Open a new VTK output file and write the mesh data into it.
+"""
 function open_vtk_file(mesh::Mesh, file_name::String)
   points = zeros(Float64, length(mesh.Nodes[1]), length(mesh.Nodes))
   for (i,p) in enumerate(mesh.Nodes)
@@ -319,14 +329,29 @@ function open_vtk_file(mesh::Mesh, file_name::String)
   return WriteVTK.vtk_grid(file_name, points, cells)
 end
 
+"""
+  function write_point_data(vtkfile, data, data_name::String)
+
+Add a new point data field with a name to an existing VTK file.
+"""
 function write_point_data(vtkfile, data, data_name::String)
   WriteVTK.vtk_point_data(vtkfile, data, data_name)
 end
 
+"""
+  function write_cell_data(vtkfile, data, data_name::String)
+
+Add a new cell data field with a name to an existing VTK file.
+"""
 function write_cell_data(vtkfile, data, data_name::String)
   WriteVTK.vtk_cell_data(vtkfile, data, data_name)
 end
 
+"""
+  function save_vtk_file(vtkfile)
+
+Finalize a VTK file by writing all data to disk.
+"""
 function save_vtk_file(vtkfile)
   WriteVTK.vtk_save(vtkfile)
 end

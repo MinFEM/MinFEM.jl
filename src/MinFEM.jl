@@ -1,6 +1,7 @@
 module MinFEM
 
-using WriteVTK, SparseArrays, LinearAlgebra
+import WriteVTK
+using SparseArrays, LinearAlgebra
 
 export PDESystem, 
        solve, 
