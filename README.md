@@ -14,7 +14,6 @@ Thus, hit the **]** key and type
 
 ```
 add https://github.com/msiebenborn/MinFEM.jl
-add WriteVTK
 test MinFEM
 ```
 
@@ -24,10 +23,8 @@ First we have to load the package MinFEM and WriteVTK. The latter is used to wri
 
 ```julia
 using MinFEM
-using WriteVTK
 
 mesh = unit_square(30)
-
 ```
 
 As an alternative: Download the package from github to obtain the examples and meshes and navigate, within the julia console, to the **examples** folder. Then import one of the mesh files generated with GMSH.
@@ -71,8 +68,8 @@ Finally, we solve the PDE and write the solution in a file for visualization wit
 
 ```julia
 solve(pde)
-vtkfile = write_vtk_mesh(mesh, "output.vtu")
-vtk_point_data(vtkfile, pde.state, "y")
-vtk_point_data(vtkfile, s, "s")
-vtk_save(vtkfile)
+vtkfile = open_vtk_file(mesh, "poisson.vtu")
+write_point_data(vtkfile, pde.state, "Y")
+write_point_data(vtkfile, s, "S")
+save_vtk_file(vtkfile)
 ```

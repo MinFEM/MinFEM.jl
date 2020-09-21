@@ -75,7 +75,7 @@ end
 """
   `function import_mesh(file_name::String)`
 
-Import a gmsh file of version 2 or 4.
+Import a gmsh file of version v2 or v4.
 """
 function import_mesh(file_name::String)
   f = open(file_name)
