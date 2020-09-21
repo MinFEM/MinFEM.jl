@@ -1,5 +1,5 @@
 """
-    Boundary
+  `Boundary`
 
 Structure holding sets of node and edge indices for one particular physical boundary.
 """
@@ -9,7 +9,7 @@ mutable struct Boundary
 end
 
 """
-    Mesh
+  `Mesh`
 
 Structure for a triangular finite element mesh with volume and boundary markers.
 """
@@ -40,7 +40,7 @@ mutable struct Mesh
 end
 
 """
-  PDESystem
+  `PDESystem`
 
 Structure holding all information to describe simple PDEs with Dirichlet realized
 resolved by multipliers.

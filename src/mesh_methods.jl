@@ -1,5 +1,5 @@
 """
-    unit_square(n::Int64)
+  `unit_square(n::Int64)`
 
 Set up a n-by-n quasi-uniform mesh for the unit square.
 """
@@ -73,7 +73,7 @@ function unit_square(n::Int64)
 end
 
 """
-  function import_mesh(file_name::String)
+  `function import_mesh(file_name::String)`
 
 Import a gmsh file of version 2 or 4.
 """
@@ -311,7 +311,7 @@ function getCellVolumes(mesh::Mesh)
 end
 
 """
-  function open_vtk_file(mesh::Mesh, file_name::String)
+  `function open_vtk_file(mesh::Mesh, file_name::String)`
 
 Open a new VTK output file and write the mesh data into it.
 """
@@ -330,7 +330,7 @@ function open_vtk_file(mesh::Mesh, file_name::String)
 end
 
 """
-  function write_point_data(vtkfile, data, data_name::String)
+  `function write_point_data(vtkfile, data, data_name::String)`
 
 Add a new point data field with a name to an existing VTK file.
 """
@@ -339,7 +339,7 @@ function write_point_data(vtkfile, data, data_name::String)
 end
 
 """
-  function write_cell_data(vtkfile, data, data_name::String)
+  `function write_cell_data(vtkfile, data, data_name::String)`
 
 Add a new cell data field with a name to an existing VTK file.
 """
@@ -348,7 +348,7 @@ function write_cell_data(vtkfile, data, data_name::String)
 end
 
 """
-  function save_vtk_file(vtkfile)
+  `function save_vtk_file(vtkfile)`
 
 Finalize a VTK file by writing all data to disk.
 """

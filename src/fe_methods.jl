@@ -61,7 +61,7 @@ function refresh(S::PDESystem)
 end
 
 """
-    solve(S::PDESystem)
+  `solve(S::PDESystem)`
 
 First tries to set up the system matrix with multipliers for Dirichlet conditions.
 If the system has already been used before, this step is skipped.
@@ -77,7 +77,7 @@ function solve(S::PDESystem)
 end
 
 """
-    getDirichletProjection(jj::Int64, DI::Set{Int64};qdim=1)
+  `getDirichletProjection(jj::Int64, DI::Set{Int64};qdim=1)`
 
 Build the projection onto the Dirichlet nodes where the input jj is understood as qdim*nnodes.
 """
@@ -92,7 +92,7 @@ function getDirichletProjection(jj::Int64, DI::Set{Int64}; qdim=1)
 end
 
 """
-    evaluateMeshFunction(mesh::Mesh, f::Function; region=[], qdim=1)
+  `evaluateMeshFunction(mesh::Mesh, f::Function; region=[], qdim=1)`
 
 Evaluate a given function object f on all nodes of the mesh. Or, if region is specified,
 it is assumed to be a set or vector of node indices, where f should be evaluated.
@@ -146,7 +146,7 @@ function gradPhi(ii::Int64)
 end
 
 """
-    function asmDirichletCondition(SM, DI::Set{Int64}, rhs=[], bc=[]; qdim=1, insert=1.0)
+  `function asmDirichletCondition(SM, DI::Set{Int64}, rhs=[], bc=[]; qdim=1, insert=1.0)`
 
 Modify a stiffness matrix and a right hand side according to the given Dirichlet conditions.
 DI has to be the set of node indices for which the condition should be active.
@@ -223,7 +223,7 @@ function __asmLaplacian(mesh::Mesh)
 end
 
 """
-    asmLaplacian(mesh::Mesh)
+  `asmLaplacian(mesh::Mesh)`
 
 Assemble the Laplacian stiffness matrix for all elements in the mesh.
 """
@@ -259,7 +259,7 @@ function asmLaplacian(mesh::Mesh)
 end
 
 """
-    asmMassMatrix(mesh::Mesh; qdim=1)
+  `asmMassMatrix(mesh::Mesh; qdim=1)`
 
 Assemble a mass matrix for all elements of the given mesh.
 """
@@ -298,7 +298,7 @@ function asmMassMatrix(mesh::Mesh; qdim=1)
 end
 
 """
-    asmBoundaryMassMatrix(mesh::Mesh; Edges=Set{Int64}(), qdim=1)
+  `asmBoundaryMassMatrix(mesh::Mesh; Edges=Set{Int64}(), qdim=1)`
 
 Assemble a mass matrix for the given set of boundary edges.
 """
@@ -342,7 +342,7 @@ function asmBoundaryMassMatrix(mesh::Mesh; Edges=Set{Int64}(), qdim=1)
 end
 
 """
-    asmBoundarySource(mesh::Mesh, S::Array{Float64,1}, BoundaryEdges=Set{Int64}(-1); qdim=1)
+  `asmBoundarySource(mesh::Mesh, S::Array{Float64,1}, BoundaryEdges=Set{Int64}(-1); qdim=1)`
 
 Assemble the source S on the given set of boundary edges.
 """
@@ -369,7 +369,7 @@ function asmBoundarySource(mesh::Mesh, S::Array{Float64,1}, BoundaryEdges=Set{In
 end
 
 """
-    L2norm(Mass::SparseMatrixCSC{Float64,Int64}, v::AbstractVector; qdim=1)
+  `L2norm(Mass::SparseMatrixCSC{Float64,Int64}, v::AbstractVector; qdim=1)`
 
 Computes the L2 norm of a vector v according to the mass matrix Mass.
 """
@@ -378,7 +378,7 @@ function L2norm(Mass::SparseMatrixCSC{Float64,Int64}, v::AbstractVector; qdim=1)
 end
 
 """
-    asmCubicTerm(mesh::Mesh, y::AbstractVector)
+  `asmCubicTerm(mesh::Mesh, y::AbstractVector)`
 
 The cubic term of the standard semilinear parabolic equation.
 """
@@ -408,7 +408,7 @@ function asmCubicTerm(mesh::Mesh, y::AbstractVector)
 end
 
 """
-    asmCubicDerivativeMatrix(mesh::Mesh, y::AbstractVector)
+  `asmCubicDerivativeMatrix(mesh::Mesh, y::AbstractVector)`
 
 Assembly of the linearization of the cubic term of the standard semilinear elliptic equation.
 """
@@ -454,7 +454,7 @@ function asmCubicDerivativeMatrix(mesh::Mesh, y::AbstractVector)
 end
 
 """
-    asmCubicSecondDerivativeMatrix(mesh::Mesh, y::AbstractVector, p::AbstractVector)
+  `asmCubicSecondDerivativeMatrix(mesh::Mesh, y::AbstractVector, p::AbstractVector)`
 
 Assembly of the second derivative of the cubic term of the standard semilinear elliptic equation 
 around the state y.
@@ -501,7 +501,7 @@ function asmCubicSecondDerivativeMatrix(mesh::Mesh, y::AbstractVector, p::Abstra
 end
 
 """
-    strainTensor(grad::AbstractMatrix)
+  `strainTensor(grad::AbstractMatrix)`
 
 Strain tensor for linear elasticity with gradient as argument.
 """
@@ -510,7 +510,7 @@ function strainTensor(grad::AbstractMatrix)
 end
 
 """
-    stressTensor(grad::AbstractMatrix, lambda::Float64, mu::Float64)
+  `stressTensor(grad::AbstractMatrix, lambda::Float64, mu::Float64)`
 
 Strain tensor for linear elasticity with gradient as argument.
 """
@@ -520,7 +520,7 @@ function stressTensor(grad::AbstractMatrix, lambda::Float64, mu::Float64)
 end
 
 """
-    asmElasticity(mesh::Mesh, lambda::Float64, mu::Float64)
+  `asmElasticity(mesh::Mesh, lambda::Float64, mu::Float64)`
 
 Assembly of the linear elasticity stiffness matrix for constant coefficients lambda and mu.
 """
@@ -569,7 +569,7 @@ function asmElasticity(mesh::Mesh, lambda::Float64, mu::Float64)
 end
 
 """
-    computeGradient(mesh::Mesh, y::AbstractVector; qdim=1)
+  `computeGradient(mesh::Mesh, y::AbstractVector; qdim=1)`
 
 Compute the gradient of a state y on a given mesh.
 """
@@ -590,7 +590,7 @@ function computeGradient(mesh::Mesh, y::AbstractVector; qdim=1)
 end
 
 """
-    asmGradient(mesh::Mesh; qdim=1)
+  `asmGradient(mesh::Mesh; qdim=1)`
 
 Assembles the linear mapping from a state on the given mesh to the gradient.
 """
