@@ -1,7 +1,6 @@
 using MinFEM
 
 mesh = unit_square(100)
-
 L = asmLaplacian(mesh)
 M = asmMassMatrix(mesh)
 
