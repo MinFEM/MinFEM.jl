@@ -193,35 +193,6 @@ function asmSparseMatrix(D::Dict{Tuple{Int64,Int64}, Float64}; nrows=0, ncols=0)
   return sparse(II,JJ,AA, maximum([nrows,maximum(II)]), maximum([ncols,maximum(JJ)]))
 end
 
-
-function __asmLaplacian(mesh::Mesh)
-  D = Dict{Tuple{Int64,Int64}, Float64}()
-
-  for el=1:mesh.nelems
-    nodes = mesh.Triangles[el]
-    (detJ, J) = Jacobian(mesh, el)
-    elemMat = zeros(3,3)
-    for i=1:3
-      for j=1:3
-        elemMat[i,j] += (J*gradPhi(i))'*(J*gradPhi(j))
-      end
-    end
-    elemMat *= sum(quadW)*detJ
-
-    for i=1:3
-      for j=1:3
-        if(in((nodes[i], nodes[j]), keys(D)))
-          D[(nodes[i], nodes[j])] += elemMat[i,j]
-        else
-          D[(nodes[i], nodes[j])] = elemMat[i,j]
-        end
-      end
-    end
-  end
-
-  return asmSparseMatrix(D)
-end
-
 """
   `asmLaplacian(mesh::Mesh)`
 
@@ -629,4 +600,119 @@ function asmGradient(mesh::Mesh; qdim=1)
   end
 
   return sparse(II[1:n],JJ[1:n],AA[1:n], 2*qdim*mesh.nelems, qdim*mesh.nnodes)
+end
+
+"""
+  `asmIncompressibility(mesh::Mesh)`
+
+Assembles the matrix for a linear incompressibility block in a saddle point system.
+"""
+function asmIncompressibility(mesh::Mesh)
+
+  AA = zeros(Float64, mesh.nelems * 3^2 * 2)
+  II = zeros(Int64, length(AA))
+  JJ = zeros(Int64, length(AA))
+  n = 0
+
+  for el=1:mesh.nelems
+    nodes = mesh.Triangles[el]
+    (detJ, J) = Jacobian(mesh, el)
+    elemMat = zeros(2*3,3)
+    for i=1:3
+      for j=1:3
+        for (q, x) in enumerate(quadX)
+          elemMat[2*(i-1).+[1;2],j] += Phi(j, x) * (J*gradPhi(i)) * quadW[q] * detJ
+        end
+      end
+    end
+
+    for d=1:2
+      for i=1:3
+        for j=1:3
+          n = n+1
+          II[n] = 2*(nodes[i]-1)+d
+          JJ[n] = nodes[j]
+          AA[n] = elemMat[2*(i-1)+d,j]
+        end
+      end
+    end
+  end
+
+  return sparse(II[1:n],JJ[1:n],AA[1:n])
+end
+
+"""
+  `asmVectorLaplacian(mesh::Mesh; qdim=1)`
+
+Assemble the vector-valued Laplacian stiffness matrix for all elements in the mesh.
+"""
+function asmVectorLaplacian(mesh::Mesh; qdim=1)
+
+  AA = zeros(Float64, qdim^2 * mesh.nelems * 3^2)
+  II = zeros(Int64, length(AA))
+  JJ = zeros(Int64, length(AA))
+  n = 0
+
+  for el=1:mesh.nelems
+    nodes = mesh.Triangles[el]
+    (detJ, J) = Jacobian(mesh, el)
+    elemMat = zeros(3,3)
+    for i=1:3
+      for j=1:3
+        elemMat[i,j] += (J*gradPhi(i))'*(J*gradPhi(j))
+      end
+    end
+    elemMat *= sum(quadW)*detJ
+
+    for d=1:qdim
+      for i=1:3
+        for j=1:3
+          n = n+1
+          II[n] = qdim*(nodes[i]-1)+d
+          JJ[n] = qdim*(nodes[j]-1)+d
+          AA[n] = elemMat[i,j]
+        end
+      end
+    end
+  end
+
+  return sparse(II[1:n],JJ[1:n],AA[1:n])
+end
+
+"""
+  `function asmStokesStabilization(mesh::Mesh)`
+
+Assemble the vector-valued Laplacian stiffness matrix for all elements in the mesh.
+"""
+function asmStokesStabilization(mesh::Mesh)
+
+  AA = zeros(Float64, mesh.nelems * 3^2)
+  II = zeros(Int64, length(AA))
+  JJ = zeros(Int64, length(AA))
+  n = 0
+  diam = MinFEM.getCellDiameter(mesh)
+
+  for el=1:mesh.nelems
+    nodes = mesh.Triangles[el]
+    (detJ, J) = Jacobian(mesh, el)
+    elemMat = zeros(3,3)
+    d = diam[el]
+    for i=1:3
+      for j=1:3
+        elemMat[i,j] += d^2 * (J*gradPhi(i))'*(J*gradPhi(j))
+      end
+    end
+    elemMat *= sum(quadW)*detJ
+
+    for i=1:3
+      for j=1:3
+        n = n+1
+        II[n] = nodes[i]
+        JJ[n] = nodes[j]
+        AA[n] = elemMat[i,j]
+      end
+    end
+  end
+
+  return sparse(II[1:n],JJ[1:n],AA[1:n])
 end

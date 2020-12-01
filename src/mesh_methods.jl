@@ -311,6 +311,46 @@ function getCellVolumes(mesh::Mesh)
 end
 
 """
+  `function getCellDiameter(mesh::Mesh)`
+
+Return a vector of the cell diameter, i.e. the longest edges length.
+"""
+function getCellDiameter(mesh::Mesh)
+  nelems = mesh.nelems
+  v = zeros(nelems)
+  for el=1:nelems
+    nodes = mesh.Nodes[mesh.Triangles[el]]
+    v[el] = maximum([norm(nodes[3]-nodes[1]); norm(nodes[2]-nodes[1]); norm(nodes[3]-nodes[2])])
+  end
+  return v
+end
+
+"""
+  `function getMeshBoundingBox(mesh::Mesh)`
+
+Return two nodes, which span the bounding box of the mesh.
+"""
+function getMeshBoundingBox(mesh::Mesh)
+  xmin = Inf
+  ymin = Inf
+  xmax = -Inf
+  ymax = -Inf
+  for v in mesh.Nodes
+    if v[1] < xmin
+      xmin = v[1]
+    elseif v[1] > xmax
+      xmax = v[1]
+    end
+    if v[2] < ymin
+      ymin = v[2]
+    elseif v[2] > ymax
+      ymax = v[2]
+    end
+  end
+  Array[[xmin;ymin],[xmax;ymax]]
+end
+
+"""
   `function open_vtk_file(mesh::Mesh, file_name::String)`
 
 Open a new VTK output file and write the mesh data into it.
