@@ -13,7 +13,7 @@ First we need to add the MinFEM package to our Julia installation.
 Thus, hit the **]** key and type
 
 ```
-add https://github.com/msiebenborn/MinFEM.jl
+add MinFEM
 test MinFEM
 ```
 
