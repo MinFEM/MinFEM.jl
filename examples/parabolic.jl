@@ -1,46 +1,35 @@
 using MinFEM
 
-function parabolic(;T::Float64, tsteps::Int, theta=1.0)
-  mesh = unit_square(100)
+function parabolic(mesh::Mesh, T::Float64, tsteps::Int; theta=1.0)
+    path = "parabolic_problem/"
+    mkpath(path)
+    
+    boundary = select_boundary(mesh)
+    L = assemble_laplacian(mesh)
+    M = assemble_massmatrix(mesh)
 
-  boundary = union(mesh.Boundaries[1001].Nodes,
-                   mesh.Boundaries[1002].Nodes,
-                   mesh.Boundaries[1003].Nodes,
-                   mesh.Boundaries[1004].Nodes)
+    # time increment assuming that t0=0
+    dt = (T-0)/tsteps
 
-  L = asmLaplacian(mesh)
-  M = asmMassMatrix(mesh)
+    source(x) = 1.0
+    f = evaluate_mesh_function(mesh, source)
 
-  # time increment assuming that t0=0
-  dt = (T-0)/tsteps
+    initial_condition(x) = 0.0
+    u = evaluate_mesh_function(mesh, initial_condition)
+    write_to_vtk(u, mesh, "u", path*"parabolic_"*lpad(string(0), 3, '0')*".vtu")
 
-  source(x) = 1.0
-  f = evaluateMeshFunction(mesh, source)
+    for i = 1:tsteps
+        # we have to solve the following equation depending on theta
+        # with the prescribed Dirichlet conditions
+        # M*(u_new - u)/dt + L(theta*u_new + (1.0-theta)*u) = M*f
+        pde = PDESystem(A=(M + theta*dt*L), b=(M - (1.0-theta)*dt*L)*u + dt*M*f, bc=zeros(mesh.nnodes), DI=extract_nodes(boundary))
+        solve!(pde)
 
-  initial_condition(x) = 0.0
-  u = evaluateMeshFunction(mesh, initial_condition)
+        u = copy(pde.state)
 
-  for i=1:tsteps
-
-    # in first timestep additional output of u0
-    if i==1
-      vtkfile = open_vtk_file(mesh, "parabolic_"*lpad(string(0), 3, '0')*".vtu")
-      write_point_data(vtkfile, u, "u")
-      save_vtk_file(vtkfile)
+        write_to_vtk(u, mesh, "u", path*"parabolic_"*lpad(string(i), 3, '0')*".vtu")
     end
 
-    # we have to solve the following equation depending on theta
-    # with the prescribed Dirichlet conditions
-    # M*(u_new - u)/dt + L(theta*u_new + (1.0-theta)*u) = M*f
-    pde = PDESystem(A=(M + theta*dt*L), b=(M - (1.0-theta)*dt*L)*u + dt*M*f, bc=zeros(mesh.nnodes), DI=boundary)
-    solve(pde)
-
-    u = copy(pde.state)
-
-    vtkfile = open_vtk_file(mesh, "parabolic_"*lpad(string(i), 3, '0')*".vtu")
-    write_point_data(vtkfile, u, "u")
-    save_vtk_file(vtkfile)
-  end
-
 end
-parabolic(T=0.001, tsteps=10, theta=1.0)
+
+parabolic(import_mesh("../meshes/Lshaped.msh"), 1.5, 100, theta=1.0)
