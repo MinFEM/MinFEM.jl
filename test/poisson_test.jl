@@ -1,30 +1,59 @@
-using MinFEM
+using MinFEMDev
 
-function solve_poisson(file_name::String)
+function test_poisson()
+    n = 3
+    m = 2
+    f1(x) = sin(n*x[1]*pi)
+    f2(x) = sin(n*x[1]*pi) * sin(m*x[2]*pi)
 
-  mesh = import_mesh(file_name)
+    mesh::Mesh = import_mesh("test_line_v4.msh")
+    boundaryNodes = extract_nodes(select_boundary(mesh))
 
-  L = asmLaplacian(mesh)
-  M = asmMassMatrix(mesh)
+    L = assemble_laplacian(mesh)
+    M = assemble_massmatrix(mesh)
 
-  n=3
-  m=2
-  f(x) = sin(n*x[1]*pi)*sin(m*x[2]*pi)
-  s = evaluateMeshFunction(mesh, f)
+    s = evaluate_mesh_function(mesh, f1)
+    rhs = M * s
 
-  boundary = union(mesh.Boundaries[1001].Nodes,
-                   mesh.Boundaries[1002].Nodes,
-                   mesh.Boundaries[1003].Nodes,
-                   mesh.Boundaries[1004].Nodes)
+    pde = PDESystem(A=L, b=rhs, bc=zeros(mesh.nnodes), DI=boundaryNodes)
+    solve!(pde)
+    
+    assemble_dirichletcondition!(L, boundaryNodes, rhs=rhs, bc=zeros(mesh.nnodes))
+    y = L \ rhs
 
-  pde = PDESystem(A=L, b=M*s, bc=zeros(mesh.nnodes), DI=boundary)
+    any(abs.(pde.state .- y) .> 1e-15) && return false
 
-  solve(pde)
+    v1 = (n*pi)^2 * pde.state - s
+    sqrt(v1' * M * v1) > 6e-2 && return false
 
-  v = ((n*pi)^2 + (m*pi)^2)*pde.state - s
-  return sqrt(v'*M*v)
+    v2 = (n*pi)^2 * y - s
+    sqrt(v2' * M * v2) > 6e-2 && return false
 
+
+    mesh = import_mesh("test_square_v4.msh")
+    boundaryNodes = extract_nodes(select_boundary(mesh))
+
+    L = assemble_laplacian(mesh)
+    M = assemble_massmatrix(mesh)
+
+    s = evaluate_mesh_function(mesh, f2)
+    rhs = M * s
+
+    pde = PDESystem(A=L, b=rhs, bc=zeros(mesh.nnodes), DI=boundaryNodes)
+    solve!(pde)
+    
+    assemble_dirichletcondition!(L, boundaryNodes, rhs=rhs, bc=zeros(mesh.nnodes))
+    y = L \ rhs
+
+    any(abs.(pde.state .- y) .> 1e-15) && return false
+
+    v1 = ((n*pi)^2 + (m*pi)^2) * pde.state - s
+    sqrt(v1' * M * v1) > 6e-2 && return false
+
+    v2 = ((n*pi)^2 + (m*pi)^2) * y - s
+    sqrt(v2' * M * v2) > 6e-2 && return false
+    
+    return true
 end
 
-@test solve_poisson("test_v2.msh") == solve_poisson("test_v4.msh")
-@test solve_poisson("test_v2.msh") < 4e-3
+@test test_poisson()

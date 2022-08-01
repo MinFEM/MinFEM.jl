@@ -1,43 +1,37 @@
-using MinFEM
+using MinFEMDev
 using LinearAlgebra
 
-function semilinear(mesh::Mesh, L::AbstractMatrix, M::AbstractMatrix,
-                    s::AbstractVector, BoundaryIndices::Set{Int64}=[], tol=1e-10)
+function test_semilinear(file_name::String)
 
-  y = zeros(mesh.nnodes)
+    mesh = import_mesh(file_name)
 
-  pde = PDESystem(A=L, b=M*s, bc=zeros(mesh.nnodes), DI=BoundaryIndices)
+    L = assemble_laplacian(mesh)
+    M = assemble_massmatrix(mesh)
 
-  res = Inf
-  while res > tol
-    pde.A = L + asmCubicDerivativeMatrix(mesh, y)
-    pde.b = -L*y + M*s - asmCubicTerm(mesh, y)
-    refresh(pde)
-    solve(pde)
+    f(x) = 100.0 * x[1] * x[2]
+    s = evaluate_mesh_function(mesh, f)
 
-    y += pde.state
-    res = norm(pde.state)
-  end
-  return y
+    boundary = select_boundary(mesh)
+
+    pde = PDESystem(A=L, b=M*s, bc=zeros(mesh.nnodes), DI=extract_nodes(boundary))
+
+    y = zeros(mesh.nnodes)
+    res = Inf
+    for it = 1:6
+        pde.A = L + assemble_cubicderivativematrix(mesh, y)
+        pde.b = -L*y + M*s - assemble_cubicterm(mesh, y)
+        refresh!(pde)
+        solve!(pde)
+
+        y += pde.state
+        res = norm(pde.state)
+        
+        if res <= 1e-10
+            return true
+        end
+    end
+
+    return false
 end
 
-function solve_semilinear(file_name::String)
-
-  mesh = import_mesh(file_name)
-
-  L = asmLaplacian(mesh)
-  M = asmMassMatrix(mesh)
-
-  f(x) = 100.0*x[1]*x[2]
-  s = evaluateMeshFunction(mesh, f)
-
-  boundary = union!(mesh.Boundaries[1001].Nodes,
-                    mesh.Boundaries[1002].Nodes,
-                    mesh.Boundaries[1003].Nodes,
-                    mesh.Boundaries[1004].Nodes);
-
-  y = semilinear(mesh, L, M, s, boundary);
-  return true
-end
-
-@test solve_semilinear("test_v4.msh")
+@test test_semilinear("test_square_v4.msh")
