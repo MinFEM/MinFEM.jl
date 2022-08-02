@@ -21,7 +21,7 @@ export  unit_square,
         deform_mesh!,
         deform_mesh
 
-export  select_boundary,
+export  select_boundaries,
         extract_elements,
         extract_nodes
 

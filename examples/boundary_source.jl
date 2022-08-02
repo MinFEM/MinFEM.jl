@@ -1,9 +1,9 @@
 using MinFEM
 
 mesh = import_mesh("../meshes/rounded.msh")
-freeBoundary = select_boundary(mesh, 1003, 1004)
+freeBoundary = select_boundaries(mesh, 1003, 1004)
 freeElements = extract_elements(freeBoundary)
-dirichletBoundary = select_boundary(mesh, 1001, 1002)
+dirichletBoundary = select_boundaries(mesh, 1001, 1002)
 dirichletNodes = extract_nodes(dirichletBoundary)
 
 L = assemble_laplacian(mesh)

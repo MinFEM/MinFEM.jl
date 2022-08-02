@@ -5,9 +5,9 @@ function test_vtk()
     mesh2::Mesh = import_mesh("test_square_v4.msh")
     mesh3::Mesh = import_mesh("test_cube_v4.msh")
 
-    b1 = extract_elements(select_boundary(mesh1))
-    b2 = extract_elements(select_boundary(mesh2))
-    b3 = extract_elements(select_boundary(mesh3))
+    b1 = extract_elements(select_boundaries(mesh1))
+    b2 = extract_elements(select_boundaries(mesh2))
+    b3 = extract_elements(select_boundaries(mesh3))
 
     E11 = assemble_basismatrix_boundary(mesh1, boundaryElements=b1, order=1, qdim=1)
     E21 = assemble_basismatrix_boundary(mesh2, boundaryElements=b2, order=1, qdim=1)

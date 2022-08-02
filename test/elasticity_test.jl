@@ -3,8 +3,8 @@ using MinFEMDev
 function test_elasticity(fileName::String)
     mesh = import_mesh(fileName)
 
-    forcingBoundary = select_boundary(mesh, 1001)
-    fixedBoundary = select_boundary(mesh, 1003)
+    forcingBoundary = select_boundaries(mesh, 1001)
+    fixedBoundary = select_boundaries(mesh, 1003)
 
     L = assemble_elasticity(mesh, 1.0, 1.0)
     Mb = assemble_massmatrix_boundary(mesh, boundaryElements=extract_elements(forcingBoundary), qdim=2)

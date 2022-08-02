@@ -11,7 +11,7 @@ function test_semilinear(file_name::String)
     f(x) = 100.0 * x[1] * x[2]
     s = evaluate_mesh_function(mesh, f)
 
-    boundary = select_boundary(mesh)
+    boundary = select_boundaries(mesh)
 
     pde = PDESystem(A=L, b=M*s, bc=zeros(mesh.nnodes), DI=extract_nodes(boundary))
 

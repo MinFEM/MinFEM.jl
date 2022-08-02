@@ -32,7 +32,7 @@ M = assemble_massmatrix(mesh)
 f(x) = 3*2*pi^2*sin(x[1]*pi)*sin(x[2]*pi) + (3*sin(x[1]*pi)*sin(x[2]*pi))^3
 s = evaluate_mesh_function(mesh, f)
 
-boundary = select_boundary(mesh)
+boundary = select_boundaries(mesh)
 boundaryNodes = extract_nodes(boundary)
 
 y = semilinear(mesh, L, M, s, boundaryNodes);

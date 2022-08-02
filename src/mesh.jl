@@ -838,11 +838,11 @@ function deform_mesh(mesh::Mesh, v::AbstractVector{Float64}; t::Float64=1.0)
 end
 
 """
-    select_boundary(mesh::Mesh, args...) -> Set{Boundary}
+    select_boundaries(mesh::Mesh, args...) -> Set{Boundary}
 
 Returns set of all or specified physical boundaries of the mesh.
 """
-function select_boundary(mesh::Mesh, args...)
+function select_boundaries(mesh::Mesh, args...)
     Boundaries = Array{Boundary,1}()
     
     for id in args

@@ -4,7 +4,7 @@ function parabolic(mesh::Mesh, T::Float64, tsteps::Int; theta=1.0)
     path = "parabolic_problem/"
     mkpath(path)
     
-    boundary = select_boundary(mesh)
+    boundary = select_boundaries(mesh)
     L = assemble_laplacian(mesh)
     M = assemble_massmatrix(mesh)
 

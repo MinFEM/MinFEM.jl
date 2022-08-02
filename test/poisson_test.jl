@@ -7,7 +7,7 @@ function test_poisson()
     f2(x) = sin(n*x[1]*pi) * sin(m*x[2]*pi)
 
     mesh::Mesh = import_mesh("test_line_v4.msh")
-    boundaryNodes = extract_nodes(select_boundary(mesh))
+    boundaryNodes = extract_nodes(select_boundaries(mesh))
 
     L = assemble_laplacian(mesh)
     M = assemble_massmatrix(mesh)
@@ -31,7 +31,7 @@ function test_poisson()
 
 
     mesh = import_mesh("test_square_v4.msh")
-    boundaryNodes = extract_nodes(select_boundary(mesh))
+    boundaryNodes = extract_nodes(select_boundaries(mesh))
 
     L = assemble_laplacian(mesh)
     M = assemble_massmatrix(mesh)

@@ -46,7 +46,7 @@ function test_norms()
     abs(qnorm(7.0, fh, mesh, order=3) - (6/13)^(6/7)) >  1e-5 && return false
     abs(qnorm(8.0, fh, mesh, order=3) - (7/15)^(7/8)) >  1e-5 && return false
 
-    belems = extract_elements(select_boundary(mesh))
+    belems = extract_elements(select_boundaries(mesh))
     abs(pnorm_boundary(1.0, fh, mesh, boundaryElements=belems, order=1) - 2) >  1e-15 && return false
     abs(pnorm_boundary(2.0, fh, mesh, boundaryElements=belems, order=2) - (2/3+1)^(1/2)) >  1e-15 && return false
     abs(pnorm_boundary(3.0, fh, mesh, boundaryElements=belems, order=3) - (2/4+1)^(1/3)) >  1e-15 && return false
@@ -68,7 +68,7 @@ function test_norms()
     abs(pnorm(7.0, fh, mesh, order=7) - 8^(-1/7)) >  1e-15 && return false
     abs(pnorm(Inf, fh, mesh, order=1) - 1) >  1e-15 && return false
 
-    belems = extract_elements(select_boundary(mesh))
+    belems = extract_elements(select_boundaries(mesh))
     abs(pnorm_boundary(1.0, fh, mesh, boundaryElements=belems, order=1) - (4/2+1)^(1/1)) >  1e-15 && return false
     abs(pnorm_boundary(2.0, fh, mesh, boundaryElements=belems, order=2) - (4/3+1)^(1/2)) >  1e-15 && return false
     abs(pnorm_boundary(3.0, fh, mesh, boundaryElements=belems, order=3) - (4/4+1)^(1/3)) >  1e-15 && return false
