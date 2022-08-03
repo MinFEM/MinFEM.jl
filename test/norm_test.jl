@@ -1,4 +1,4 @@
-using MinFEMDev
+using MinFEM
 
 function test_norms()
     f(x) = -x[1]

@@ -1,4 +1,4 @@
-using MinFEMDev
+using MinFEM
 
 function test_quadrature()
     f0(x) = 1

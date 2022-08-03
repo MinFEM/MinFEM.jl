@@ -1,4 +1,4 @@
-using MinFEMDev
+using MinFEM
 
 function test_elasticity(fileName::String)
     mesh = import_mesh(fileName)

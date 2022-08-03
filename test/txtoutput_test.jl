@@ -1,4 +1,4 @@
-using MinFEMDev
+using MinFEM
 
 function test_output()
     mesh1::Mesh = import_mesh("test_line_v4.msh")

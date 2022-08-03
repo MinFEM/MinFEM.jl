@@ -1,4 +1,4 @@
-using MinFEMDev
+using MinFEM
 
 function test_normals()
     f(x) = 0.5 * x[1]

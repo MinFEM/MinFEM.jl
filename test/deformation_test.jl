@@ -1,4 +1,4 @@
-using MinFEMDev
+using MinFEM
 
 function test_deformation()
     f1(x) = max(x[1]-0.5, 0)

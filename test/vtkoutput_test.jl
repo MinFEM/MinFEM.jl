@@ -1,4 +1,4 @@
-using MinFEMDev
+using MinFEM
 
 function test_vtk()
     mesh1::Mesh = import_mesh("test_line_v4.msh")

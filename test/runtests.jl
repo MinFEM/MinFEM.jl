@@ -1,4 +1,4 @@
-using MinFEMDev
+using MinFEM
 using Test
 
 tests = ["quadrature_test", "mesh_test", "properties_test", "deformation_test", "normal_test", 

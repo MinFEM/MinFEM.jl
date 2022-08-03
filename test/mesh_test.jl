@@ -1,4 +1,4 @@
-using MinFEMDev
+using MinFEM
 
 function test_mesh(filePath::String)
     mesh1 = import_mesh("$(filePath)_v1.msh")

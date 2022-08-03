@@ -1,4 +1,4 @@
-using MinFEMDev
+using MinFEM
 
 function test_poisson()
     n = 3

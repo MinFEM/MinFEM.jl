@@ -1,4 +1,4 @@
-using MinFEMDev
+using MinFEM
 
 function test_properties()
     mesh = unit_interval(11)
