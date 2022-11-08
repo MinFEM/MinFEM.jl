@@ -35,7 +35,7 @@ Restricts a multivector of qdim*block*m elements for qdim dimensions to the regu
 """
 function restrict_multivector(x::AbstractVector{Float64}, m::Int64, qdim::Int64; block::Int64=1)
     if qdim == 1
-        return x
+        return copy(x)
     elseif block == 1
         v = zeros(m)
         for i=1:m
@@ -60,7 +60,7 @@ Prolongates a vector of m blocks of size block to a multivector for qdim dimensi
 """
 function prolong_multivector(x::AbstractVector{Float64}, m::Int64, qdim::Int64; block::Int64=1)
     if qdim == 1
-        return x
+        return copy(x)
     elseif block == 1
         v = zeros(qdim*m)
         for i = 1:m
@@ -92,7 +92,7 @@ function assemble_weightmultivector(mesh::Mesh; qdim::Int64=1, order::Int64=1)
     omega = zeros(Float64, m * wle)
     for i = 1:m
         (detJ, _) = jacobian(mesh, mesh.Elements[i])
-        omega[wle*(i-1)+1:wle*i] += detJ .* quadW
+        omega[wle*(i-1)+1:wle*i] += abs(detJ) .* quadW
     end
     
     return prolong_multivector(omega, m*wle, qdim)
@@ -112,7 +112,7 @@ function assemble_weightmultivector_boundary(mesh::Mesh; qdim::Int64=1, order::I
     omega = zeros(Float64, m*wle)
     for i = 1:m
         detJ = jacobian_boundary(mesh, mesh.BoundaryElements[i])
-        omega[wle*(i-1)+1:wle*i] += detJ .* quadW
+        omega[wle*(i-1)+1:wle*i] += abs(detJ) .* quadW
     end
 
     return prolong_multivector(omega, m*wle, qdim)
