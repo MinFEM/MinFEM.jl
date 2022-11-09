@@ -1,0 +1,63 @@
+# Internal Documentation
+
+---
+
+```@meta
+CurrentModule = MinFEMDev
+```
+
+Documentation for `MinFEMDev.jl`'s internal types and functions.
+
+See the [Public](public.md) page of the library for the documentation of the public interface.
+
+## Contents
+
+```@contents
+Pages = ["internals.md"]
+Depth = 2
+```
+
+## Types
+
+```@docs
+Entity
+```
+
+## Mesh Import
+
+```@docs
+import_mesh1
+import_mesh2
+import_mesh4
+getDimFromGMSHElementType
+getGMSHElementTypeFromDim
+getParentBoundary
+```
+
+## Quadrature
+
+```@docs
+gausslegendre_points
+gausslegendre_weights
+compute_coordinates_line
+compute_coordinates_triangle
+compute_coordinates_tetrahedron
+compute_weights_line
+compute_weights_triangle
+compute_weights_tetrahedron
+```
+
+## Utility
+
+```@docs
+stressTensor
+strainTensor
+```
+
+## Index
+
+```@index
+Pages = ["internals.md"]
+Module = ["MinFEMDev"]
+Order = [:type, :function]
+```

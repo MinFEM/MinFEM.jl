@@ -1,3 +1,4 @@
 *.vtu
+docs/build/
 logo/*
 Manifest.toml
