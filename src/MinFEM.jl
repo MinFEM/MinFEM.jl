@@ -1,9 +1,9 @@
 """
-    MinFEMDev
+    MinFEM
 
 A minimal finite element tool for demonstration and teaching in julia.
 """
-module MinFEMDev
+module MinFEM
 
 using LinearAlgebra, SparseArrays, WriteVTK
 
