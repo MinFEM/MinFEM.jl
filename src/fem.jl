@@ -29,11 +29,14 @@ function grad_phi(d::Int64, ii::Int64)
 end
 
 """
-    restrict_multivector(x::AbstractVector{Float64}, m::Int64, qdim::Int64; block::Int64=1) -> Vector{Float64}
+    restrict_multivector(x::AbstractVector{Float64}, m::Int64, qdim::Int64;
+                            block::Int64=1) -> Vector{Float64}
     
-Restricts a multivector of qdim*block*m elements for qdim dimensions to the regular vector of m blocks of size block.
+Restricts a multivector of qdim×block×m elements for qdim dimensions 
+to the regular vector of m blocks of size block.
 """
-function restrict_multivector(x::AbstractVector{Float64}, m::Int64, qdim::Int64; block::Int64=1)
+function restrict_multivector(x::AbstractVector{Float64}, m::Int64, qdim::Int64; 
+                                block::Int64=1)
     if qdim == 1
         return copy(x)
     elseif block == 1
@@ -46,7 +49,8 @@ function restrict_multivector(x::AbstractVector{Float64}, m::Int64, qdim::Int64;
         v = zeros(block*m)
         for i = 1:m
             for j = 1:qdim
-                v[block*(i-1) + j] = sum(x[(qdim*block*(i-1)+(j-1)*block+1):(qdim*block*(i-1)+block*j)])
+                v[block*(i-1) + j] = 
+                    sum(x[(qdim*block*(i-1)+(j-1)*block+1):(qdim*block*(i-1)+block*j)])
             end
         end
         return v
@@ -54,11 +58,14 @@ function restrict_multivector(x::AbstractVector{Float64}, m::Int64, qdim::Int64;
 end 
 
 """
-    prolong_multivector(x::AbstractVector{Float64}, m::Int64, qdim::Int64; block::Int64=1) -> Vector{Float64}
+    prolong_multivector(x::AbstractVector{Float64}, m::Int64, qdim::Int64; 
+                        block::Int64=1) -> Vector{Float64}
     
-Prolongates a vector of m blocks of size block to a multivector for qdim dimensions of length qdim*block*m.
+Prolongates a vector of m blocks of size block to a multivector 
+for qdim dimensions of length qdim×block×m.
 """
-function prolong_multivector(x::AbstractVector{Float64}, m::Int64, qdim::Int64; block::Int64=1)
+function prolong_multivector(x::AbstractVector{Float64}, m::Int64, qdim::Int64;
+                                block::Int64=1)
     if qdim == 1
         return copy(x)
     elseif block == 1
@@ -71,7 +78,8 @@ function prolong_multivector(x::AbstractVector{Float64}, m::Int64, qdim::Int64; 
         v = zeros(qdim*block*m)
         for i = 1:m
             for j = 1:qdim
-                v[(qdim*block*(i-1)+(j-1)*block+1):(qdim*block*(i-1)+block*j)] = x[(block*(i-1)+1):(block*i)]
+                v[(qdim*block*(i-1)+(j-1)*block+1):(qdim*block*(i-1)+block*j)] = 
+                    x[(block*(i-1)+1):(block*i)]
             end
         end
         return v
@@ -79,7 +87,8 @@ function prolong_multivector(x::AbstractVector{Float64}, m::Int64, qdim::Int64; 
 end
 
 """
-    assemble_weightmultivector(mesh::Mesh; qdim::Int64=1, order::Int64=1) -> Vector{Float64}
+    assemble_weightmultivector(mesh::Mesh; qdim::Int64=1, order::Int64=1) 
+        -> Vector{Float64}
     
 Returns the vector of weights for all elements of mesh and image dimension qdim.
 Weight is equal to volume if 1st order integration by mid-point rule is used.
@@ -99,7 +108,8 @@ function assemble_weightmultivector(mesh::Mesh; qdim::Int64=1, order::Int64=1)
 end
 
 """
-    assemble_weightmultivector_boundary(mesh::Mesh; qdim::Int64=1, order::Int64=1) -> Vector{Float64}
+    assemble_weightmultivector_boundary(mesh::Mesh; qdim::Int64=1, order::Int64=1) 
+        -> Vector{Float64}
     
 Returns the vector of weights for all boundary elements of mesh and image dimension qdim.
 Weight is equal to volume if 1st order integration by mid-point rule is used.
@@ -119,11 +129,11 @@ function assemble_weightmultivector_boundary(mesh::Mesh; qdim::Int64=1, order::I
 end
 
 """
-    assemble_derivativematrix(mesh::Mesh; qdim=1) -> SparseMatrixCSC{Float64, Int64}
+    assemble_derivativematrix(mesh::Mesh; qdim::Int64=1) -> SparseMatrixCSC{Float64, Int64}
     
 Returns the discrete derivative matrix for all elements of mesh and image dimension qdim.
 """
-function assemble_derivativematrix(mesh::Mesh; qdim=1)   
+function assemble_derivativematrix(mesh::Mesh; qdim::Int64=1)   
     AA = zeros(Float64, mesh.d * qdim * mesh.nelems * (mesh.d+1))
     II = zeros(Int64, length(AA))
     JJ = zeros(Int64, length(AA))
@@ -157,13 +167,15 @@ function assemble_derivativematrix(mesh::Mesh; qdim=1)
 end
 
 """
-    assemble_laplacian(mesh::Mesh; qdim=1) -> SparseMatrixCSC{Float64, Int64}
-    assemble_laplacian(D::SparseMatrixCSC{Float64, Int64}, w::AbstractVector{Float64}) -> SparseMatrixCSC{Float64, Int64}
+    assemble_laplacian(mesh::Mesh; qdim::Int64=1) 
+        -> SparseMatrixCSC{Float64, Int64}
+    assemble_laplacian(D::SparseMatrixCSC{Float64, Int64}, w::AbstractVector{Float64}) 
+        -> SparseMatrixCSC{Float64, Int64}
 
 Returns the Laplacian stiffness matrix for all elements of mesh and image dimension qdim.
 Can either be assembled directly or from derivative matrix and weight vector.
 """
-function assemble_laplacian(mesh::Mesh; qdim=1)
+function assemble_laplacian(mesh::Mesh; qdim::Int64=1)
     AA = zeros(Float64, qdim^2 * mesh.nelems * (mesh.d+1)^2)
     II = zeros(Int64, length(AA))
     JJ = zeros(Int64, length(AA))
@@ -207,13 +219,19 @@ function assemble_laplacian(D::SparseMatrixCSC{Float64, Int64}, w::AbstractVecto
 end
 
 """
-    assemble_derivativematrix_boundary(mesh::Mesh; boundaryElements::Set{Int64}=Set{Int64}(), qdim=1) -> SparseMatrixCSC{Float64, Int64}
+    assemble_derivativematrix_boundary(mesh::Mesh; 
+                                        boundaryElements::Set{Int64}=Set{Int64}(), 
+                                        qdim::Int64=1) 
+                                        -> SparseMatrixCSC{Float64, Int64}
     
-Returns the discrete derivative matrix for all or specied boundary elements of mesh and image dimension qdim.
+Returns the discrete derivative matrix for all or specied boundary elements 
+of mesh and image dimension qdim.
 Workaround based on the derivate tensor for the corresponding full element
 and the fact that the gradient ist constant on the element. 
 """
-function assemble_derivativematrix_boundary(mesh::Mesh; boundaryElements::Set{Int64}=Set{Int64}(), qdim=1)
+function assemble_derivativematrix_boundary(mesh::Mesh; 
+                                            boundaryElements::Set{Int64}=Set{Int64}(),
+                                            qdim::Int64=1)
     if isempty(boundaryElements)
         boundaryElements = Set{Int64}(1 : mesh.nboundelems)
     end
@@ -252,13 +270,19 @@ function assemble_derivativematrix_boundary(mesh::Mesh; boundaryElements::Set{In
 end
 
 """
-    assemble_normalderivativematrix(mesh::Mesh; boundaryElements::Set{Int64}=Set{Int64}(), qdim=1) -> SparseMatrixCSC{Float64, Int64}
+    assemble_normalderivativematrix(mesh::Mesh;
+                                    boundaryElements::Set{Int64}=Set{Int64}(),
+                                    qdim::Int64=1) 
+                                    -> SparseMatrixCSC{Float64, Int64}
     
-Returns the discrete normal derivative matrix for all or specied boundary elements of mesh and image dimension qdim.
+Returns the discrete normal derivative matrix for all or specied boundary elements 
+of mesh and image dimension qdim.
 Workaround based on the derivate tensor for the corresponding full element
 and the fact that the gradient ist constant on the element. 
 """
-function assemble_normalderivativematrix(mesh::Mesh; boundaryElements::Set{Int64}=Set{Int64}(), qdim=1)
+function assemble_normalderivativematrix(mesh::Mesh; 
+                                            boundaryElements::Set{Int64}=Set{Int64}(),
+                                            qdim::Int64=1)
     if isempty(boundaryElements)
         boundaryElements = Set{Int64}(1 : mesh.nboundelems)
     end
@@ -295,9 +319,10 @@ function assemble_normalderivativematrix(mesh::Mesh; boundaryElements::Set{Int64
 end
 
 """
-    assemble_basismatrix(mesh::Mesh; qdim=1) -> SparseMatrixCSC{Float64, Int64}
+    assemble_basismatrix(mesh::Mesh; qdim::Int64=1) -> SparseMatrixCSC{Float64, Int64}
     
-Returns the discrete basis matrix with given local integration order for all elements of mesh and image dimension qdim.
+Returns the discrete basis matrix with given local integration order 
+for all elements of mesh and image dimension qdim.
 """
 function assemble_basismatrix(mesh::Mesh; qdim::Int64=1, order::Int64=3)       
     quadX = quadrature_points(mesh.d, order)
@@ -335,10 +360,13 @@ function assemble_basismatrix(mesh::Mesh; qdim::Int64=1, order::Int64=3)
 end
 
 """
-    assemble_massmatrix(mesh::Mesh; qdim::Int64=1, order::Int64=1) -> SparseMatrixCSC{Float64, Int64}
-    assemble_massmatrix(E::SparseMatrixCSC{Float64, Int64}, w::AbstractVector{Float64}) -> SparseMatrixCSC{Float64, Int64}
+    assemble_massmatrix(mesh::Mesh; qdim::Int64=1, order::Int64=1)
+        -> SparseMatrixCSC{Float64, Int64}
+    assemble_massmatrix(E::SparseMatrixCSC{Float64, Int64}, w::AbstractVector{Float64})
+        -> SparseMatrixCSC{Float64, Int64}
 
-Returns the mass matrix with given local integration order for all elements of mesh and image dimension qdim.
+Returns the mass matrix with given local integration order for all elements 
+of mesh and image dimension qdim.
 Can either be assembled directly or from derivative matrix and weight vector.
 """
 function assemble_massmatrix(mesh::Mesh; qdim::Int64=1, order::Int64=3)
@@ -379,7 +407,8 @@ function assemble_massmatrix(mesh::Mesh; qdim::Int64=1, order::Int64=3)
     return M
 end
 
-function assemble_massmatrix(E::SparseMatrixCSC{Float64, Int64}, w::AbstractVector{Float64})
+function assemble_massmatrix(E::SparseMatrixCSC{Float64, Int64}, 
+                                w::AbstractVector{Float64})
     M = E' * Diagonal(w) * E
     dropzeros!(M)
     return M
@@ -387,11 +416,17 @@ end
 
 
 """
-    assemble_basismatrix_boundary(mesh::Mesh; boundaryElements::Set{Int64}=Set{Int64}(), qdim::Int64=1, order::Int64=1) -> SparseMatrixCSC{Float64, Int64}
+    assemble_basismatrix_boundary(mesh::Mesh; 
+                                    boundaryElements::Set{Int64}=Set{Int64}(),
+                                    qdim::Int64=1, order::Int64=1) 
+                                    -> SparseMatrixCSC{Float64, Int64}
     
-Returns the discrete basis matrix with given local integration order for all or specified boundary elements of mesh and image dimension qdim.
+Returns the discrete basis matrix with given local integration order
+for all or specified boundary elements of mesh and image dimension qdim.
 """
-function assemble_basismatrix_boundary(mesh::Mesh; boundaryElements::Set{Int64}=Set{Int64}(), qdim::Int64=1, order::Int64=3)
+function assemble_basismatrix_boundary(mesh::Mesh; 
+                                        boundaryElements::Set{Int64}=Set{Int64}(), 
+                                        qdim::Int64=1, order::Int64=3)
     if isempty(boundaryElements)
         boundaryElements = Set{Int64}(1 : mesh.nboundelems)
     end
@@ -431,13 +466,21 @@ function assemble_basismatrix_boundary(mesh::Mesh; boundaryElements::Set{Int64}=
 end
 
 """
-    assemble_massmatrix_boundary(mesh::Mesh; boundaryElements::Set{Int64}=Set{Int64}(), qdim::Int64=1, order::Int64=1) -> SparseMatrixCSC{Float64, Int64}
-    assemble_massmatrix_boundary(E::SparseMatrixCSC{Float64, Int64}, w::AbstractVector{Float64}) -> SparseMatrixCSC{Float64, Int64}
+    assemble_massmatrix_boundary(mesh::Mesh; 
+                                    boundaryElements::Set{Int64}=Set{Int64}(), 
+                                    qdim::Int64=1, order::Int64=1)
+                                    -> SparseMatrixCSC{Float64, Int64}
+    assemble_massmatrix_boundary(E::SparseMatrixCSC{Float64, Int64},
+                                    w::AbstractVector{Float64})
+                                    -> SparseMatrixCSC{Float64, Int64}
 
-Retruns the mass matrix with given local integration order for all or specified boundary elements of mesh and image dimension qdim.
+Retruns the mass matrix with given local integration order 
+for all or specified boundary elements of mesh and image dimension qdim.
 Can either be assembled directly or from derivative matrix and weight vector.
 """
-function assemble_massmatrix_boundary(mesh::Mesh; boundaryElements::Set{Int64}=Set{Int64}(), qdim::Int64=1, order::Int64=3)
+function assemble_massmatrix_boundary(mesh::Mesh; 
+                                        boundaryElements::Set{Int64}=Set{Int64}(), 
+                                        qdim::Int64=1, order::Int64=3)
     if isempty(boundaryElements)
         boundaryElements = Set{Int64}(1 : mesh.nboundelems)
     end
@@ -477,14 +520,16 @@ function assemble_massmatrix_boundary(mesh::Mesh; boundaryElements::Set{Int64}=S
     return sparse(II[1:n],JJ[1:n],AA[1:n], qdim*mesh.nnodes, qdim*mesh.nnodes)
 end
 
-function assemble_massmatrix_boundary(E::SparseMatrixCSC{Float64, Int64}, w::AbstractVector{Float64})
+function assemble_massmatrix_boundary(E::SparseMatrixCSC{Float64, Int64},
+                                        w::AbstractVector{Float64})
     M = E' * Diagonal(w) * E
     dropzeros!(M)
     return M
 end
 
 """
-    assemble_cubicterm(mesh::Mesh, y::AbstractVector)
+    assemble_cubicterm(mesh::Mesh, y::AbstractVector; order::Int64=3)
+        -> SparseMatrixCSC{Float64, Int64}
 
 Returns the cubic term of the standard semilinear parabolic equation.
 """
@@ -518,7 +563,8 @@ function assemble_cubicterm(mesh::Mesh, y::AbstractVector; order::Int64=3)
 end
 
 """
-    assemble_cubicderivativematrix(mesh::Mesh, y::AbstractVector)
+    assemble_cubicderivativematrix(mesh::Mesh, y::AbstractVector; order::Int64=3)
+        -> SparseMatrixCSC{Float64, Int64}
 
 Returns the linearization of the cubic term of the standard semilinear elliptic equation.
 """
@@ -549,7 +595,8 @@ function assemble_cubicderivativematrix(mesh::Mesh, y::AbstractVector; order::In
         for i = 1:mesh.d+1
             for j = 1:mesh.d+1
                 for (q, x) in enumerate(quadX)
-                    elemMat[i,j] += 3.0 * y_quadratic[q] * phi(i, x) * phi(j, x) * quadW[q] * detJ
+                    elemMat[i,j] += 3.0 * y_quadratic[q] * 
+                                    phi(i, x) * phi(j, x) * quadW[q] * detJ
                 end
             end
         end
@@ -568,12 +615,15 @@ function assemble_cubicderivativematrix(mesh::Mesh, y::AbstractVector; order::In
 end
 
 """
-    assemble_cubicsecondderivativematrix(mesh::Mesh, y::AbstractVector, p::AbstractVector)
+    assemble_cubicsecondderivativematrix(mesh::Mesh, y::AbstractVector,
+                                            p::AbstractVector; order::Int64=3)
+                                            -> SparseMatrixCSC{Float64, Int64}
 
-Returns the second derivative of the cubic term of the standard semilinear elliptic equation 
-around the state y.
+Returns the second derivative of the cubic term 
+of the standard semilinear elliptic equation around the state y.
 """
-function assemble_cubicsecondderivativematrix(mesh::Mesh, y::AbstractVector, p::AbstractVector; order::Int64=3)
+function assemble_cubicsecondderivativematrix(mesh::Mesh, y::AbstractVector, 
+                                                p::AbstractVector; order::Int64=3)
 
     AA = zeros(Float64, mesh.nelems * (mesh.d+1)^2)
     II = zeros(Int64, length(AA))
@@ -600,7 +650,8 @@ function assemble_cubicsecondderivativematrix(mesh::Mesh, y::AbstractVector, p::
         for i = 1:mesh.d+1
             for j = 1:mesh.d+1
                 for (q, x) in enumerate(quadX)
-                    elemMat[i,j] += 6.0 * y_quad[q] * p_quad[q] * phi(i, x) * phi(j, x) * quadW[q] * detJ
+                    elemMat[i,j] += 6.0 * y_quad[q] * p_quad[q] *
+                                    phi(i, x) * phi(j, x) * quadW[q] * detJ
                 end
             end
         end
@@ -640,7 +691,8 @@ function stressTensor(grad::AbstractMatrix, lambda::Float64, mu::Float64)
 end
 
 """
-    assemble_elasticity(mesh::Mesh, lambda::Float64, mu::Float64)
+    assemble_elasticity(mesh::Mesh, lambda::Float64, mu::Float64) 
+        -> SparseMatrixCSC{Float64, Int64}
 
 Returns the linear elasticity stiffness matrix with constant coefficients λ and μ 
 for all elements of mesh and image dimension qdim.
@@ -665,7 +717,8 @@ function assemble_elasticity(mesh::Mesh, lambda::Float64, mu::Float64)
                         grad_i[:,ic] = J * grad_phi(mesh.d, i)
                         grad_j = zeros(mesh.d, mesh.d)
                         grad_j[:,jc] = J * grad_phi(mesh.d, j)
-                        elemMat[qdim*(i-1)+ic, qdim*(j-1)+jc] += dot(stressTensor(grad_j, lambda, mu), strainTensor(grad_i))
+                        elemMat[qdim*(i-1)+ic, qdim*(j-1)+jc] += 
+                            dot(stressTensor(grad_j, lambda, mu), strainTensor(grad_i))
                     end
                 end
             end
@@ -690,8 +743,10 @@ function assemble_elasticity(mesh::Mesh, lambda::Float64, mu::Float64)
 end
 
 """
-    assemble_dirichletcondition!(A, DI::Set{Int64}; rhs=[], bc=[], qdim=1, insert=1.0)
-    assemble_dirichletcondition!(A, DI::Set{Boundary}; rhs=[], bc=[], qdim=1, insert=1.0)
+    assemble_dirichletcondition!(A, DI::Set{Int64}; 
+                                    rhs=[], bc=[], qdim::Int64=1, insert=1.0)
+    assemble_dirichletcondition!(A, DI::Set{Boundary};
+                                    rhs=[], bc=[], qdim::Int64=1, insert=1.0)
 
 Modify a stiffness matrix and a right hand side according to the given Dirichlet conditions.
 DI has to be the set of node indices for which the condition should be active.
@@ -699,7 +754,8 @@ For vector valued states either DI can be set to each component that should have
 Dirichlet condtion or qdim is set, if all components should have the condition.
 The value insert is put as diagonal element. Usually you want a 1.0 here.
 """
-function assemble_dirichletcondition!(A, DI::Set{Int64}; rhs=[], bc=[], qdim=1, insert=1.0)
+function assemble_dirichletcondition!(A, DI::Set{Int64}; 
+                                        rhs=[], bc=[], qdim::Int64=1, insert=1.0)
     if rhs != [] && bc != []
         for i in DI
             for d = 1:qdim
@@ -726,16 +782,20 @@ function assemble_dirichletcondition!(A, DI::Set{Int64}; rhs=[], bc=[], qdim=1, 
     dropzeros!(A)
 end
 
-function assemble_dirichletcondition!(A, DI::Set{Boundary}; rhs=[], bc=[], qdim=1, insert=1.0)
-    assemble_dirichletcondition!(A, extract_nodes(DI); rhs=rhs, bc=bc, qdim=qdim, insert=insert)
+function assemble_dirichletcondition!(A, DI::Set{Boundary};
+                                        rhs=[], bc=[], qdim::Int64=1, insert=1.0)
+    assemble_dirichletcondition!(A, extract_nodes(DI);
+                                    rhs=rhs, bc=bc, qdim=qdim, insert=insert)
 end
 
 """
-    assemble_dirichletprojection(nnodes::Int64, DI::Set{Int64};qdim=1) -> SparseMatrixCSC{Float64, Int64}
+    assemble_dirichletprojection(nnodes::Int64, DI::Set{Int64}; qdim::Int64=1) 
+        -> SparseMatrixCSC{Float64, Int64}
 
-Returns the projection matrix onto the Dirichlet nodes where the input ncoeffs is understood as qdim*nnodes.
+Returns the projection matrix onto the Dirichlet nodes 
+where the input ncoeffs is understood as qdim*nnodes.
 """
-function assemble_dirichletprojection(ncoeffs::Int64, DI::Set{Int64}; qdim=1)
+function assemble_dirichletprojection(ncoeffs::Int64, DI::Set{Int64}; qdim::Int64=1)
     bcids = Set{Int64}()
     for r = 1:qdim
         union!(bcids, qdim * (collect(DI) .- 1) .+ r)

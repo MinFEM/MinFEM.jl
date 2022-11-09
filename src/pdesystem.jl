@@ -1,7 +1,8 @@
 """
     PDESystem
 
-Structure holding all information to describe simple PDEs with Dirichlet boundary conditions.
+Structure holding all information to describe simple PDEs 
+with Dirichlet boundary conditions.
 """
 mutable struct PDESystem
     "stiffness matrix"
@@ -43,7 +44,8 @@ PDESystem(;A=spzeros(0,0), b=[], bc=[], DI=Set{Int64}(), qdim=1, Factors=[],
 """
     assemble!(S::PDESystem)
 
-If the system has not been used before, sets up the system matrix with multipliers for Dirichlet conditions and factorizes it.
+If the system has not been used before, sets up the system matrix 
+with multipliers for Dirichlet conditions and factorizes it.
 """
 function assemble!(S::PDESystem)
     if S.Factors == []
@@ -78,7 +80,8 @@ end
 First tries to set up the system matrix with multipliers for Dirichlet conditions.
 If the system has already been used before, this step is skipped.
 This is determined depending on an existing factorization of the system matrix.
-If the stiffness matrix or Dirichlet conditions have changes, one should invole refresh() first.
+If the stiffness matrix or Dirichlet conditions have changes, 
+one should invole refresh() first.
 Finally the system is solved via matrix factorization.
 """
 function solve!(S::PDESystem)

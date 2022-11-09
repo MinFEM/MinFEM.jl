@@ -1,7 +1,8 @@
 """
     Boundary
 
-Structure holding the name and sets of node and edge indices for one particular physical boundary.
+Structure holding the name and sets of node and edge indices
+for one particular physical boundary.
 """
 mutable struct Boundary
     "unique physical name"
@@ -14,12 +15,14 @@ mutable struct Boundary
     Elements::Set{Int64}
 end
 
-Base.:(==)(a::Boundary, b::Boundary) = a.Nodes == b.Nodes && a.Elements == b.Elements
+Base.:(==)(a::Boundary, b::Boundary) = a.Nodes == b.Nodes &&
+                                        a.Elements == b.Elements
 
 """
     Domain
 
-Type holding the name and the set of element indices for one particular physical domain.
+Type holding the name and the set of element indices
+for one particular physical domain.
 """
 mutable struct Domain
     "unique physical name"
@@ -34,7 +37,8 @@ Base.:(==)(a::Domain, b::Domain) = a.Elements == b.Elements
 """
     Entity
 
-Type holding the associated physical tag and the set of elements for one gmsh elementary entity.
+Type holding the associated physical tag and the set of elements
+for one gmsh elementary entity.
 """
 mutable struct Entity
     "unique physical id"
@@ -44,7 +48,8 @@ mutable struct Entity
     Elements::Set{Int64}
 end
 
-Base.:(==)(a::Entity, b::Entity) = a.PhysicalTag == b.PhysicalTag && a.Elements == b.Elements
+Base.:(==)(a::Entity, b::Entity) = a.PhysicalTag == b.PhysicalTag && 
+                                    a.Elements == b.Elements
 
 """
     Mesh
@@ -52,7 +57,7 @@ Base.:(==)(a::Entity, b::Entity) = a.PhysicalTag == b.PhysicalTag && a.Elements 
 Type for a triangular finite element mesh with volume and boundary markers.
 """
 mutable struct Mesh
-    "number of nodes"
+    "dimension"
     d::Int64
 
     "number of nodes"
@@ -89,15 +94,22 @@ mutable struct Mesh
     Entities::Array{Dict{Int64,Entity},1}
 end
 
-Base.:(==)(a::Mesh, b::Mesh) = a.d==b.d && a.nnodes==b.nnodes && a.nelems==b.nelems && a.Nodes==b.Nodes && 
-                                a.Elements==b.Elements && a.BoundaryElements==b.BoundaryElements && 
-                                a.ParentElements == b.ParentElements && a.Boundaries==b.Boundaries && 
-                                a.Domains==b.Domains && a.Entities==b.Entities
+Base.:(==)(a::Mesh, b::Mesh) = a.d == b.d && 
+                                a.nnodes == b.nnodes &&
+                                a.nelems == b.nelems && 
+                                a.Nodes == b.Nodes &&
+                                a.Elements == b.Elements && 
+                                a.BoundaryElements == b.BoundaryElements && 
+                                a.ParentElements == b.ParentElements && 
+                                a.Boundaries == b.Boundaries && 
+                                a.Domains == b.Domains &&
+                                a.Entities == b.Entities
 
 """
     unit_interval(n::Int64) -> Mesh
 
 Returns an n nodes quasi-uniform mesh for the 1D unit interval.
+The left boundary node is denoted by 1001 and the right one by 1002.
 """
 function unit_interval(n::Int64)
     if (n < 2)
@@ -140,19 +152,22 @@ function unit_interval(n::Int64)
 
     Domains[10001] = Domain("domain", Set{Int64}(1:nelems))
 
-    Entities = [Dict{Int64,Entity}(), Dict{Int64,Entity}(), Dict{Int64,Entity}(), Dict{Int64,Entity}()]
+    Entities = [Dict{Int64,Entity}(), Dict{Int64,Entity}(),
+                Dict{Int64,Entity}(), Dict{Int64,Entity}()]
     Entities[1][1] = Entity(1001, Set{Int64}(1))
     Entities[1][2] = Entity(1002, Set{Int64}(2))
     Entities[2][1] = Entity(10001, Set{Int64}(1:nelems))
 
     return Mesh(d, nnodes, nelems, nboundelems, Nodes, 
-                Elements, BoundaryElements, ParentElements, ParentBoundaries, Boundaries, Domains, Entities)
+                Elements, BoundaryElements, ParentElements, ParentBoundaries,
+                Boundaries, Domains, Entities)
 end
 
 """
     unit_square(n::Int64) -> Mesh
 
 Returns a n-by-n quasi-uniform mesh for the 2D unit square.
+The boundary indices are given in the order bottom, top, left, right from 1001 to 1004.
 """
 function unit_square(n::Int64)
     if (n < 2)
@@ -237,7 +252,8 @@ function unit_square(n::Int64)
 
     Domains[10001] = Domain("domain", Set{Int64}(1:nelems))
 
-    Entities = [Dict{Int64,Entity}(), Dict{Int64,Entity}(), Dict{Int64,Entity}(), Dict{Int64,Entity}()]
+    Entities = [Dict{Int64,Entity}(), Dict{Int64,Entity}(), 
+                Dict{Int64,Entity}(), Dict{Int64,Entity}()]
     Entities[2][1] = Entity(1001, copy(Boundaries[1001].Elements))
     Entities[2][2] = Entity(1002, copy(Boundaries[1002].Elements))
     Entities[2][3] = Entity(1003, copy(Boundaries[1003].Elements))
@@ -245,7 +261,8 @@ function unit_square(n::Int64)
     Entities[3][1] = Entity(10001, Set{Int64}(1:nelems))
 
     return Mesh(d, nnodes, nelems, nboundelems, Nodes, 
-                Elements, BoundaryElements, ParentElements, ParentBoundaries, Boundaries, Domains, Entities)
+                Elements, BoundaryElements, ParentElements, ParentBoundaries,
+                Boundaries, Domains, Entities)
 end
 
 """
@@ -280,7 +297,9 @@ function import_mesh(fileName::String)
         elseif version >= 4.1 && version < 5.0
             mesh = import_mesh4(f)
         else
-            throw(ErrorException("Unsupported mesh format: $(string(parse(Float64, a[1]))).\n msh4 is recommended."))
+            throw(ErrorException("Unsupported mesh format: " *
+                                    "$(string(parse(Float64, a[1]))).\n" *
+                                    "msh4 is recommended."))
         end
     end
 
@@ -291,7 +310,8 @@ end
 """
     import_mesh1(f::IOStream) -> Mesh
 
-Returns mesh by continuing import process started by `import_mesh()` for gmsh files of version 1. 
+Returns mesh by continuing import process started by `import_mesh()`
+for gmsh files of version 1. 
 """
 function import_mesh1(f::IOStream)
     l=readline(f)
@@ -340,7 +360,8 @@ function import_mesh1(f::IOStream)
     ParentBoundaries = Array{Int64,1}(undef,length(_Elements[d-1]))
     Domains = Dict{Int64, Domain}()
     Boundaries = Dict{Int64, Boundary}()
-    Entities = [Dict{Int64,Entity}(), Dict{Int64,Entity}(), Dict{Int64,Entity}(), Dict{Int64,Entity}()]
+    Entities = [Dict{Int64,Entity}(), Dict{Int64,Entity}(), 
+                Dict{Int64,Entity}(), Dict{Int64,Entity}()]
 
     for (i,el) in enumerate(_Elements[d])
         Elements[i] = copy(el[4:end])
@@ -359,7 +380,8 @@ function import_mesh1(f::IOStream)
         BoundaryElements[i] = copy(el[4:end])
 
         ParentElements[i] = findfirst(x -> issubset(BoundaryElements[i], x), Elements)
-        ParentBoundaries[i] = getParentBoundary(BoundaryElements[i], Elements[ParentElements[i]])
+        ParentBoundaries[i] = getParentBoundary(BoundaryElements[i], 
+                                                Elements[ParentElements[i]])
 
         if !in(el[2],keys(Boundaries))
             Boundaries[el[2]] = Boundary("", Set{Int64}(), Set{Int64}())
@@ -376,16 +398,19 @@ function import_mesh1(f::IOStream)
     end
   
     return Mesh(d, nnodes, length(Elements), length(BoundaryElements), Nodes, 
-                Elements, BoundaryElements, ParentElements, ParentBoundaries, Boundaries, Domains, Entities)
+                Elements, BoundaryElements, ParentElements, ParentBoundaries,
+                Boundaries, Domains, Entities)
   end
 
   """
     import_mesh2(f::IOStream) -> Mesh
 
-Returns mesh by continuing import process started by `import_mesh()` for gmsh files of version 2. 
+Returns mesh by continuing import process started by `import_mesh()`
+for gmsh files of version 2. 
 """
 function import_mesh2(f::IOStream)
-    physicalNames = [Dict{Int64,String}(), Dict{Int64,String}(), Dict{Int64,String}(), Dict{Int64,String}()]
+    physicalNames = [Dict{Int64,String}(), Dict{Int64,String}(),
+                        Dict{Int64,String}(), Dict{Int64,String}()]
 
     while !eof(f)
         l=readline(f)
@@ -397,7 +422,9 @@ function import_mesh2(f::IOStream)
             for r = 1:numPhysicalNames
                 l = readline(f)
                 a = split(l, " ")
-                physicalNames[parse(Int64, a[1])+1][parse(Int64, a[2])] = chop(a[3], head = 1, tail = 1)
+                id1 = parse(Int64, a[1]) + 1
+                id2 = parse(Int64, a[2])
+                physicalNames[id1][id2] = chop(a[3], head = 1, tail = 1)
             end
             # No break and run until other case
 
@@ -420,7 +447,8 @@ function import_mesh2(f::IOStream)
     l=readline(f)
     nelems = parse(Int64, l)
   
-    _Elements = [Array{Array{Float64,1},1}(), Array{Array{Float64,1},1}(), Array{Array{Float64,1},1}(), Array{Array{Float64,1},1}()]
+    _Elements = [Array{Array{Float64,1},1}(), Array{Array{Float64,1},1}(),
+                    Array{Array{Float64,1},1}(), Array{Array{Float64,1},1}()]
     for i = 1:nelems
         l = readline(f)
         a = split(l, " ")
@@ -452,7 +480,8 @@ function import_mesh2(f::IOStream)
     ParentBoundaries = Array{Int64,1}(undef, length(BoundaryElements))
     Domains = Dict{Int64, Domain}()
     Boundaries = Dict{Int64, Boundary}()
-    Entities = [Dict{Int64,Entity}(), Dict{Int64,Entity}(), Dict{Int64,Entity}(), Dict{Int64,Entity}()]
+    Entities = [Dict{Int64,Entity}(), Dict{Int64,Entity}(),
+                Dict{Int64,Entity}(), Dict{Int64,Entity}()]
 
     for (i,el) in enumerate(_Elements[d+1])
         Elements[i] = copy(el[4:end])
@@ -471,10 +500,12 @@ function import_mesh2(f::IOStream)
         BoundaryElements[i] = copy(el[4:end])
 
         ParentElements[i] = findfirst(x -> issubset(BoundaryElements[i], x), Elements)
-        ParentBoundaries[i] = getParentBoundary(BoundaryElements[i], Elements[ParentElements[i]])
+        ParentBoundaries[i] = getParentBoundary(BoundaryElements[i],
+                                                Elements[ParentElements[i]])
 
         if !in(el[2],keys(Boundaries))
-            Boundaries[el[2]] = Boundary(get!(physicalNames[d],el[2],""), Set{Int64}(), Set{Int64}())
+            Boundaries[el[2]] = Boundary(get!(physicalNames[d],el[2],""),
+                                            Set{Int64}(), Set{Int64}())
         end
         push!(Boundaries[el[2]].Elements, i)
         for node in el[4:end]
@@ -488,16 +519,19 @@ function import_mesh2(f::IOStream)
     end
   
     return Mesh(d, nnodes, length(Elements), length(BoundaryElements), Nodes, 
-                Elements, BoundaryElements, ParentElements, ParentBoundaries, Boundaries, Domains, Entities)
+                Elements, BoundaryElements, ParentElements, ParentBoundaries,
+                Boundaries, Domains, Entities)
 end
 
 """
     import_mesh4(f::IOStream) -> Mesh
 
-Returns mesh by continuing import process started by `import_mesh()` for gmsh files of version 4. 
+Returns mesh by continuing import process started by `import_mesh()` 
+for gmsh files of version 4. 
 """
 function import_mesh4(f::IOStream)
-    physicalNames = [Dict{Int64,String}(), Dict{Int64,String}(), Dict{Int64,String}(), Dict{Int64,String}()]
+    physicalNames = [Dict{Int64,String}(), Dict{Int64,String}(),
+                        Dict{Int64,String}(), Dict{Int64,String}()]
 
     while !eof(f)
         l=readline(f)
@@ -509,7 +543,9 @@ function import_mesh4(f::IOStream)
             for r = 1:numPhysicalNames
                 l = readline(f)
                 a = split(l, " ")
-                physicalNames[parse(Int64, a[1])+1][parse(Int64, a[2])] = chop(a[3], head = 1, tail = 1)
+                id1 = parse(Int64, a[1]) + 1
+                id2 = parse(Int64, a[2])
+                physicalNames[id1][id2] = chop(a[3], head = 1, tail = 1)
             end
             # No break and run until other case
 
@@ -519,10 +555,12 @@ function import_mesh4(f::IOStream)
     end
 
     # 0,1,2,3 dimensional entity tags
-    Entities = [Dict{Int64,Entity}(), Dict{Int64,Entity}(), Dict{Int64,Entity}(), Dict{Int64,Entity}()]
+    Entities = [Dict{Int64,Entity}(), Dict{Int64,Entity}(),
+                Dict{Int64,Entity}(), Dict{Int64,Entity}()]
     l = readline(f)
     a = split(l, " ")
-    numTags = [parse(Int64, a[1]), parse(Int64, a[2]), parse(Int64, a[3]), parse(Int64, a[4])]
+    numTags = [parse(Int64, a[1]), parse(Int64, a[2]), 
+                parse(Int64, a[3]), parse(Int64, a[4])]
 
     # Point tags
     for r = 1:numTags[1]
@@ -642,10 +680,12 @@ function import_mesh4(f::IOStream)
         BoundaryElements[i] = [NodeNumbering[n] for n in el[4:end]]
 
         ParentElements[i] = findfirst(x -> issubset(BoundaryElements[i], x), Elements)
-        ParentBoundaries[i] = getParentBoundary(BoundaryElements[i], Elements[ParentElements[i]])
+        ParentBoundaries[i] = getParentBoundary(BoundaryElements[i], 
+                                                Elements[ParentElements[i]])
 
         if (!in(el[2], keys(Boundaries)))
-            Boundaries[el[2]] = Boundary(get!(physicalNames[d],el[2],""), Set{Int64}(), Set{Int64}())
+            Boundaries[el[2]] = Boundary(get!(physicalNames[d],el[2],""),
+                                            Set{Int64}(), Set{Int64}())
         end
         
         push!(Boundaries[el[2]].Elements, i)
@@ -657,7 +697,8 @@ function import_mesh4(f::IOStream)
     end
 
     return Mesh(d, nnodes, length(Elements), length(BoundaryElements), Nodes, 
-                Elements, BoundaryElements, ParentElements, ParentBoundaries, Boundaries, Domains, Entities)
+                Elements, BoundaryElements, ParentElements, ParentBoundaries,
+                Boundaries, Domains, Entities)
 end
 
 """
@@ -675,7 +716,8 @@ function export_mesh(mesh::Mesh, fileName::String)
     write(f, "2.2 0 8\n")
     write(f, "\$EndMeshFormat\n")
 
-    nPhysicalNames = length(findall(x -> x.Name != "", mesh.Boundaries)) + length(findall(x -> x.Name != "", mesh.Domains))
+    nPhysicalNames = length(findall(x -> x.Name != "", mesh.Boundaries)) +
+                        length(findall(x -> x.Name != "", mesh.Domains))
     if nPhysicalNames > 0
         write(f, "\$PhysicalNames\n")
         write(f, "$(length(mesh.Boundaries)+length(mesh.Domains))\n")
@@ -747,7 +789,8 @@ function getGMSHElementTypeFromDim(d::Int64)
     elseif d == 3
         return 4 # 4-node tetrahedron
     else
-        throw(DomainError(d, "Unsupported dimension. Only dimensions 0,1,2 and 3 are supported."))
+        throw(DomainError(d, "Unsupported dimension. " *
+                                "Only dimensions 0,1,2 and 3 are supported."))
     end
 end
 
@@ -766,8 +809,9 @@ function getDimFromGMSHElementType(t::Int64)
     elseif t == 4
         return 3 # 4-node tetrahedron
     else
-        throw(DomainError(t, "Unsupported element type. 
-                                Only first order tetrahedral and corresponing lower dimensional types are supported."))
+        throw(DomainError(t, "Unsupported element type. " *
+                                "Only first order tetrahedral and corresponing" *
+                                "lower dimensional types are supported."))
     end
 end
 
@@ -814,7 +858,8 @@ end
 """
     deform_mesh!(mesh::Mesh, v::AbstractVector{Float64}; t::Float64=1.0)
     
-Deforms given mesh by shifting all nodes according to the vector field v scaled by the stepsize t.
+Deforms given mesh by shifting all nodes according to the vector field v 
+scaled by the stepsize t.
 """
 function deform_mesh!(mesh::Mesh, v::AbstractVector{Float64}; t::Float64=1.0)
     if length(v) != mesh.nnodes * mesh.d
@@ -889,17 +934,22 @@ function extract_elements(boundaries::Set{Boundary})
 end
 
 """
-    evaluate_mesh_function(mesh::Mesh, f::Function; region=Set{Int64}(), qdim=1) -> Vector{Float64}
-    evaluate_mesh_function(mesh::Mesh, f::Function, region::Set{Boundary}; qdim = 1) -> Vector{Float64}
+    evaluate_mesh_function(mesh::Mesh, f::Function;
+                            region=Set{Int64}(), qdim=1) -> Vector{Float64}
+    evaluate_mesh_function(mesh::Mesh, f::Function, region::Set{Boundary};
+                            qdim = 1) -> Vector{Float64}
 
 Returns evaluation of a given function object f on all or specified nodes of the mesh.
-Can be either called with set of physical boundaries or directly with a set of nodes when given with keyword argument region.
+Can be either called with set of physical boundaries or directly with a set of nodes 
+when given with keyword argument region.
 """
-function evaluate_mesh_function(mesh::Mesh, f::Function, region::Set{Boundary}; qdim = 1)
+function evaluate_mesh_function(mesh::Mesh, f::Function, region::Set{Boundary}; 
+                                qdim = 1)
     evaluate_mesh_function(mesh, f, region = extract_nodes(region), qdim = qdim)
 end
 
-function evaluate_mesh_function(mesh::Mesh, f::Function; region::Set{Int64}=Set{Int64}(), qdim = 1)
+function evaluate_mesh_function(mesh::Mesh, f::Function; 
+                                region::Set{Int64}=Set{Int64}(), qdim = 1)
     v = zeros(Float64, qdim * mesh.nnodes)
     nodes = 1:mesh.nnodes
 
@@ -979,7 +1029,8 @@ end
     elementvolume(mesh::Mesh, element::Int64) -> Float64
     elementvolume(d::Int64) -> Float64
 
-Returns volume of all or one element(s) in a mesh or of the d-dimensional reference element. 
+Returns volume of all or one element(s) in a mesh 
+or of the d-dimensional reference element. 
 """
 function elementvolume(mesh::Mesh)
     v = zeros(mesh.nelems)
@@ -1029,7 +1080,8 @@ end
     elementdiameter(nodes::Vector{Vector{Float64}}) -> Float64
 
 Returns diameter (i.e. longest edge length) of all or one element(s) in a mesh 
-or of an element spanned by the given nodes or coordinates (not necessarily of full dimension).
+or of an element spanned by the given nodes or coordinates
+(not necessarily of full dimension).
 """
 function elementdiameter(mesh::Mesh)
     v = zeros(mesh.nelems)
@@ -1086,13 +1138,17 @@ end
 
 
 """
-    outernormalvector(mesh::Mesh; boundaryElements::Set{Int64}=Set{Int64}()) -> Vector{Float64}
-    outernormalvector(mesh::Mesh, boundaryElement::Int64) -> Vector{Float64}
-    outernormalvector(mesh::Mesh, boundaryElement::Int64, J::AbstractMatrix{Float64}) -> Vector{Float64}
-    outernormalvector(dim::Int64, ii::Int64) -> Vector{Float64}
+    outernormalvector(mesh::Mesh; boundaryElements::Set{Int64}=Set{Int64}()) 
+        -> Vector{Float64}
+    outernormalvector(mesh::Mesh, boundaryElement::Int64) 
+        -> Vector{Float64}
+    outernormalvector(mesh::Mesh, boundaryElement::Int64, J::AbstractMatrix{Float64})
+        -> Vector{Float64}
+    outernormalvector(dim::Int64, ii::Int64) 
+        -> Vector{Float64}
     
-Returns the outer normal vector at specified boundary element(s) of the boundary of the mesh
-or at the ii-th boundary of the dim-dimensional reference element. 
+Returns the outer normal vector at specified boundary element(s) of the boundary 
+of the mesh or at the ii-th boundary of the dim-dimensional reference element. 
 """
 function outernormalvector(mesh::Mesh; boundaryElements::Set{Int64}=Set{Int64}())
     if isempty(boundaryElements)

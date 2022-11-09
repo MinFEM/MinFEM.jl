@@ -1,4 +1,9 @@
-module MinFEM
+"""
+    MinFEMDev
+
+A minimal finite element tool for demonstration and teaching in julia.
+"""
+module MinFEMDev
 
 using LinearAlgebra, SparseArrays, WriteVTK
 
@@ -66,7 +71,7 @@ export  assemble_derivativematrix,
         assemble_cubicsecondderivativematrix,
         assemble_elasticity
 
-export  assemble_dirichletcondition!
+export  assemble_dirichletcondition!,
         assemble_dirichletprojection
 
 export  pnorm,
@@ -89,4 +94,4 @@ export  write_to_vtk,
         write_to_txt,
         read_from_txt
 
-end
+end # module

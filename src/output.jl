@@ -1,11 +1,16 @@
 """
-    write_to_vtk(x::Vector{Vector{Float64}}, mesh::Mesh, dataName::Array{String}, fileName::String, qdim::Array{Int64})
-    write_to_vtk(x::Vector{Vector{Float64}}, mesh::Mesh, dataNames::Array{String}, fileName::String; qdim::Int64=1)
-    write_to_vtk(x::Vector{Float64}, mesh::Mesh, dataName::String, fileName::String; qdim=1)
+    write_to_vtk(x::Vector{Vector{Float64}}, mesh::Mesh, dataName::Array{String}, 
+                    fileName::String, qdim::Array{Int64})
+    write_to_vtk(x::Vector{Vector{Float64}}, mesh::Mesh, dataNames::Array{String}, 
+                    fileName::String; qdim::Int64=1)
+    write_to_vtk(x::Vector{Float64}, mesh::Mesh, dataName::String, 
+                    fileName::String; qdim::Int64=1)
     
-Writes one or multiple vectors with variable qdim corrsponding to the mesh nodes to a VTK file. 
+Writes one or multiple vectors with variable qdim corrsponding to the mesh nodes 
+to a VTK file. 
 """
-function write_to_vtk(x::Vector{Vector{Float64}}, mesh::Mesh, dataName::Array{String}, fileName::String, qdim::Array{Int64})
+function write_to_vtk(x::Vector{Vector{Float64}}, mesh::Mesh, dataName::Array{String}, 
+                        fileName::String, qdim::Array{Int64})
     if !endswith(fileName,".vtu")
         fileName = fileName * ".vtu"
     end
@@ -16,30 +21,49 @@ function write_to_vtk(x::Vector{Vector{Float64}}, mesh::Mesh, dataName::Array{St
             write_pointdata_vtkfile!(vtkfile, x[k], dataName[k])
         elseif qdim[k] == 2
             # Add third dimension to be able to use orientation array in paraview 
-            write_pointdata_vtkfile!(vtkfile, [reshape(x[k], qdim[k], mesh.nnodes); zeros(1,mesh.nnodes)], dataName[k])
+            write_pointdata_vtkfile!(
+                vtkfile, 
+                [reshape(x[k], qdim[k], mesh.nnodes); zeros(1,mesh.nnodes)],
+                dataName[k]
+            )
         else
-            write_pointdata_vtkfile!(vtkfile, reshape(x[k], qdim[k], mesh.nnodes), dataName[k])
+            write_pointdata_vtkfile!(
+                vtkfile, 
+                reshape(x[k], qdim[k], mesh.nnodes), 
+                dataName[k]
+            )
         end
     end
     vtk_save(vtkfile)
 end
 
-function write_to_vtk(x::Vector{Vector{Float64}}, mesh::Mesh, dataNames::Array{String}, fileName::String; qdim::Int64=1)
+function write_to_vtk(x::Vector{Vector{Float64}}, mesh::Mesh, dataNames::Array{String}, 
+                        fileName::String; qdim::Int64=1)
     write_to_vtk(x, mesh, dataNames, fileName, ones(Int64, length(x)) * qdim)
 end
 
-function write_to_vtk(x::Vector{Float64}, mesh::Mesh, dataName::String, fileName::String; qdim=1)
+function write_to_vtk(x::Vector{Float64}, mesh::Mesh, dataName::String, 
+                        fileName::String; qdim::Int64=1)
     write_to_vtk([x], mesh, [dataName], fileName, qdim=qdim)
 end
 
 """
-    write_to_vtk_boundary(x::Vector{Vector{Float64}}, mesh::Mesh, dataName::Array{String}, fileName::String, qdim::Array{Int64}; boundary=Set{Boundary}())
-    write_to_vtk_boundary(x::Vector{Vector{Float64}}, mesh::Mesh, dataNames::Array{String}, fileName::String; boundary=Set{Boundary}(), qdim::Int64=1)
-    write_to_vtk_boundary(x::Vector{Float64}, mesh::Mesh, dataName::String, fileName::String; boundary=Set{Boundary}(), qdim=1)
+    write_to_vtk_boundary(x::Vector{Vector{Float64}}, mesh::Mesh, 
+                            dataName::Array{String}, fileName::String, 
+                            qdim::Array{Int64}; boundary=Set{Boundary}())
+    write_to_vtk_boundary(x::Vector{Vector{Float64}}, mesh::Mesh,
+                            dataNames::Array{String}, fileName::String; 
+                            boundary=Set{Boundary}(), qdim::Int64=1)
+    write_to_vtk_boundary(x::Vector{Float64}, mesh::Mesh, 
+                            dataName::String, fileName::String; 
+                            boundary=Set{Boundary}(), qdim::Int64=1)
     
-Writes one or multiple vectors with variable qdim corrsponding to the mesh boundary elements to a VTK file. 
+Writes one or multiple vectors with variable qdim corrsponding to the mesh 
+boundary elements to a VTK file. 
 """
-function write_to_vtk_boundary(x::Vector{Vector{Float64}}, mesh::Mesh, dataName::Array{String}, fileName::String, qdim::Array{Int64}; boundary=Set{Boundary}())
+function write_to_vtk_boundary(x::Vector{Vector{Float64}}, mesh::Mesh, 
+                                dataName::Array{String}, fileName::String, 
+                                qdim::Array{Int64}; boundary=Set{Boundary}())
     if isempty(boundary)
         boundaryElements = Set{Int64}(1 : mesh.nboundelems)
     else
@@ -67,12 +91,18 @@ function write_to_vtk_boundary(x::Vector{Vector{Float64}}, mesh::Mesh, dataName:
     vtk_save(vtkfile)
 end
 
-function write_to_vtk_boundary(x::Vector{Vector{Float64}}, mesh::Mesh, dataNames::Array{String}, fileName::String; boundary=Set{Boundary}(), qdim::Int64=1)
-    write_to_vtk_boundary(x, mesh, dataNames, fileName, ones(Int64, length(x)) * qdim, boundary=boundary)
+function write_to_vtk_boundary(x::Vector{Vector{Float64}}, mesh::Mesh, 
+                                dataNames::Array{String}, fileName::String; 
+                                boundary=Set{Boundary}(), qdim::Int64=1)
+    write_to_vtk_boundary(x, mesh, dataNames, fileName, 
+                            ones(Int64, length(x)) * qdim, boundary=boundary)
 end
 
-function write_to_vtk_boundary(x::Vector{Float64}, mesh::Mesh, dataName::String, fileName::String; boundary=Set{Boundary}(), qdim=1)
-    write_to_vtk_boundary([x], mesh, [dataName], fileName, qdim=qdim, boundary=boundary)
+function write_to_vtk_boundary(x::Vector{Float64}, mesh::Mesh, 
+                                dataName::String, fileName::String; 
+                                boundary=Set{Boundary}(), qdim::Int64=1)
+    write_to_vtk_boundary([x], mesh, [dataName], fileName, 
+                            qdim=qdim, boundary=boundary)
 end
 
 """
@@ -105,8 +135,8 @@ function open_vtkfile(mesh::Mesh, file_name::String)
 end
 
 """
-    open_vtkfile_boundary(mesh::Mesh, file_name::String, boundaryElements=Set{Int64}()) -> WriteVTK.DatasetFile
-    open_vtkfile_boundary(mesh::Mesh, file_name::String; boundary=Set{Boundary}()) -> WriteVTK.DatasetFile
+    open_vtkfile_boundary(mesh::Mesh, file_name::String, boundaryElements=Set{Int64}())
+    open_vtkfile_boundary(mesh::Mesh, file_name::String; boundary=Set{Boundary}())
 
 Open a new VTK output file and write the mesh data into it.
 """
@@ -148,7 +178,8 @@ end
 
 Add a new point data field with a name to an existing VTK file.
 """
-function write_pointdata_vtkfile!(vtkfile::WriteVTK.DatasetFile, data::Any, data_name::String)
+function write_pointdata_vtkfile!(vtkfile::WriteVTK.DatasetFile, data::Any, 
+                                    data_name::String)
     WriteVTK.vtk_point_data(vtkfile, data, data_name)
 end
 
@@ -157,7 +188,8 @@ end
 
 Add a new cell data field with a name to an existing VTK file.
 """
-function write_celldata_vtkfile!(vtkfile::WriteVTK.DatasetFile, data::Any, data_name::String)
+function write_celldata_vtkfile!(vtkfile::WriteVTK.DatasetFile, data::Any, 
+                                    data_name::String)
     WriteVTK.vtk_cell_data(vtkfile, data, data_name)
 end
 
@@ -202,7 +234,8 @@ end
 """
     read_from_txt(fileName::String)
 
-Reads node coordinates and finite element coefficient vector from file generated by `write_to_txt`.
+Reads node coordinates and finite element coefficient vector from file 
+generated by `write_to_txt`.
 """
 function read_from_txt(fileName::String)
     f = open(fileName)

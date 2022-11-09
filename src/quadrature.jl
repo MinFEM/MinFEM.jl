@@ -24,7 +24,8 @@ function gausslegendre_points(order::Int64)
         val2 = 1/3 * sqrt(5 + val)
         return  [-val2, -val1, 0, val1, val2]
     else
-        throw(ErrorException("Order $order not possible. Highest possible order for 1D is 9."))
+        throw(ErrorException("Order $order not possible. " *
+                                "Highest possible order for 1D is 9."))
     end
 end
 
@@ -53,7 +54,8 @@ function gausslegendre_weights(order::Int64)
         val2 = (322 - val) / 900
         return  [val2, val1, 128/225, val1, val2]
     else
-        throw(ErrorException("Order $order not possible. Highest possible order for 1D is 9."))
+        throw(ErrorException("Order $order not possible. " *
+                                "Highest possible order for 1D is 9."))
     end
 end
 
@@ -61,7 +63,8 @@ end
 """
     quadrature_points(d::Int64, order::Int64) -> Array{Array{Float64,1},1}
     
-Returns coordinates of the Gauss-Legendre quadrature points on the d-dimensional FEM reference element 
+Returns coordinates of the Gauss-Legendre quadrature points 
+on the d-dimensional FEM reference element 
 for exact integration of polynomials up to the given order.
 """
 function quadrature_points(d::Int64, order::Int64)
@@ -69,7 +72,9 @@ function quadrature_points(d::Int64, order::Int64)
         throw(ErrorException("Order $order not possible. Order has to be at least 0."))
     end
     if d < 0 || d > 3
-        throw(ErrorException("Dimension $d not possible. Qudrature points are only available for 0D, 1D, 2D and 3D."))
+        throw(ErrorException("Dimension $d not possible. " *
+                                "Quadrature points are only available " *
+                                "for 0D, 1D, 2D and 3D."))
     end
 
     if d == 0
@@ -78,7 +83,8 @@ function quadrature_points(d::Int64, order::Int64)
         if order <= 9
             return compute_coordinates_line(order)
         else
-            throw(ErrorException("Order $order not possible. Highest possible order for 1D is 9."))
+            throw(ErrorException("Order $order not possible. " *
+                                    "Highest possible order for 1D is 9."))
         end
     elseif d == 2
         if order <= 1
@@ -86,7 +92,8 @@ function quadrature_points(d::Int64, order::Int64)
         elseif order <= 8
             return compute_coordinates_triangle(order)
         else
-            throw(ErrorException("Order $order not possible. Highest possible order for 2D is 8."))
+            throw(ErrorException("Order $order not possible. " *
+                                    "Highest possible order for 2D is 8."))
         end
     elseif d == 3
         if order <= 1
@@ -94,7 +101,8 @@ function quadrature_points(d::Int64, order::Int64)
         elseif order <= 7
             return compute_coordinates_tetrahedron(order)
         else
-            throw(ErrorException("Order $order not possible. Highest possible order for 3D is 7."))
+            throw(ErrorException("Order $order not possible. " *
+                                    "Highest possible order for 3D is 7."))
         end
     end
 end
@@ -102,7 +110,8 @@ end
 """
     quadrature_weights(d::Int64, order::Int64) -> Array{Float64,1}
     
-Returns weights of the Gauss-Legendre quadrature points on the d-dimensional FEM reference element 
+Returns weights of the Gauss-Legendre quadrature points 
+on the d-dimensional FEM reference element 
 for exact integration of polynomials up to the given order.
 """
 function quadrature_weights(d::Int64, order::Int64)
@@ -110,7 +119,9 @@ function quadrature_weights(d::Int64, order::Int64)
         throw(ErrorException("Order $order not possible. Order has to be at least 0."))
     end
     if d < 0 || d > 3
-        throw(ErrorException("Dimension $d not possible. Qudrature weights are only available for 1D, 2D and 3D."))
+        throw(ErrorException("Dimension $d not possible. " *
+                                "Quadrature weights are only available " *
+                                "for 1D, 2D and 3D."))
     end
 
     if d == 0
@@ -119,7 +130,8 @@ function quadrature_weights(d::Int64, order::Int64)
         if order <= 9
             return compute_weights_line(order)
         else
-            throw(ErrorException("Order $order not possible. Highest possible order for 1D is 9."))
+            throw(ErrorException("Order $order not possible. " *
+                                    "Highest possible order for 1D is 9."))
         end
     elseif d == 2
         if order <= 1
@@ -127,7 +139,8 @@ function quadrature_weights(d::Int64, order::Int64)
         elseif order <= 8
             return compute_weights_triangle(order)
         else
-            throw(ErrorException("Order $order not possible. Highest possible order for 2D is 8."))
+            throw(ErrorException("Order $order not possible. " *
+                                    "Highest possible order for 2D is 8."))
         end
     elseif d == 3
         if order <= 1
@@ -135,7 +148,8 @@ function quadrature_weights(d::Int64, order::Int64)
         elseif order <= 7
             return compute_weights_tetrahedron(order)
         else
-            throw(ErrorException("Order $order not possible. Highest possible order for 3D is 7."))
+            throw(ErrorException("Order $order not possible. " * 
+                                    "Highest possible order for 3D is 7."))
         end
     end
 end
@@ -143,7 +157,8 @@ end
 """
     compute_coordinates_line(order::Int64) -> Array{Array{Float64,1},1}
     
-Returns coordinates of the Gauss-Legendre quadrature points on the 1-dimensional FEM reference element [0,1] 
+Returns coordinates of the Gauss-Legendre quadrature points 
+on the 1-dimensional FEM reference element [0,1] 
 for exact integration of polynomials up to the given order.
 """
 function compute_coordinates_line(order::Int64)
@@ -163,7 +178,8 @@ end
 """
     compute_weights_line(order::Int64) -> Array{Float64,1}
     
-Returns weights of the Gauss-Legendre quadrature points on the 1-dimensional FEM reference element [0,1] 
+Returns weights of the Gauss-Legendre quadrature points 
+on the 1-dimensional FEM reference element [0,1] 
 for exact integration of polynomials up to the given order.
 """
 function compute_weights_line(order::Int64)    
@@ -184,7 +200,8 @@ end
 """
     compute_coordinates_triangle(order::Int64) -> Array{Array{Float64,1},1}
     
-Returns coordinates of the Gauss-Legendre quadrature points on the 2-dimensional FEM reference element 
+Returns coordinates of the Gauss-Legendre quadrature points 
+on the 2-dimensional FEM reference element 
 for exact integration of polynomials up to the given order.
 """
 function compute_coordinates_triangle(order::Int64)
@@ -207,7 +224,8 @@ end
 """
     compute_weights_triangle(order::Int64) -> Array{Float64,1}
     
-Returns weights of the Gauss-Legendre quadrature points on the 2-dimensional FEM reference element 
+Returns weights of the Gauss-Legendre quadrature points 
+on the 2-dimensional FEM reference element 
 for exact integration of polynomials up to the given order.
 """
 function compute_weights_triangle(order::Int64)
@@ -231,7 +249,8 @@ end
 """
     compute_coordinates_tetrahedron(order::Int64) -> Array{Array{Float64,1},1}
     
-Returns coordinates of the Gauss-Legendre quadrature points on the 3-dimensional FEM reference element 
+Returns coordinates of the Gauss-Legendre quadrature points 
+on the 3-dimensional FEM reference element 
 for exact integration of polynomials up to the given order.
 """
 function compute_coordinates_tetrahedron(order::Int64)
@@ -245,7 +264,9 @@ function compute_coordinates_tetrahedron(order::Int64)
     for i = 1:n
         for j = 1:n
             for k = 1:n
-                c[r] = [(1 + p1[i]) / 2 , (1 - p1[i]) * (1 + p1[j]) / 4 , (1 - p1[i]) * (1 - p1[j]) * (1 + p1[k]) / 8 ]
+                c[r] = [(1 + p1[i]) / 2,
+                        (1 - p1[i]) * (1 + p1[j]) / 4,
+                        (1 - p1[i]) * (1 - p1[j]) * (1 + p1[k]) / 8 ]
                 r = r + 1
             end    
         end
@@ -256,7 +277,8 @@ end
 """
     compute_weights_tetrahedron(order::Int64) -> Array{Float64,1}
     
-Returns weights of the Gauss-Legendre quadrature points on the 3-dimensional FEM reference element 
+Returns weights of the Gauss-Legendre quadrature points 
+on the 3-dimensional FEM reference element 
 for exact integration of polynomials up to the given order.
 """
 function compute_weights_tetrahedron(order::Int64)
