@@ -1,4 +1,4 @@
-using Documenter, MinFEMDev
+using Documenter, MinFEM
 
 Home = "Home" => "index.md"
 
@@ -34,8 +34,8 @@ PAGES = [
     ]
 
 makedocs(
-    modules = [MinFEMDev],
-    sitename = "MinFEMDev.jl",
+    modules = [MinFEM],
+    sitename = "MinFEM.jl",
     authors = "Martin Siebenborn, Henrik Wyschka",
     format = Documenter.HTML(assets = ["assets/favicon.ico"]),
     pages = PAGES

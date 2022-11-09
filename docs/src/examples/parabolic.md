@@ -45,7 +45,7 @@ The following function implements a time loop to solve the problem on the interv
 ``[0,T]`` in `tsteps` timesteps and outputs a *.vtu*-file for each step to a folder:
 
 ```julia
-using MinFEMDev
+using MinFEM
 
 function parabolic(mesh::Mesh, boundaryIndices::Set{Int64},
                     L::AbstractMatrix, M::AbstractMatrix,

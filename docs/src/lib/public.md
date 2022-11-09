@@ -3,10 +3,10 @@
 ---
 
 ```@meta
-CurrentModule = MinFEMDev
+CurrentModule = MinFEM
 ```
 
-Documentation for `MinFEMDev.jl`'s public interface.
+Documentation for `MinFEM.jl`'s public interface.
 
 See the [Internals](internals.md) page of the library for the documentation 
 of internal types and functions.
@@ -20,7 +20,7 @@ Depth = 3
 
 ## Module
 ```@docs
-MinFEMDev
+MinFEM
 ```
 
 ## Types
@@ -152,6 +152,6 @@ read_from_txt
 
 ```@index
 Pages = ["public.md"]
-Module = ["MinFEMDev"]
+Module = ["MinFEM"]
 Order = [:type, :function]
 ```

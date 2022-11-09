@@ -9,7 +9,7 @@ Depth = 3
 ```
 
 ```@setup fem
-using MinFEMDev, Plots
+using MinFEM, Plots
 path = "src/assets/fem/"
 ```
 

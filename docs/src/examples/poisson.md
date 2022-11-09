@@ -27,13 +27,13 @@ For simplicitity we could also generate a uniform mesh for the unit square ``(0,
 with, e.g., 30 nodes in each direction:
 
 ```julia
-using MinFEMDev
+using MinFEM
 mesh = import_mesh("../meshes/square.msh");
 #mesh = unit_square(30);
 ```
 
 ```@setup poisson
-using MinFEMDev
+using MinFEM
 mesh = unit_square(30)
 ```
 

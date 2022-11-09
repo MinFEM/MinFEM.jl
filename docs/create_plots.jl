@@ -1,4 +1,4 @@
-using MinFEMDev, Plots
+using MinFEM, Plots
 
 path = "src/assets/fem/"
 
