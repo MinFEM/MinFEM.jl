@@ -33,12 +33,19 @@ PAGES = [
     License
     ]
 
+FORMAT = Documenter.HTML(
+            prettyurls = true,
+            assets = ["assets/favicon.ico"]
+        )
+
 makedocs(
     modules = [MinFEM],
     sitename = "MinFEM.jl",
     authors = "Martin Siebenborn, Henrik Wyschka",
-    format = Documenter.HTML(assets = ["assets/favicon.ico"]),
+    format = FORMAT,
     pages = PAGES
 )
 
-# deploydocs(repo = "github.com/MinFEM/MinFEM.jl.git")
+deploydocs(
+    repo = "github.com/MinFEM/MinFEM.jl.git"
+)
