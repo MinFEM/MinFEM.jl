@@ -14,4 +14,5 @@ boundaryNodes = extract_nodes(boundary)
 
 pde = PDESystem(A=L, b=M*s, bc=zeros(mesh.nnodes), DI=boundaryNodes)
 solve!(pde)
+
 write_to_vtk([pde.state, s], mesh, ["Y","S"], "poisson")

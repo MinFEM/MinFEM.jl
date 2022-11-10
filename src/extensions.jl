@@ -15,11 +15,14 @@ function barycenter(mesh::Mesh)
 end
 
 """
-    pnorm(p::Float64,v::AbstractVector{Float64}, mesh::Mesh; qdim::Int64=1, order::Int64=1) -> Float64
+    pnorm(p::Float64,v::AbstractVector{Float64}, mesh::Mesh; 
+            qdim::Int64=1, order::Int64=1) -> Float64
 
-Returns \$L^p\$-norm of a FEM coefficient vector v over the nodes or quadrature points in the elements on the given mesh.
+Returns \$L^p\$-norm of a FEM coefficient vector v over the nodes 
+or quadrature points in the elements on the given mesh.
 """
-function pnorm(p::Float64, v::AbstractVector{Float64}, mesh::Mesh; qdim::Int64=1, order::Int64=1)
+function pnorm(p::Float64, v::AbstractVector{Float64}, mesh::Mesh; 
+                qdim::Int64=1, order::Int64=1)
     if p < 1
         throw(DomainError(p, "p has to be conjugated Hölder exponent 1 ≤ p ≤ ∞."))
     end
@@ -62,12 +65,14 @@ function pnorm(p::Float64, v::AbstractVector{Float64}, mesh::Mesh; qdim::Int64=1
 end
 
 """
-    qnorm(p::Float64,v::AbstractVector{Float64}, mesh::Mesh; qdim::Int64=1, order::Int64=1) -> Float64
+    qnorm(p::Float64,v::AbstractVector{Float64}, mesh::Mesh; 
+            qdim::Int64=1, order::Int64=1) -> Float64
 
 Returns \$L^q\$-norm of a function f or its FEM coefficient vector v on the given mesh
 with q being the conjugated exponent to p.
 """
-function qnorm(p::Float64, v::AbstractVector{Float64}, mesh::Mesh; qdim::Int64=1, order::Int64=1)
+function qnorm(p::Float64, v::AbstractVector{Float64}, mesh::Mesh; 
+                qdim::Int64=1, order::Int64=1)
     return pnorm(conjugated_exponent(p), v, mesh, qdim=qdim, order=order)
 end
 
@@ -88,11 +93,16 @@ function conjugated_exponent(p::Float64)
 end
 
 """
-    pnorm_boundary(p::Float64, v::AbstractVector{Float64}, mesh::Mesh; boundaryElements::Set{Int64}=Set{Int64}(), qdim::Int64=1, order::Int64=1) -> Float64
+    pnorm_boundary(p::Float64, v::AbstractVector{Float64}, mesh::Mesh; 
+                    boundaryElements::Set{Int64}=Set{Int64}(), 
+                    qdim::Int64=1, order::Int64=1) -> Float64
 
-Returns \$L^p\$-norm of a FEM coefficient vector v over the nodes or quadrature points in the boundary elements on the given mesh.
+Returns \$L^p\$-norm of a FEM coefficient vector v over the nodes or quadrature points 
+in the boundary elements on the given mesh.
 """
-function pnorm_boundary(p::Float64, v::AbstractVector{Float64}, mesh::Mesh; boundaryElements::Set{Int64}=Set{Int64}(), qdim::Int64=1, order::Int64=1)
+function pnorm_boundary(p::Float64, v::AbstractVector{Float64}, mesh::Mesh; 
+                        boundaryElements::Set{Int64}=Set{Int64}(), 
+                        qdim::Int64=1, order::Int64=1)
     if p < 1
         throw(DomainError(p, "p has to be conjugated Hölder exponent 1 ≤ p ≤ ∞."))
     end
@@ -106,7 +116,8 @@ function pnorm_boundary(p::Float64, v::AbstractVector{Float64}, mesh::Mesh; boun
             t = abs.(v)
             le = mesh.nnodes
         else
-            E = assemble_basismatrix_boundary(mesh, boundaryElements=boundaryElements, qdim=qdim, order=order)
+            E = assemble_basismatrix_boundary(mesh, boundaryElements=boundaryElements,
+                                                qdim=qdim, order=order)
             t = abs.(E * v)
             le = mesh.nboundelems * length(quadrature_weights(mesh.d-1, order))
         end
@@ -136,11 +147,17 @@ function pnorm_boundary(p::Float64, v::AbstractVector{Float64}, mesh::Mesh; boun
 end
 
 """
-    qnorm_boundary(p::Float64, v::AbstractVector{Float64}, mesh::Mesh; boundaryElements::Set{Int64}=Set{Int64}(), qdim::Int64=1, order::Int64=1) -> Float64
+    qnorm_boundary(p::Float64, v::AbstractVector{Float64}, mesh::Mesh; 
+                    boundaryElements::Set{Int64}=Set{Int64}(), 
+                    qdim::Int64=1, order::Int64=1) -> Float64
 
 Returns \$L^q\$-norm of a function f or its FEM coefficient vector v on the given mesh
 with q being the conjugated exponent to p.
 """
-function qnorm_boundary(p::Float64, v::AbstractVector{Float64}, mesh::Mesh; boundaryElements::Set{Int64}=Set{Int64}(), qdim::Int64=1, order::Int64=1)
-    return pnorm_boundary(conjugated_exponent(p), v, mesh, boundaryElements=boundaryElements, qdim=qdim, order=order)
+function qnorm_boundary(p::Float64, v::AbstractVector{Float64}, mesh::Mesh; 
+                        boundaryElements::Set{Int64}=Set{Int64}(), 
+                        qdim::Int64=1, order::Int64=1)
+    return pnorm_boundary(conjugated_exponent(p), v, mesh, 
+                            boundaryElements=boundaryElements, 
+                            qdim=qdim, order=order)
 end
