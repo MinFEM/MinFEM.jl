@@ -53,14 +53,14 @@ we obtain the basis functions
 
 in 2 dimension looking the following:
 
-![Reference Element](assets/fem/local_basis.svg)
+![Local Basis Functions](assets/fem/local_basis.svg)
 
 ### The Global Basis Functions
 
 On a patch of, e.g., five physical triangles we then have a global basis function 
 ``\Phi_i: \Omega \to \mathbb{R}`` of the following form:
 
-![Reference Element](assets/fem/global_basis.svg)
+![Global Basis Function](assets/fem/global_basis.svg)
 
 Since with each node ``x_i`` in the mesh one global basis function ``\Phi_i`` is associated
 we have the property
@@ -77,7 +77,7 @@ quadrature.
 Here we use a tensorproduct Gauss formula,
 since for these types the approximation order is known.
 
-![Reference Element](assets/fem/quadrature.svg)
+![Quadrature Formula](assets/fem/quadrature.svg)
 
 The presented quadrature rule allows exact integration of polynomials of order up to p=3.
 
@@ -109,7 +109,7 @@ function
 \psi_k: T \to T_k.
 ```
 
-![Reference Element](assets/fem/physical_element.svg)
+![Physical Element](assets/fem/physical_element.svg)
 
 ### Integration Over the Reference Element via Transformation Formula
 
