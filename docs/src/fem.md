@@ -8,11 +8,6 @@ Pages = ["fem.md"]
 Depth = 3
 ```
 
-```@setup fem
-using MinFEM, Plots
-path = "src/assets/fem/"
-```
-
 ### The Reference Element
 
 The first thing we will cover is the so-called reference element.
