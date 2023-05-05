@@ -27,6 +27,7 @@ MinFEM
 
 ```@docs
 Mesh
+Region
 Boundary
 Domain
 PDESystem
@@ -40,6 +41,7 @@ unit_interval
 unit_square
 import_mesh
 export_mesh
+update_mesh!
 deform_mesh!
 deform_mesh
 ```
@@ -47,6 +49,7 @@ deform_mesh
 ### Type Handling
 ```@docs
 select_boundaries
+select_domains
 extract_elements
 extract_nodes
 ```
@@ -54,6 +57,8 @@ extract_nodes
 ### Function Discretization
 ```@docs
 evaluate_mesh_function
+evaluate_quadrature_function
+evaluate_quadrature_function_boundary
 ```
 
 ### Mesh (Element) Properties
@@ -62,8 +67,11 @@ jacobian
 jacobian_boundary
 elementvolume
 elementvolume_boundary
+elementbarycenter
 elementdiameter
 elementdiameter_boundary
+elementratio
+elementangle
 outernormalvector
 stripwidth
 boundingbox
@@ -74,7 +82,9 @@ barycenter
 ### Local Quadrature
 ```@docs
 quadrature_points
+quadrature_points_boundary
 quadrature_weights
+quadrature_weights_boundary
 quadrature_order
 integral_over_reference_element
 ```
