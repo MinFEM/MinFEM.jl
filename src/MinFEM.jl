@@ -23,6 +23,7 @@ export  unit_square,
         unit_interval,
         import_mesh,
         export_mesh,
+        update_mesh!,
         deform_mesh!,
         deform_mesh
 
@@ -36,8 +37,11 @@ export  jacobian,
         jacobian_boundary,
         elementvolume,
         elementvolume_boundary,
+        elementbarycenter,
         elementdiameter,
         elementdiameter_boundary,
+        elementratio,
+        elementangle,
         outernormalvector,
         stripwidth,
         boundingbox,
@@ -45,9 +49,14 @@ export  jacobian,
         barycenter
 
 export  quadrature_points,
+        quadrature_points_boundary,
         quadrature_weights,
+        quadrature_weights_boundary,
         quadrature_order,
         integral_over_reference_element
+
+export  evaluate_quadrature_function,
+        evaluate_quadrature_function_boundary
 
 export  prolong_multivector,
         restrict_multivector

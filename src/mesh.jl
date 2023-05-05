@@ -1,10 +1,18 @@
 """
+    Region
+
+Abstract type for structs specifing regions of a domain, i.e. mesh.
+Subtypes should contain at least Name, Nodes and Elements.
+"""
+abstract type Region end
+
+"""
     Boundary
 
 Structure holding the name and sets of node and edge indices
 for one particular physical boundary.
 """
-mutable struct Boundary
+mutable struct Boundary <: Region
     "unique physical name"
     Name::String
     
@@ -24,9 +32,12 @@ Base.:(==)(a::Boundary, b::Boundary) = a.Nodes == b.Nodes &&
 Type holding the name and the set of element indices
 for one particular physical domain.
 """
-mutable struct Domain
+mutable struct Domain <: Region
     "unique physical name"
     Name::String
+
+    "list of node indices"
+    Nodes::Set{Int64}
 
     "list of element indices"
     Elements::Set{Int64}
@@ -149,8 +160,7 @@ function unit_interval(n::Int64)
     ParentElements::Array{Int64,1} = [1,nelems]
     ParentBoundaries::Array{Int64,1} = [1,2]
 
-
-    Domains[10001] = Domain("domain", Set{Int64}(1:nelems))
+    DDomains[10001] = Domain("domain", Set{Int64}(1:nnodes), Set{Int64}(1:nelems))
 
     Entities = [Dict{Int64,Entity}(), Dict{Int64,Entity}(),
                 Dict{Int64,Entity}(), Dict{Int64,Entity}()]
@@ -235,7 +245,7 @@ function unit_square(n::Int64)
     end
 
     for j = 1:n-1
-        BoundaryElements[k] = [j * n + 1, (j - 1) * n + 1]
+        BoundaryElements[k] = [(j - 1) * n + 1, j * n + 1]
         ParentElements[k] = (j-1) * 2 * (n-1) + 1
         ParentBoundaries[k] = 2
         push!(Boundaries[1003].Elements, k)
@@ -250,7 +260,7 @@ function unit_square(n::Int64)
         k = k + 1
     end
 
-    Domains[10001] = Domain("domain", Set{Int64}(1:nelems))
+    Domains[10001] = Domain("domain", Set{Int64}(1:nnodes), Set{Int64}(1:nelems))
 
     Entities = [Dict{Int64,Entity}(), Dict{Int64,Entity}(), 
                 Dict{Int64,Entity}(), Dict{Int64,Entity}()]
@@ -366,9 +376,12 @@ function import_mesh1(f::IOStream)
     for (i,el) in enumerate(_Elements[d])
         Elements[i] = copy(el[4:end])
         if !in(el[2], keys(Domains))
-            Domains[el[2]] = Domain("", Set{Int64}())
+            Domains[el[2]] = Domain("", Set{Int64}(), Set{Int64}())
         end
         push!(Domains[el[2]].Elements, i)
+        for node in el[4:end]
+            push!(Domains[el[2]].Nodes, node)
+        end
 
         if !in(el[3],keys(Entities[d+1]))
             Entities[d+1][el[3]] = Entity(el[2], Set{Int64}())
@@ -377,17 +390,23 @@ function import_mesh1(f::IOStream)
     end
   
     for (i,el) in enumerate(_Elements[d-1])
-        BoundaryElements[i] = copy(el[4:end])
+        _boundarynodes = copy(el[4:end])
 
-        ParentElements[i] = findfirst(x -> issubset(BoundaryElements[i], x), Elements)
-        ParentBoundaries[i] = getParentBoundary(BoundaryElements[i], 
-                                                Elements[ParentElements[i]])
+        ParentElements[i] = findfirst(x -> issubset(_boundarynodes, x), Elements)
+        ParentBoundaries[i] = getParentBoundary(
+            _boundarynodes, 
+            Elements[ParentElements[i]]
+        )
+        BoundaryElements[i] = sort_boundaryelement(
+            _boundarynodes,
+            Elements[ParentElements[i]]
+        )
 
         if !in(el[2],keys(Boundaries))
             Boundaries[el[2]] = Boundary("", Set{Int64}(), Set{Int64}())
         end
         push!(Boundaries[el[2]].Elements, i)
-        for node in el[4:end]
+        for node in _boundarynodes
             push!(Boundaries[el[2]].Nodes, node)
         end
 
@@ -397,9 +416,20 @@ function import_mesh1(f::IOStream)
         push!(Entities[d][el[3]].Elements, i)
     end
   
-    return Mesh(d, nnodes, length(Elements), length(BoundaryElements), Nodes, 
-                Elements, BoundaryElements, ParentElements, ParentBoundaries,
-                Boundaries, Domains, Entities)
+    return Mesh(
+        d,
+        nnodes,
+        length(Elements),
+        length(BoundaryElements),
+        Nodes, 
+        Elements,
+        BoundaryElements,
+        ParentElements,
+        ParentBoundaries,
+        Boundaries,
+        Domains,
+        Entities
+    )
   end
 
   """
@@ -447,8 +477,8 @@ function import_mesh2(f::IOStream)
     l=readline(f)
     nelems = parse(Int64, l)
   
-    _Elements = [Array{Array{Float64,1},1}(), Array{Array{Float64,1},1}(),
-                    Array{Array{Float64,1},1}(), Array{Array{Float64,1},1}()]
+    _Elements = [Array{Array{Int64,1},1}(), Array{Array{Int64,1},1}(),
+                    Array{Array{Int64,1},1}(), Array{Array{Int64,1},1}()]
     for i = 1:nelems
         l = readline(f)
         a = split(l, " ")
@@ -486,9 +516,16 @@ function import_mesh2(f::IOStream)
     for (i,el) in enumerate(_Elements[d+1])
         Elements[i] = copy(el[4:end])
         if !in(el[2], keys(Domains))
-            Domains[el[2]] = Domain(get!(physicalNames[d+1],el[2],""), Set{Int64}())
+            Domains[el[2]] = Domain(
+                get!(physicalNames[d+1],el[2],""),
+                Set{Int64}(),
+                Set{Int64}()
+            )
         end
         push!(Domains[el[2]].Elements, i)
+        for node in el[4:end]
+            push!(Domains[el[2]].Nodes, node)
+        end
 
         if !in(el[3],keys(Entities[d+1]))
             Entities[d+1][el[3]] = Entity(el[2], Set{Int64}())
@@ -497,18 +534,24 @@ function import_mesh2(f::IOStream)
     end
   
     for (i,el) in enumerate(_Elements[d])
-        BoundaryElements[i] = copy(el[4:end])
+        _boundarynodes = copy(el[4:end])
 
-        ParentElements[i] = findfirst(x -> issubset(BoundaryElements[i], x), Elements)
-        ParentBoundaries[i] = getParentBoundary(BoundaryElements[i],
-                                                Elements[ParentElements[i]])
+        ParentElements[i] = findfirst(x -> issubset(_boundarynodes, x), Elements)
+        ParentBoundaries[i] = getParentBoundary(
+            _boundarynodes, 
+            Elements[ParentElements[i]]
+        )
+        BoundaryElements[i] = sort_boundaryelement(
+            _boundarynodes,
+            Elements[ParentElements[i]]
+        )
 
         if !in(el[2],keys(Boundaries))
             Boundaries[el[2]] = Boundary(get!(physicalNames[d],el[2],""),
                                             Set{Int64}(), Set{Int64}())
         end
         push!(Boundaries[el[2]].Elements, i)
-        for node in el[4:end]
+        for node in _boundarynodes
             push!(Boundaries[el[2]].Nodes, node)
         end
 
@@ -518,9 +561,20 @@ function import_mesh2(f::IOStream)
         push!(Entities[d][el[3]].Elements, i)
     end
   
-    return Mesh(d, nnodes, length(Elements), length(BoundaryElements), Nodes, 
-                Elements, BoundaryElements, ParentElements, ParentBoundaries,
-                Boundaries, Domains, Entities)
+    return Mesh(
+        d,
+        nnodes,
+        length(Elements),
+        length(BoundaryElements),
+        Nodes, 
+        Elements,
+        BoundaryElements,
+        ParentElements,
+        ParentBoundaries,
+        Boundaries,
+        Domains,
+        Entities
+    )
 end
 
 """
@@ -630,8 +684,8 @@ function import_mesh4(f::IOStream)
     a = split(l, " ")
     blocks = parse(Int64, a[1])
 
-    _Elements = Array{Array{Float64,1},1}()
-    _BoundaryElements = Array{Array{Float64,1},1}()
+    _Elements = Array{Array{Int64,1},1}()
+    _BoundaryElements = Array{Array{Int64,1},1}()
     boundaryElementType = getGMSHElementTypeFromDim(d-1)
     elementType = getGMSHElementTypeFromDim(d)
     for i = 1:blocks
@@ -669,19 +723,32 @@ function import_mesh4(f::IOStream)
     for (i, el) in enumerate(_Elements)
         Elements[i] = [NodeNumbering[n] for n in el[4:end]]
         if (!in(el[2], keys(Domains)))
-            Domains[el[2]] = Domain(get!(physicalNames[d+1],el[2],""), Set{Int64}())
+            Domains[el[2]] = Domain(
+                get!(physicalNames[d+1],el[2],""),
+                Set{Int64}(),
+                Set{Int64}()
+            )
         end
         push!(Domains[el[2]].Elements, i)
+        for node in el[4:end]
+            push!(Domains[el[2]].Nodes, NodeNumbering[node])
+        end
         
         push!(Entities[d+1][el[3]].Elements, i)
     end
 
     for (i, el) in enumerate(_BoundaryElements)
-        BoundaryElements[i] = [NodeNumbering[n] for n in el[4:end]]
+        _boundarynodes = [NodeNumbering[n] for n in el[4:end]]
 
-        ParentElements[i] = findfirst(x -> issubset(BoundaryElements[i], x), Elements)
-        ParentBoundaries[i] = getParentBoundary(BoundaryElements[i], 
-                                                Elements[ParentElements[i]])
+        ParentElements[i] = findfirst(x -> issubset(_boundarynodes, x), Elements)
+        ParentBoundaries[i] = getParentBoundary(
+            _boundarynodes, 
+            Elements[ParentElements[i]]
+        )
+        BoundaryElements[i] = sort_boundaryelement(
+            _boundarynodes,
+            Elements[ParentElements[i]]
+        )
 
         if (!in(el[2], keys(Boundaries)))
             Boundaries[el[2]] = Boundary(get!(physicalNames[d],el[2],""),
@@ -689,16 +756,27 @@ function import_mesh4(f::IOStream)
         end
         
         push!(Boundaries[el[2]].Elements, i)
-        for n in el[4:end]
-            push!(Boundaries[el[2]].Nodes, NodeNumbering[n])
+        for n in _boundarynodes
+            push!(Boundaries[el[2]].Nodes, n)
         end
 
         push!(Entities[d][el[3]].Elements, i)
     end
 
-    return Mesh(d, nnodes, length(Elements), length(BoundaryElements), Nodes, 
-                Elements, BoundaryElements, ParentElements, ParentBoundaries,
-                Boundaries, Domains, Entities)
+    return Mesh(
+        d,
+        nnodes,
+        length(Elements),
+        length(BoundaryElements),
+        Nodes, 
+        Elements,
+        BoundaryElements,
+        ParentElements,
+        ParentBoundaries,
+        Boundaries,
+        Domains,
+        Entities
+    )
 end
 
 """
@@ -855,6 +933,32 @@ function getParentBoundary(nodes::Vector{Int64}, parentNodes::Vector{Int64})
     end
 end
 
+function sort_boundaryelement(nodes::Array{Int64}, parent::Array{Int64})
+    sorted = Array{Int64,1}(undef,length(nodes))
+    k=1
+    for node in parent
+        if node in nodes
+            sorted[k] = node
+            k = k + 1
+        end
+    end
+
+    return sorted
+end
+
+"""
+    update_mesh!(mesh::Mesh, c::Array{Array{Float64,1},1})
+    
+Updates given mesh by shifting all nodes to new coordinates c.
+"""
+function update_mesh!(mesh::Mesh, v::Array{Array{Float64,1},1})
+    if length(v) != mesh.nnodes
+        throw(ArgumentError("Deformation vector does not have matching length."))
+    end
+
+    mesh.Nodes = deepcopy(v)
+end
+
 """
     deform_mesh!(mesh::Mesh, v::AbstractVector{Float64}; t::Float64=1.0)
     
@@ -908,9 +1012,35 @@ function select_boundaries(mesh::Mesh, args...)
 end
 
 """
-    extract_nodes(boundaries::Set{Boundary}) -> Set{Int64}
+    select_domains(mesh::Mesh, args...) -> Set{Domain}
 
-Returns set of node ids in set of physical boundaries.
+Returns set of all or specified physical boundaries of the mesh.
+"""
+function select_domains(mesh::Mesh, args...)
+    Domains = Array{Domain,1}()
+    
+    for id in args
+        if in(id, keys(mesh.Domains))
+            push!(Domains, mesh.Domains[id])
+        else
+            throw(ArgumentError("Physical domain id $(id) not valid integer."))
+        end
+    end
+
+    if length(args) == 0
+        for (_, domain) in mesh.Domains
+            push!(Domains, domain)
+        end
+    end
+
+    return Set(Domains)
+end
+
+"""
+    extract_nodes(boundaries::Set{Boundary}) -> Set{Int64}
+    extract_nodes(domains::Set{Domain}) -> Set{Int64}
+
+Returns set of node ids in set of physical regions.
 """
 function extract_nodes(boundaries::Set{Boundary})
     nodes = Set{Int64}()
@@ -920,15 +1050,32 @@ function extract_nodes(boundaries::Set{Boundary})
     return nodes
 end
 
+function extract_nodes(domains::Set{Domain})
+    nodes = Set{Int64}()
+    for domain in domains
+        union!(nodes, domain.Nodes)
+    end
+    return nodes
+end
+
 """
     extract_elements(boundaries::Set{Boundary}) -> Set{Int64}
+    extract_elements(domains::Set{Domain}) -> Set{Int64}
 
-Returns set of boundary element ids in set of physical boundaries.
+Returns set of boundary element ids in set of physical regions.
 """
 function extract_elements(boundaries::Set{Boundary})
     elements = Set{Int64}()
     for boundary in boundaries
         union!(elements, boundary.Elements)
+    end
+    return elements
+end
+
+function extract_elements(domains::Set{Domain})
+    elements = Set{Int64}()
+    for domain in domains
+        union!(elements, domain.Elements)
     end
     return elements
 end
@@ -971,6 +1118,33 @@ function evaluate_mesh_function(mesh::Mesh, f::Function;
 end
 
 """
+    base_jacobian(coords::Vector{Vector{Float64}}) -> Matrix{Float64}
+    base_jacobian(mesh::Mesh, nodes::Array{Int64,1}) -> Matrix{Float64}
+    base_jacobian(mesh::Mesh, element::Int64) -> Matrix{Float64}
+    
+Returns transformation matrix (jacobian) of the mapping 
+from the FEM reference element to an element spanned by the given nodes.
+"""
+function base_jacobian(coords::Vector{Vector{Float64}})
+    d = length(coords) - 1
+    
+    J = zeros(Float64, d, d)
+    for i = 1:d
+        J[:,i] = coords[i+1] - coords[1] 
+    end
+
+    return J
+end
+
+function base_jacobian(mesh::Mesh, nodes::Array{Int64,1})
+    return base_jacobian(mesh.Nodes[nodes])
+end
+
+function base_jacobian(mesh::Mesh, element::Int64)
+    return base_jacobian(mesh.Nodes[mesh.Elements[element]])
+end
+
+"""
     jacobian(coords::Vector{Vector{Float64}}) -> Float64, Matrix{Float64}
     jacobian(mesh::Mesh, nodes::Array{Int64,1}) -> Float64, Matrix{Float64}
     jacobian(mesh::Mesh, element::Int64) -> Float64, Matrix{Float64}
@@ -979,12 +1153,7 @@ Returns determinant (i.e. element weight) and inverse transposed of the jacobian
 of an FEM element spanned by the given nodes.
 """
 function jacobian(coords::Vector{Vector{Float64}})
-    d = length(coords) - 1
-    
-    J = zeros(d, d)
-    for i = 1:d
-        J[:,i] = coords[i+1] - coords[1] 
-    end
+    J = base_jacobian(coords)
     return det(J), inv(J)'
 end
 
@@ -1034,17 +1203,19 @@ or of the d-dimensional reference element.
 """
 function elementvolume(mesh::Mesh)
     v = zeros(mesh.nelems)
+    ref_vol = elementvolume(mesh.d)
 
     for el in eachindex(v)
-        v[el] = elementvolume(mesh, el)
+        detJ = det(base_jacobian(mesh, el))
+        v[el] = detJ * ref_vol
     end
 
     return v
 end
 
 function elementvolume(mesh::Mesh, element::Int64)
-    (detJ, _) = jacobian(mesh, element)
-    return detJ * elementvolume(mesh.d)
+    detJ = det(base_jacobian(mesh, element))
+    return detJ* elementvolume(mesh.d)
 end
 
 function elementvolume(d::Int64)
@@ -1071,6 +1242,40 @@ end
 function elementvolume_boundary(mesh::Mesh, element::Int64)
     detJ = jacobian_boundary(mesh, element)
     return detJ * elementvolume(mesh.d-1)
+end
+
+"""
+    elementbarycenter(mesh::Mesh) -> Vector{Float64}
+    elementbarycenter(mesh::Mesh, element::Int64) -> Float64
+    elementbarycenter(d::Int64) -> Float64
+
+Returns barycenter of all or one element(s) in a mesh 
+or of the d-dimensional reference element. 
+"""
+function elementbarycenter(mesh::Mesh)
+    v = zeros(mesh.nelems)
+    ref_bc = elementbarycenter(mesh.d)
+
+    for el in eachindex(v)
+        J = base_jacobian(mesh, element)
+        shift = mesh.Nodes[mesh.Elements[element][1]]
+        v[el] = J * ref_bc + shift
+    end
+
+    return v
+end
+
+function elementbarycenter(mesh::Mesh, element::Int64)
+    J = base_jacobian(mesh, element)
+    shift = mesh.Nodes[mesh.Elements[element][1]]
+    return J * elementbarycenter(mesh.d) + shift 
+end
+
+function elementbarycenter(d::Int64)
+    v = zeros(Float64, d)
+    v .= 1 / (d + 1)
+
+    return v
 end
 
 """
@@ -1135,7 +1340,92 @@ function elementdiameter_boundary(mesh::Mesh, element::Int64)
     return elementdiameter(mesh.Nodes[mesh.BoundaryElements[element]])
 end
 
+"""
+    circleratio(coords::Array{Array{Float64,1},1})
 
+Returns ratio of inscribed to circumscribed circle radii
+for triangular element spanned by three given coordinates.
+"""
+function circleratio(coords::Array{Array{Float64,1},1})
+    l3 = norm(coords[1]-coords[2])
+    l2 = norm(coords[1]-coords[3])
+    l1 = norm(coords[2]-coords[3])
+
+    lc = 0.5 * (l1+l2+l3)
+    area = sqrt(lc*(lc-l1)*(lc-l2)*(lc-l3))
+
+    radius_circumsribed = l1*l2*l3 / (4*area)
+    radius_inscribed = area / lc
+
+    return radius_inscribed / radius_circumsribed
+end
+
+"""
+    elementratio(coords::Array{Array{Float64,1},1}) -> Float64
+    elementratio(mesh::Mesh) -> Array{Float64,1}
+
+Returns ratio of inscribed to circumscribed circle or sphere
+for a specific element or all elements of a given mesh.
+"""
+function elementratio(coords::Array{Array{Float64,1},1})
+    dim = length(coords)-1
+    if dim == 1
+        return 1
+    elseif dim == 2
+        return circleratio(coords)
+    elseif dim == 3
+        throw(ErrorException("Element ratio for 3D currently not supported."))
+    else
+        throw(DimensionMismatch("Coordinate array does not have valid dimension."))
+    end
+end
+
+function elementratio(mesh::Mesh)
+    ratios = zeros(mesh.nelems)
+    for el=1:mesh.nelems
+        ratios[el] = elementratio(mesh.Nodes[mesh.Elements[el]])
+    end
+
+    return ratios
+end
+
+"""
+    elementangle(coords::Array{Array{Float64,1},1}) -> Float64
+    elementangle(mesh::Mesh) -> Array{Float64,1}
+
+Returns smallest interior angle for a specific element or all elements of a given mesh.
+"""
+function elementangle(coords::Array{Array{Float64,1},1})
+    min = pi
+    n = length(coords)
+    for i = 1:n
+        c = coords[i]
+        for j = 1:n
+            for k = 1:n
+                if i != j && i != k && j != k
+                    a = c - coords[j]
+                    b = c - coords[k]
+
+                    angle = acos(dot(a,b)/(norm(a)*norm(b)))
+                    if angle < min
+                        min = angle
+                    end
+                end
+            end
+        end
+    end
+
+    return min
+end
+
+function elementangle(mesh::Mesh)
+    angles = zeros(mesh.nelems)
+    for el=1:mesh.nelems
+        angles[el] = elementangle(mesh.Nodes[mesh.Elements[el]])
+    end
+
+    return angles 
+end
 
 """
     outernormalvector(mesh::Mesh; boundaryElements::Set{Int64}=Set{Int64}()) 
@@ -1194,7 +1484,40 @@ end
 Returns the d-dimenional volume of the domain definded by the mesh. 
 """
 function volume(mesh::Mesh)
-    return sum(elementvolume(mesh))
+    v = 0
+    ref_vol = elementvolume(mesh.d)
+
+    for el = 1:mesh.nelems
+        detJ = det(base_jacobian(mesh, el))
+        v += detJ * ref_vol
+    end
+
+    return v
+end
+
+"""
+    barycenter(mesh::Mesh) -> Vector{Float64}
+    
+Returns the d-dimenional domain of the domain definded by the mesh. 
+"""
+function barycenter(mesh::Mesh)
+    ref_vol = elementvolume(mesh.d)
+    ref_bc = elementbarycenter(mesh.d)
+
+    bc = zeros(Float64,mesh.d)
+    vol = 0
+    for el = 1:mesh.nelems
+        J = base_jacobian(mesh, el)
+        
+        shift = mesh.Nodes[mesh.Elements[el][1]]
+        ebc = J * ref_bc .+ shift
+        evol = abs(det(J) * ref_vol)
+
+        bc += evol .* ebc
+        vol += evol
+    end
+
+    return bc ./ vol
 end
 
 """

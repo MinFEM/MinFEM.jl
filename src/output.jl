@@ -17,21 +17,22 @@ function write_to_vtk(x::Vector{Vector{Float64}}, mesh::Mesh, dataName::Array{St
     vtkfile = open_vtkfile(mesh, fileName)
     
     for k in eachindex(x)
+        val = Array{Array{Float64,1},1}()
         if qdim[k] == 1
-            write_pointdata_vtkfile!(vtkfile, x[k], dataName[k])
+            val = x[k]'
         elseif qdim[k] == 2
             # Add third dimension to be able to use orientation array in paraview 
-            write_pointdata_vtkfile!(
-                vtkfile, 
-                [reshape(x[k], qdim[k], mesh.nnodes); zeros(1,mesh.nnodes)],
-                dataName[k]
-            )
+            val = [reshape(x[k], qdim[k], mesh.nnodes); zeros(1,mesh.nnodes)]
         else
-            write_pointdata_vtkfile!(
-                vtkfile, 
-                reshape(x[k], qdim[k], mesh.nnodes), 
-                dataName[k]
-            )
+            val = reshape(x[k], qdim[k], mesh.nnodes)
+        end
+
+        if size(val, 2) == mesh.nnodes
+            write_pointdata_vtkfile!(vtkfile, val, dataName[k])
+        elseif size(val, 2) == mesh.nelems
+            write_celldata_vtkfile!(vtkfile, val, dataName[k])
+        else
+            throw(DimensionMismatch("Input vector does not match mesh."))
         end
     end
     vtk_save(vtkfile)

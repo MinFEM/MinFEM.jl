@@ -115,7 +115,7 @@ Returns the vector of weights for all boundary elements of mesh and image dimens
 Weight is equal to volume if 1st order integration by mid-point rule is used.
 """
 function assemble_weightmultivector_boundary(mesh::Mesh; qdim::Int64=1, order::Int64=1)
-    quadW = quadrature_weights(mesh.d-1, order)
+    quadW = quadrature_weights_boundary(mesh.d, order)
     wle = length(quadW)
 
     m = mesh.nboundelems
@@ -431,7 +431,7 @@ function assemble_basismatrix_boundary(mesh::Mesh;
         boundaryElements = Set{Int64}(1 : mesh.nboundelems)
     end
 
-    quadX = quadrature_points(mesh.d-1, order)
+    quadX = quadrature_points_boundary(mesh.d, order)
     xle = length(quadX)
     
     AA = zeros(Float64, xle * qdim * mesh.nboundelems * mesh.d)
@@ -490,8 +490,8 @@ function assemble_massmatrix_boundary(mesh::Mesh;
     JJ = zeros(Int64, length(AA))
     n = 0
 
-    quadX = quadrature_points(mesh.d-1, order)
-    quadW = quadrature_weights(mesh.d-1, order)
+    quadX = quadrature_points_boundary(mesh.d, order)
+    quadW = quadrature_weights_boundary(mesh.d, order)
 
     for bel in boundaryElements
         nodes = mesh.BoundaryElements[bel]
