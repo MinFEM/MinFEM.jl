@@ -23,17 +23,6 @@ Depth = 2
 Entity
 ```
 
-## Mesh Import
-
-```@docs
-import_mesh1
-import_mesh2
-import_mesh4
-getDimFromGMSHElementType
-getGMSHElementTypeFromDim
-getParentBoundary
-```
-
 ## Quadrature
 
 ```@docs
@@ -45,9 +34,28 @@ compute_coordinates_tetrahedron
 compute_weights_line
 compute_weights_triangle
 compute_weights_tetrahedron
+parentcoordinates
 ```
 
-## Utility
+## Mesh Import
+
+```@docs
+import_mesh1
+import_mesh2
+import_mesh4
+getDimFromGMSHElementType
+getGMSHElementTypeFromDim
+getParentBoundary
+```
+
+## Mesh Utility
+
+```@docs
+base_jacobian
+circleratio
+```
+
+## FEM Utility
 
 ```@docs
 stressTensor

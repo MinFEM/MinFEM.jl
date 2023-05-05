@@ -1,20 +1,4 @@
 """
-    barycenter(mesh::Mesh) -> Vector{Float64}
-    
-Returns vector of coordinates of the barycenter of the domain definded by the mesh. 
-"""
-function barycenter(mesh::Mesh)
-    M = assemble_massmatrix(mesh)
-    vol = volume(mesh)
-    bc = zeros(Float64, mesh.d)
-    for j = 1:mesh.d
-        bc[j] =  sum(M * evaluate_mesh_function(mesh, x->x[j])) / vol
-    end 
-    
-    return bc 
-end
-
-"""
     pnorm(p::Float64,v::AbstractVector{Float64}, mesh::Mesh; 
             qdim::Int64=1, order::Int64=1) -> Float64
 
@@ -119,7 +103,7 @@ function pnorm_boundary(p::Float64, v::AbstractVector{Float64}, mesh::Mesh;
             E = assemble_basismatrix_boundary(mesh, boundaryElements=boundaryElements,
                                                 qdim=qdim, order=order)
             t = abs.(E * v)
-            le = mesh.nboundelems * length(quadrature_weights(mesh.d-1, order))
+            le = mesh.nboundelems * length(quadrature_weights_boundary(mesh.d, order))
         end
     elseif mod(length(v), mesh.nboundelems*qdim) == 0
         t = abs.(v)
