@@ -160,7 +160,7 @@ function unit_interval(n::Int64)
     ParentElements::Array{Int64,1} = [1,nelems]
     ParentBoundaries::Array{Int64,1} = [1,2]
 
-    DDomains[10001] = Domain("domain", Set{Int64}(1:nnodes), Set{Int64}(1:nelems))
+    Domains[10001] = Domain("domain", Set{Int64}(1:nnodes), Set{Int64}(1:nelems))
 
     Entities = [Dict{Int64,Entity}(), Dict{Int64,Entity}(),
                 Dict{Int64,Entity}(), Dict{Int64,Entity}()]
