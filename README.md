@@ -3,6 +3,11 @@
 
 ## A minimal finite element tool for demonstration and teaching.
 
+[![][license-badge]][license-url]
+[![][docs-badge]][docs-url]
+[![][test-badge]][test-url]
+[![][cov-badge]][cov-url]
+
 * The purpose of this package is to provide an easy and minimalistic introdcution to the finite element method.
 
 * We restrict ourselves to linear finite elements on tetrahedral grids in 1D, 2D and 3D.
@@ -69,3 +74,12 @@ solve!(pde)
 
 write_to_vtk([pde.state, s], mesh, ["Y","S"], "poisson")
 ```
+
+[license-url]: https://github.com/MinFEM/MinFEM.jl/blob/master/LICENSE
+[license-badge]: https://img.shields.io/badge/License-MIT-brightgreen.svg
+[docs-url]: https://minfem.github.io/MinFEM.jl/stable/
+[docs-badge]: https://img.shields.io/badge/docs-stable-blue.svg
+[test-url]: https://github.com/MinFEM/MinFEM.jl/actions/workflows/test.yml
+[test-badge]: https://github.com/MinFEM/MinFEM.jl/actions/workflows/test.yml/badge.svg
+[cov-url]: https://codecov.io/gh/MinFEM/MinFEM.jl
+[cov-badge]: https://codecov.io/gh/MinFEM/MinFEM.jl/branch/master/graph/badge.svg
