@@ -54,7 +54,8 @@ f(x) = ((n*pi)^2 + (m*pi)^2) *sin(n*x[1]*pi)*sin(m*x[2]*pi)
 s = evaluate_mesh_function(mesh, f)
 ```
 
-The next step is to set up a PDESystem structure, which holds all necessary information for the PDE. These are the stiffness matrix, the load vector, Dirichlet values and indices of the boundary nodes:
+The next step is to set up a PDESystem structure, which holds all necessary information for the PDE.
+These are the stiffness matrix, the load vector, Dirichlet values and indices of the boundary nodes:
 
 
 ```julia
@@ -74,6 +75,11 @@ solve!(pde)
 
 write_to_vtk([pde.state, s], mesh, ["Y","S"], "poisson")
 ```
+
+## Acknowledgment
+The authors acknowledge the support by the Deutsche Forschungsgemeinschaft (DFG)
+within the Research Training Group GRK 2583
+"Modeling, Simulation and Optimization of Fluid Dynamic Applications”.
 
 [license-url]: https://github.com/MinFEM/MinFEM.jl/blob/master/LICENSE
 [license-badge]: https://img.shields.io/badge/License-MIT-brightgreen.svg
