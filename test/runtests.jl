@@ -8,6 +8,7 @@ tests = [
     "properties_test",
     "deformation_test",
     "normal_test",
+    "fem_test",
     "extension_test",
     "gradient_test",
     "poisson_test",
