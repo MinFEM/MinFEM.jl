@@ -4,6 +4,8 @@
 
 Returns \$L^p\$-norm of a FEM coefficient vector v over the nodes 
 or quadrature points in the elements on the given mesh.
+Note that for p=Inf, the values do not get inter- or extrapolated
+and thus it might not be true maximum over the domain, but only over the given data.
 """
 function pnorm(p::Float64, v::AbstractVector{Float64}, mesh::Mesh; 
                 qdim::Int64=1, order::Int64=1)
@@ -111,6 +113,8 @@ function pnorm_boundary(p::Float64, v::AbstractVector{Float64}, mesh::Mesh;
         nPoints = div(length(v), mesh.nboundelems * qdim)
         order = quadrature_order(mesh.d-1, nPoints)
         le = mesh.nboundelems * nPoints
+    else
+        throw(ArgumentError("The vector v does not have a valid length."))
     end
     
     if qdim != 1
