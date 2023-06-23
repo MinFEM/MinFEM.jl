@@ -1090,13 +1090,21 @@ Returns evaluation of a given function object f on all or specified nodes of the
 Can be either called with set of physical boundaries or directly with a set of nodes 
 when given with keyword argument region.
 """
-function evaluate_mesh_function(mesh::Mesh, f::Function, region::Set{Boundary}; 
-                                qdim = 1)
+function evaluate_mesh_function(
+    mesh::Mesh,
+    f::Function,
+    region::Set{Boundary}; 
+    qdim::Int64=1
+)
     evaluate_mesh_function(mesh, f, region = extract_nodes(region), qdim = qdim)
 end
 
-function evaluate_mesh_function(mesh::Mesh, f::Function; 
-                                region::Set{Int64}=Set{Int64}(), qdim = 1)
+function evaluate_mesh_function(
+    mesh::Mesh,
+    f::Function; 
+    region::Set{Int64}=Set{Int64}(),
+    qdim::Int64=1
+)
     v = zeros(Float64, qdim * mesh.nnodes)
     nodes = 1:mesh.nnodes
 
