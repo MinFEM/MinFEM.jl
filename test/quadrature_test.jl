@@ -105,4 +105,133 @@ function test_quadrature()
     return true
 end
 
+function test_quadrature_base()
+    try
+        qp = quadrature_points(1,-1)
+    catch e
+        if !isa(e, ErrorException) && !occursin("Order has to be at least 0.", e.msg)
+            return false
+        end
+    end
+
+    try
+        qp = quadrature_points(-1,0)
+    catch e
+        if !isa(e, ErrorException) && !occursin("available for 1D, 2D and 3D.", e.msg)
+            return false
+        end
+    end
+
+    try
+        qp = quadrature_points(4,0)
+    catch e
+        if !isa(e, ErrorException) && !occursin("available for 1D, 2D and 3D.", e.msg)
+            return false
+        end
+    end
+
+    try
+        qp = quadrature_points(1,10)
+    catch e
+        if !isa(e, ErrorException) && !occursin("order for 3D is 9.", e.msg)
+            return false
+        end
+    end
+
+    try
+        qp = quadrature_points(2,9)
+    catch e
+        if !isa(e, ErrorException) && !occursin("order for 2D is 8.", e.msg)
+            return false
+        end
+    end
+
+    try
+        qp = quadrature_points(3,8)
+    catch e
+        if !isa(e, ErrorException) && !occursin("order for 3D is 7.", e.msg)
+            return false
+        end
+    end
+
+
+
+    try
+        qw = quadrature_weights(1,-1)
+    catch e
+        if !isa(e, ErrorException) && !occursin("Order has to be at least 0.", e.msg)
+            return false
+        end
+    end
+
+    try
+        qw = quadrature_weights(-1,0)
+    catch e
+        if !isa(e, ErrorException) && !occursin("available for 1D, 2D and 3D.", e.msg)
+            return false
+        end
+    end
+
+    try
+        qw = quadrature_weights(4,0)
+    catch e
+        if !isa(e, ErrorException) && !occursin("available for 1D, 2D and 3D.", e.msg)
+            return false
+        end
+    end
+
+    try
+        qw = quadrature_weights(1,10)
+    catch e
+        if !isa(e, ErrorException) && !occursin("order for 3D is 9.", e.msg)
+            return false
+        end
+    end
+
+    try
+        qw = quadrature_weights(2,9)
+    catch e
+        if !isa(e, ErrorException) && !occursin("order for 2D is 8.", e.msg)
+            return false
+        end
+    end
+
+    try
+        qw = quadrature_weights(3,8)
+    catch e
+        if !isa(e, ErrorException) && !occursin("order for 3D is 7.", e.msg)
+            return false
+        end
+    end
+
+
+
+    x = Vector{Float64}()
+    any(abs.(parentcoordinates(x, 1) .- [0.0]) .> 1e-5) && return false
+    any(abs.(parentcoordinates(x, 2) .- [1.0]) .> 1e-5) && return false
+
+    x = [1/2]
+    any(abs.(parentcoordinates(x, 1) .- [1/2, 0.0]) .> 1e-5) && return false
+    any(abs.(parentcoordinates(x, 2) .- [0.0, 1/2]) .> 1e-5) && return false
+    any(abs.(parentcoordinates(x, 3) .- [1/2, 1/2]) .> 1e-5) && return false
+
+    x = [1/3, 1/3]
+    any(abs.(parentcoordinates(x, 1) .- [1/3, 1/3, 0.0]) .> 1e-5) && return false
+    any(abs.(parentcoordinates(x, 2) .- [1/3, 0.0, 1/3]) .> 1e-5) && return false
+    any(abs.(parentcoordinates(x, 3) .- [0.0, 1/3, 1/3]) .> 1e-5) && return false
+    any(abs.(parentcoordinates(x, 4) .- [1/3, 1/3, 1/3]) .> 1e-5) && return false
+
+    x = [1/4, 1/4, 1/4]
+    try
+        c = parentcoordinates(x, 1)
+    catch e
+        if !isa(e, DomainError) || !occursin("Unsupported dimension.", e.msg)
+            return false
+        end
+    end
+
+    return true
+end
+
 @test test_quadrature()
+@test test_quadrature_base()

@@ -6,12 +6,15 @@ function test_evaluation()
     id3(x) = [x[1], x[2], x[3]]
 
     mesh = import_mesh("test_line_v4.msh")
+    dom = select_domains(mesh, 10001)
     for order = 1:9
         points = quadrature_points(mesh, order)
         xle = length(quadrature_points(mesh.d, order))
 
         vm = evaluate_mesh_function(mesh, id1)
         vq = evaluate_quadrature_function(mesh, id1, order=order)
+
+        vq != evaluate_quadrature_function(mesh, id1, dom, order=order) && return false
 
         E = assemble_basismatrix(mesh, order = order)
         vmq = E * vm
@@ -34,12 +37,16 @@ function test_evaluation()
     end
     
     mesh = import_mesh("test_square_v4.msh")
+    dom = select_domains(mesh, 10001)
     for order = 1:8
         points = quadrature_points(mesh, order)
         xle = length(quadrature_points(mesh.d, order))
 
         vm = evaluate_mesh_function(mesh, id2, qdim=2)
         vq = evaluate_quadrature_function(mesh, id2, order=order, qdim=2)
+
+        vq != evaluate_quadrature_function(mesh, id2, dom, order=order, qdim = 2) && 
+            return false
 
         E = assemble_basismatrix(mesh, order = order, qdim=2)
         vmq = E * vm
@@ -62,12 +69,16 @@ function test_evaluation()
     end
 
     mesh = import_mesh("test_cube_v4.msh")
+    dom = select_domains(mesh, 10001)
     for order = 1:7
         points = quadrature_points(mesh, order)
         xle = length(quadrature_points(mesh.d, order))
 
         vm = evaluate_mesh_function(mesh, id3, qdim=3)
         vq = evaluate_quadrature_function(mesh, id3, order=order, qdim=3)
+
+        vq != evaluate_quadrature_function(mesh, id3, dom, order=order, qdim = 3) && 
+            return false
 
         E = assemble_basismatrix(mesh, order = order, qdim=3)
         vmq = E * vm

@@ -11,6 +11,7 @@ tests = [
     "fem_test",
     "extension_test",
     "gradient_test",
+    "pdesystem_test",
     "poisson_test",
     "elasticity_test",
     "semilinear_test",

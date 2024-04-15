@@ -10,6 +10,7 @@ function test_normals()
 
     n = outernormalvector(mesh, boundaryElements=belems)
     any(abs.(n .- [-1.0, 1.0]) .> 1e-15) && return false
+    n != outernormalvector(mesh) && return false
 
     Dn = assemble_normalderivativematrix(mesh, boundaryElements=belems, qdim=1)
     Dnf = Dn * fh
