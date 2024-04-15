@@ -114,6 +114,14 @@ function test_evaluation_boundary()
         points = quadrature_points_boundary(mesh, order)
         xle = length(quadrature_points_boundary(mesh.d, order))
 
+        (
+            points != quadrature_points_boundary(
+                mesh,
+                order,
+                boundaryElements=extract_elements(boundary)
+            )
+        ) && return false
+
         vm = evaluate_mesh_function(mesh, id1, boundary)
         vq = evaluate_quadrature_function_boundary(mesh, id1, boundary, order=order)
 
@@ -170,6 +178,14 @@ function test_evaluation_boundary()
     for order = 1:8
         points = quadrature_points_boundary(mesh, order)
         xle = length(quadrature_points_boundary(mesh.d, order))
+
+        (
+            points != quadrature_points_boundary(
+                mesh,
+                order,
+                boundaryElements=extract_elements(boundary)
+            )
+        ) && return false
 
         vm = evaluate_mesh_function(mesh, id2, boundary, qdim=2)
         vq = evaluate_quadrature_function_boundary(mesh, id2, boundary, order=order, qdim=2)
@@ -230,6 +246,14 @@ function test_evaluation_boundary()
         points = quadrature_points_boundary(mesh, order)
         xle = length(quadrature_points_boundary(mesh.d, order))
 
+        (
+            points != quadrature_points_boundary(
+                mesh,
+                order,
+                boundaryElements=extract_elements(boundary)
+            )
+        ) && return false
+
         vm = evaluate_mesh_function(mesh, id3, boundary, qdim=3)
         vq = evaluate_quadrature_function_boundary(mesh, id3, boundary, order=order, qdim=3)
 
@@ -282,7 +306,7 @@ function test_evaluation_boundary()
             end
         end
     end
-
+    println(1)
     return true
 end
 

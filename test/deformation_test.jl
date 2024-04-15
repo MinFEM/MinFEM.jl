@@ -74,6 +74,14 @@ function test_deformation_fallbacks()
             return false
         end
     end
+    ch = Array{Array{Float64,1},1}(undef, mesh.nelems)
+    try
+        update_mesh!(mesh, ch)
+    catch e
+        if !isa(e, ArgumentError) || !occursin("matching length", e.msg)
+            return false
+        end
+    end
 
     mesh = unit_square(11)
     fh = zeros(Float64,mesh.nnodes)
@@ -84,11 +92,27 @@ function test_deformation_fallbacks()
             return false
         end
     end
+    ch = Array{Array{Float64,1},1}(undef, mesh.nelems)
+    try
+        update_mesh!(mesh, ch)
+    catch e
+        if !isa(e, ArgumentError) || !occursin("matching length", e.msg)
+            return false
+        end
+    end
 
     mesh = import_mesh("test_cube_v4.msh")
     fh = zeros(Float64, mesh.nnodes * 2)
     try
         deform_mesh!(mesh, fh)
+    catch e
+        if !isa(e, ArgumentError) || !occursin("matching length", e.msg)
+            return false
+        end
+    end
+    ch = Array{Array{Float64,1},1}(undef, mesh.nelems)
+    try
+        update_mesh!(mesh, ch)
     catch e
         if !isa(e, ArgumentError) || !occursin("matching length", e.msg)
             return false

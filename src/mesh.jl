@@ -1250,7 +1250,7 @@ end
 
 function elementvolume(mesh::Mesh, element::Int64)
     detJ = det(base_jacobian(mesh, element))
-    return detJ* elementvolume(mesh.d)
+    return detJ * elementvolume(mesh.d)
 end
 
 function elementvolume(d::Int64)
@@ -1266,9 +1266,11 @@ Returns volume of all or one boundary element(s) in a mesh.
 """
 function elementvolume_boundary(mesh::Mesh)
     v = zeros(mesh.nboundelems)
+    ref_vol = elementvolume_boundary(mesh.d)
     
     for el in eachindex(v)
-        v[el] = elementvolume_boundary(mesh, el)
+        detJ = jacobian_boundary(mesh, el)
+        v[el] = detJ * ref_vol
     end
 
     return v
@@ -1279,21 +1281,25 @@ function elementvolume_boundary(mesh::Mesh, element::Int64)
     return detJ * elementvolume(mesh.d-1)
 end
 
+function elementvolume_boundary(d::Int64)
+    return elementvolume(d-1)
+end
+
 """
-    elementbarycenter(mesh::Mesh) -> Vector{Float64}
-    elementbarycenter(mesh::Mesh, element::Int64) -> Float64
-    elementbarycenter(d::Int64) -> Float64
+    elementbarycenter(mesh::Mesh) -> Array{Array{Float64,1},1}
+    elementbarycenter(mesh::Mesh, element::Int64) -> Array{Float64,1}
+    elementbarycenter(d::Int64) -> Array{Float64,1}
 
 Returns barycenter of all or one element(s) in a mesh 
 or of the d-dimensional reference element. 
 """
 function elementbarycenter(mesh::Mesh)
-    v = zeros(mesh.nelems)
+    v = Array{Array{Float64,1},1}(undef, mesh.nelems)
     ref_bc = elementbarycenter(mesh.d)
 
     for el in eachindex(v)
-        J = base_jacobian(mesh, element)
-        shift = mesh.Nodes[mesh.Elements[element][1]]
+        J = base_jacobian(mesh, el)
+        shift = mesh.Nodes[mesh.Elements[el][1]]
         v[el] = J * ref_bc + shift
     end
 

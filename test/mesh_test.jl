@@ -41,7 +41,6 @@ function test_mesh()
     meshi = unit_interval(10)
     meshs = unit_square(4)
 
-
     pathBase = "temp"
     testDirPath = "" * pathBase
     while ispath(testDirPath)
@@ -49,8 +48,8 @@ function test_mesh()
     end
     mkpath(testDirPath)
 
-    export_mesh(meshi, testDirPath * "/testi.msh2")
-    export_mesh(meshs, testDirPath * "/tests.msh2")
+    export_mesh(meshi, testDirPath * "/testi")
+    export_mesh(meshs, testDirPath * "/tests")
     remeshi = import_mesh(testDirPath * "/testi.msh2")
     remeshs = import_mesh(testDirPath * "/tests.msh2")
 
@@ -110,6 +109,9 @@ end
 function test_mesh_regions()
     mesh = unit_square(3)
 
+    ball = select_boundaries(mesh)
+    (ball != select_boundaries(mesh, 1001, 1002, 1003, 1004)) && return false
+
     b1001 = select_boundaries(mesh, 1001)
     try
         b1005 = select_boundaries(mesh, 1005)
@@ -133,6 +135,7 @@ function test_mesh_regions()
     end
 
     !isa(d10001, Set{Domain}) && return false
+    (d10001 != select_domains(mesh)) && return false
     (extract_elements(d10001) != Set{Int64}(1:8)) && return false
     (extract_nodes(d10001) != Set{Int64}(1:9)) && return false    
     
