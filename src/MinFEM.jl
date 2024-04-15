@@ -28,6 +28,7 @@ export  unit_square,
         deform_mesh
 
 export  select_boundaries,
+        select_domains,
         extract_elements,
         extract_nodes
 
@@ -53,6 +54,7 @@ export  quadrature_points,
         quadrature_weights,
         quadrature_weights_boundary,
         quadrature_order,
+        parentcoordinates,
         integral_over_reference_element
 
 export  evaluate_quadrature_function,

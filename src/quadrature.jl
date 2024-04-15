@@ -2,7 +2,11 @@
     gausslegendre_points(order::Int64) -> Array{Float64,1}
     
 Returns coordinates of the Gauss-Legendre quadrature points on the default interval [-1,1] 
-for exact integration of polynomials up to the given order.
+for exact integration of polynomials up to the order given by a non-negative integer.
+
+The maximum order of accuary is 9. The function is only used internally and thus does not
+perform an check on the given order, but will either provide 1st order for negative
+arguments or 9th order if the argument is larger.
 """
 function gausslegendre_points(order::Int64)
     if order <= 1
@@ -18,14 +22,11 @@ function gausslegendre_points(order::Int64)
         val1 = sqrt(3/7 - val)
         val2 = sqrt(3/7 + val)
         return  [-val2, -val1, val1, val2]
-    elseif order <= 9
+    else
         val = 2 * sqrt(10/7)
         val1 = 1/3 * sqrt(5 - val)
         val2 = 1/3 * sqrt(5 + val)
         return  [-val2, -val1, 0, val1, val2]
-    else
-        throw(ErrorException("Order $order not possible. " *
-                                "Highest possible order for 1D is 9."))
     end
 end
 
@@ -33,7 +34,11 @@ end
     gausslegendre_weights(order::Int64) -> Array{Float64,1}
     
 Returns weights of the Gauss-Legendre quadrature points on the default interval [-1,1] 
-for exact integration of polynomials up to the given order.
+for exact integration of polynomials up to the ordergiven by a non-negative integer.
+
+The maximum order of accuary is 9. The function is only used internally and thus does not
+perform an check on the given order, but will either provide 1st order for negative
+arguments or 9th order if the argument is larger.
 """
 function gausslegendre_weights(order::Int64)
     if order <= 1
@@ -48,14 +53,11 @@ function gausslegendre_weights(order::Int64)
         val1 = (18 + val) / 36
         val2 = (18 - val) / 36
         return  [val2, val1, val1, val2]
-    elseif order <= 9
+    else
         val = 13 * sqrt(70)
         val1 = (322 + val) / 900
         val2 = (322 - val) / 900
         return  [val2, val1, 128/225, val1, val2]
-    else
-        throw(ErrorException("Order $order not possible. " *
-                                "Highest possible order for 1D is 9."))
     end
 end
 

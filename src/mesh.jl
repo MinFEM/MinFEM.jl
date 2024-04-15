@@ -140,7 +140,9 @@ function unit_interval(n::Int64)
     Boundaries[1001] = Boundary("left", Set{Int64}(), Set{Int64}())
     Boundaries[1002] = Boundary("right", Set{Int64}(), Set{Int64}())
 
-    for k = 1:n
+    Nodes[1] = [0]
+    Nodes[n] = [1]
+    for k = 2:n-1
         Nodes[k] = [(k - 1) * h]
     end
 
@@ -159,6 +161,7 @@ function unit_interval(n::Int64)
 
     ParentElements::Array{Int64,1} = [1,nelems]
     ParentBoundaries::Array{Int64,1} = [1,2]
+
 
     Domains[10001] = Domain("domain", Set{Int64}(1:nnodes), Set{Int64}(1:nelems))
 
@@ -202,12 +205,36 @@ function unit_square(n::Int64)
     Boundaries[1004] = Boundary("right", Set{Int64}(), Set{Int64}())
 
     k = 1
-    for i = 1:n
-        for j = 1:n
-            Nodes[k] = [(j - 1) * h; (i - 1) * h]
-            k = k + 1
-        end
+    # bottom
+    Nodes[k] = [0; 0]
+    k+=1
+    for j = 2:n-1
+        Nodes[k] = [(j - 1) * h; 0]
+        k += 1
     end
+    Nodes[k] = [1; 0]
+    k+=1
+
+    # interior
+    for i = 2:n-1
+        Nodes[k] = [0; (i - 1) * h]
+        k+=1
+        for j = 2:n-1
+            Nodes[k] = [(j - 1) * h; (i - 1) * h]
+            k += 1
+        end
+        Nodes[k] = [1; (i - 1) * h]
+        k+=1
+    end
+
+    # top
+    Nodes[k] = [0; 1]
+    k+=1
+    for j = 2:n-1
+        Nodes[k] = [(j - 1) * h; 1]
+        k += 1
+    end
+    Nodes[k] = [1; 1]
 
     k = 1
     for i = 1:n-1
@@ -401,7 +428,7 @@ function import_mesh1(f::IOStream)
             _boundarynodes,
             Elements[ParentElements[i]]
         )
-
+ 
         if !in(el[2],keys(Boundaries))
             Boundaries[el[2]] = Boundary("", Set{Int64}(), Set{Int64}())
         end
@@ -496,7 +523,7 @@ function import_mesh2(f::IOStream)
         end
     end
     if d == 0
-        throw(ErrorException("Mesh does not contain a domain."))
+        throw(ErrorException("File does not contain a meshed domain."))
     end
 
     Nodes = Array{Array{Float64, 1}, 1}(undef, nnodes)
@@ -640,12 +667,12 @@ function import_mesh4(f::IOStream)
         end
     end
 
-    if d == 0
-        throw(ErrorException("Mesh does not contain a domain."))
-    end
-
     while (!eof(f) && (l = readline(f)) != "\$Nodes")
     end
+    if eof(f)
+        throw(ErrorException("File does not contain a meshed domain."))
+    end
+
     l = readline(f)
     a = split(l, " ")
     blocks = parse(Int64, a[1])
@@ -1307,7 +1334,7 @@ function elementdiameter(mesh::Mesh)
 end
 
 function elementdiameter(mesh::Mesh, element::Int64)
-    return elementdiameter(mesh.Nodes[mesh.Elements[element]])
+    return elementdiameter(mesh, mesh.Elements[element])
 end
 
 function elementdiameter(mesh::Mesh, nodes::Vector{Int64})
@@ -1381,10 +1408,8 @@ function elementratio(coords::Array{Array{Float64,1},1})
         return 1
     elseif dim == 2
         return circleratio(coords)
-    elseif dim == 3
-        throw(ErrorException("Element ratio for 3D currently not supported."))
     else
-        throw(DimensionMismatch("Coordinate array does not have valid dimension."))
+        throw(ErrorException("Element ratio for 3D currently not supported."))
     end
 end
 
@@ -1404,8 +1429,12 @@ end
 Returns smallest interior angle for a specific element or all elements of a given mesh.
 """
 function elementangle(coords::Array{Array{Float64,1},1})
-    min = pi
     n = length(coords)
+    if n == 2
+        throw(ErrorException("Element angle for 1D currently not supported."))
+    end
+    
+    min = pi
     for i = 1:n
         c = coords[i]
         for j = 1:n
