@@ -1,4 +1,4 @@
-using MinFEMDev
+using MinFEM
 using LinearAlgebra
 using SparseArrays
 
