@@ -27,7 +27,6 @@ function test_properties()
 
     mesh = unit_square(2)
     bcs = elementbarycenter(mesh)
-    println(bcs)
     any(abs.(bcs[1] .- [1/3,1/3]) .> 1e-15) && return false
     any(abs.(bcs[2] .- [2/3,2/3]) .> 1e-15) && return false
     for i = 1:mesh.nelems
