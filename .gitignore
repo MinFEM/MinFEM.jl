@@ -1,3 +1,6 @@
 *.vtu
 docs/build/
 logo/*
+
+Manifest.toml
+test/Manifest.toml

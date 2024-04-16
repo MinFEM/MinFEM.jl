@@ -1,0 +1,16 @@
+$MeshFormat
+2.2 0 8
+$EndMeshFormat
+$PhysicalNames
+4
+1 1001 "bottom"
+1 1002 "top"
+1 1003 "left"
+1 1004 "right"
+$EndPhysicalNames
+$Nodes
+0
+$EndNodes
+$Elements
+0
+$EndElements

@@ -37,9 +37,18 @@ mutable struct PDESystem
 
 end
 
-PDESystem(;A=spzeros(0,0), b=[], bc=[], DI=Set{Int64}(), qdim=1, Factors=[],
-            SystemMatrix=spzeros(0,0), B=spzeros(0,0), state=[], rhs=[]) =
-                PDESystem(A, b, bc, DI, qdim, Factors, SystemMatrix, B, state, rhs)
+PDESystem(;
+    A = spzeros(0,0),
+    b = [],
+    bc = [],
+    DI = Set{Int64}(),
+    qdim = 1,
+    Factors = [],
+    SystemMatrix = spzeros(0,0),
+    B = spzeros(0,0),
+    state = [],
+    rhs = []
+) = PDESystem(A, b, bc, DI, qdim, Factors, SystemMatrix, B, state, rhs)
 
 """
     assemble!(S::PDESystem)
