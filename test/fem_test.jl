@@ -133,7 +133,29 @@ function test_dirichletcondition()
     assemble_dirichletcondition!(L2, belemes)
 
     any(abs.(nonzeros(L1) .- nonzeros(L2)) .> 1e-13) && return false
-    
+
+    return true
+end
+
+function test_dirichletcondition_rhs()
+    mesh = import_mesh("test_square_v4.msh")
+
+    bnd = select_boundaries(mesh, 1001, 1002)
+    belemes = extract_nodes(bnd)
+
+    g(x) = 0.0
+    gh = evaluate_mesh_function(mesh, g)
+
+    f(x) = 1.0
+    rhs1 = evaluate_mesh_function(mesh, f)
+    rhs2 = evaluate_mesh_function(mesh, f)
+    L = assemble_laplacian(mesh)
+
+    assemble_dirichletcondition_rhs!(L, rhs1, bnd, gh)
+    assemble_dirichletcondition_rhs!(L, rhs2, belemes, gh)
+
+    any(abs.(rhs1 .- rhs2) .> 1e-13) && return false
+
     return true
 end
 
@@ -145,3 +167,4 @@ end
 @test test_mass()
 @test test_mass_boundary()
 @test test_dirichletcondition()
+@test test_dirichletcondition_rhs()
