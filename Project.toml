@@ -10,5 +10,6 @@ SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
 WriteVTK = "64499a7a-5c06-52f2-abe2-ccb03c286192"
 
 [compat]
+DocStringExtensions = "^0.9"
 WriteVTK = "^1"
 julia = "^1.6"
