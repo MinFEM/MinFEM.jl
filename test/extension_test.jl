@@ -89,6 +89,8 @@ function test_norms()
     abs(pnorm(5.0, fe, mesh) - 6^(-1/5)) >  1e-15 && return false
     abs(pnorm(Inf, fe, mesh) - 0.996) >  1e-3 && return false
 
+    abs(twonorm(fh, mesh, order=2) - 3^(-1/2)) >  1e-15 && return false
+
     mesh = import_mesh("test_square_v4.msh")
     fh = evaluate_mesh_function(mesh, f)
     gh = evaluate_mesh_function(mesh, g, qdim=2)
@@ -116,8 +118,12 @@ function test_norms()
     abs(qnorm(7.0, fh, mesh, order=7) - (6/13)^(6/7)) >  1e-5 && return false
     abs(qnorm(8.0, fh, mesh, order=8) - (7/15)^(7/8)) >  1e-5 && return false
 
+    abs(twonorm(fh, mesh, order=2) - 3^(-1/2)) >  1e-15 && return false
+    abs(twonorm(gh, mesh, order=2, qdim=2) - (2/3)^(1/2)) >  1e-15 && return false
+
     mesh = import_mesh("test_cube_v4.msh")
     fh = evaluate_mesh_function(mesh, f)
+
     abs(pnorm(1.0, fh, mesh, order=1) - 1/2) >  1e-15 && return false
     abs(pnorm(2.0, fh, mesh, order=2) - 3^(-1/2)) >  1e-15 && return false
     abs(pnorm(3.0, fh, mesh, order=3) - 4^(-1/3)) >  1e-15 && return false
@@ -126,6 +132,8 @@ function test_norms()
     abs(pnorm(6.0, fh, mesh, order=6) - 7^(-1/6)) >  1e-15 && return false
     abs(pnorm(7.0, fh, mesh, order=7) - 8^(-1/7)) >  1e-15 && return false
     abs(pnorm(Inf, fh, mesh, order=1) - 1) >  1e-15 && return false
+
+    abs(twonorm(fh, mesh, order=2) - 3^(-1/2)) >  1e-15 && return false
 
     return true
 end
@@ -142,6 +150,7 @@ function test_boundary_norms()
 
     abs(pnorm_boundary(1.0, fh, mesh, boundaryElements=belems, order=1) - 2) >  1e-15 && return false
     abs(pnorm_boundary(2.0, fh, mesh, boundaryElements=belems, order=2) - (2/3+1)^(1/2)) >  1e-15 && return false
+    abs(twonorm_boundary(fh, mesh, boundaryElements=belems, order=2) - (2/3+1)^(1/2)) >  1e-15 && return false
     abs(pnorm_boundary(3.0, fh, mesh, boundaryElements=belems, order=3) - (2/4+1)^(1/3)) >  1e-15 && return false
     abs(pnorm_boundary(4.0, fh, mesh, boundaryElements=belems, order=4) - (2/5+1)^(1/4)) >  1e-15 && return false
     abs(pnorm_boundary(5.0, fh, mesh, boundaryElements=belems, order=5) - (2/6+1)^(1/5)) >  1e-15 && return false
@@ -160,6 +169,7 @@ function test_boundary_norms()
 
     abs(pnorm_boundary(1.0, gh, mesh, boundaryElements=belems, order=1, qdim=2) - 2*(2^(1/2))) >  1e-15 && return false
     abs(pnorm_boundary(2.0, gh, mesh, boundaryElements=belems, order=2, qdim=2) - (4/3+2)^(1/2)) >  1e-15 && return false
+    abs(twonorm_boundary(gh, mesh, boundaryElements=belems, order=2, qdim=2) - (4/3+2)^(1/2)) >  1e-15 && return false
     abs(pnorm_boundary(3.0, gh, mesh, boundaryElements=belems, order=3, qdim=2) - (2^(1/2)+2^(3/2))^(1/3)) >  1e-15 && return false
     abs(pnorm_boundary(4.0, gh, mesh, boundaryElements=belems, order=4, qdim=2) - (8/5+4)^(1/4)) >  1e-15 && return false
     abs(pnorm_boundary(Inf, gh, mesh, boundaryElements=belems, order=1, qdim=2) - 2^(1/2)) >  1e-15 && return false

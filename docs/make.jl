@@ -18,7 +18,7 @@ Examples = "Examples" => [
 
 Library = "Library" => [
     "Public" => "lib/public.md",
-    "Internals" => "lib/internals.md"
+    "Internal" => "lib/internal.md"
     ]
 
 License = "License" => "license.md"

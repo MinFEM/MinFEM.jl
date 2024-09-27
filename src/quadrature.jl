@@ -1,5 +1,5 @@
 """
-    gausslegendre_points(order::Int64) -> Array{Float64,1}
+$(TYPEDSIGNATURES)
     
 Returns coordinates of the Gauss-Legendre quadrature points on the default interval [-1,1] 
 for exact integration of polynomials up to the order given by a non-negative integer.
@@ -10,7 +10,7 @@ arguments or 9th order if the argument is larger.
 """
 function gausslegendre_points(order::Int64)
     if order <= 1
-        return [0]
+        return [0.0]
     elseif order <= 3
         val = 1/sqrt(3)
         return [-val, val]
@@ -31,7 +31,7 @@ function gausslegendre_points(order::Int64)
 end
 
 """
-    gausslegendre_weights(order::Int64) -> Array{Float64,1}
+$(TYPEDSIGNATURES)
     
 Returns weights of the Gauss-Legendre quadrature points on the default interval [-1,1] 
 for exact integration of polynomials up to the ordergiven by a non-negative integer.
@@ -42,9 +42,9 @@ arguments or 9th order if the argument is larger.
 """
 function gausslegendre_weights(order::Int64)
     if order <= 1
-        return [2]
+        return [2.0]
     elseif order <= 3
-        return [1, 1]
+        return [1.0, 1.0]
     elseif order <= 5
         val = 5/9
         return  [val, 8/9, val]
@@ -62,7 +62,7 @@ function gausslegendre_weights(order::Int64)
 end
 
 """
-    compute_coordinates_line(order::Int64) -> Array{Array{Float64,1},1}
+$(TYPEDSIGNATURES)
     
 Returns coordinates of the Gauss-Legendre quadrature points 
 on the 1-dimensional FEM reference element [0,1] 
@@ -83,7 +83,7 @@ function compute_coordinates_line(order::Int64)
 end
 
 """
-    compute_weights_line(order::Int64) -> Array{Float64,1}
+$(TYPEDSIGNATURES)
     
 Returns weights of the Gauss-Legendre quadrature points 
 on the 1-dimensional FEM reference element [0,1] 
@@ -105,7 +105,7 @@ function compute_weights_line(order::Int64)
 end
 
 """
-    compute_coordinates_triangle(order::Int64) -> Array{Array{Float64,1},1}
+$(TYPEDSIGNATURES)
     
 Returns coordinates of the Gauss-Legendre quadrature points 
 on the 2-dimensional FEM reference element 
@@ -129,7 +129,7 @@ function compute_coordinates_triangle(order::Int64)
 end
 
 """
-    compute_weights_triangle(order::Int64) -> Array{Float64,1}
+$(TYPEDSIGNATURES)
     
 Returns weights of the Gauss-Legendre quadrature points 
 on the 2-dimensional FEM reference element 
@@ -154,7 +154,7 @@ function compute_weights_triangle(order::Int64)
 end
 
 """
-    compute_coordinates_tetrahedron(order::Int64) -> Array{Array{Float64,1},1}
+$(TYPEDSIGNATURES)
     
 Returns coordinates of the Gauss-Legendre quadrature points 
 on the 3-dimensional FEM reference element 
@@ -182,7 +182,7 @@ function compute_coordinates_tetrahedron(order::Int64)
 end
 
 """
-    compute_weights_tetrahedron(order::Int64) -> Array{Float64,1}
+$(TYPEDSIGNATURES)
     
 Returns weights of the Gauss-Legendre quadrature points 
 on the 3-dimensional FEM reference element 
@@ -209,7 +209,7 @@ function compute_weights_tetrahedron(order::Int64)
 end
 
 """
-    parentcoordinates(x::Array{Float64,1}, id::Int64)
+$(TYPEDSIGNATURES)
 
 Maps coordinates given on the d-1 dimensional reference element to
 the coordinates on the boundary of the d dimensional reference element
@@ -252,7 +252,7 @@ function parentcoordinates(x::Array{Float64,1}, id::Int64)
 end
 
 """
-    quadrature_points(d::Int64, order::Int64) -> Array{Array{Float64,1},1}
+$(TYPEDSIGNATURES)
     
 Returns coordinates of the Gauss-Legendre quadrature points 
 on the d-dimensional FEM reference element 
@@ -299,7 +299,7 @@ function quadrature_points(d::Int64, order::Int64)
 end
 
 """
-    quadrature_points(mesh::Mesh, order::Int64) -> Array{Array{Float64,1},1}
+$(TYPEDSIGNATURES)
     
 Returns global coordinates of the Gauss-Legendre quadrature points 
 on each finite element in the given mesh
@@ -323,7 +323,7 @@ function quadrature_points(mesh::Mesh, order::Int64)
 end
 
 """
-    quadrature_points(element::Int64, mesh::Mesh, order::Int64) -> Array{Array{Float64,1},1}
+$(TYPEDSIGNATURES)
     
 Returns global coordinates of the Gauss-Legendre quadrature points 
 on a specified element in the given mesh
@@ -345,7 +345,7 @@ function quadrature_points(element::Int64, mesh::Mesh, order::Int64)
 end
 
 """
-    quadrature_points_boundary(d::Int64, order::Int64) -> Array{Array{Float64,1},1}
+$(TYPEDSIGNATURES)
     
 Returns coordinates of the Gauss-Legendre quadrature points 
 on the (d-1)-dimensional FEM reference element 
@@ -359,7 +359,7 @@ end
     quadrature_points_boundary(
         mesh::Mesh,
         order::Int64;
-        boundaryElements::Set{Int64}=Set{Int64}()
+        boundaryElements::Set{Int64} = Set{Int64}()
     )-> Array{Array{Float64,1},1}
     
 Returns global coordinates of the Gauss-Legendre quadrature points 
@@ -369,7 +369,7 @@ for exact integration of polynomials up to the given order.
 function quadrature_points_boundary(
     mesh::Mesh,
     order::Int64;
-    boundaryElements::Set{Int64}=Set{Int64}()
+    boundaryElements::Set{Int64} = Set{Int64}()
 )
     elements = 1:mesh.nboundelems
     if !isempty(boundaryElements)
@@ -395,8 +395,7 @@ function quadrature_points_boundary(
 end
 
 """
-    quadrature_points_boundary(element::Int64, mesh::Mesh, order::Int64)
-        -> Array{Array{Float64,1},1}
+$(TYPEDSIGNATURES)
     
 Returns global coordinates of the Gauss-Legendre quadrature points 
 on a specified boundary element in the given mesh
@@ -420,7 +419,7 @@ function quadrature_points_boundary(element::Int64, mesh::Mesh, order::Int64)
 end
 
 """
-    quadrature_weights(d::Int64, order::Int64) -> Array{Float64,1}
+$(TYPEDSIGNATURES)
     
 Returns weights of the Gauss-Legendre quadrature points 
 on the d-dimensional FEM reference element 
@@ -467,7 +466,7 @@ function quadrature_weights(d::Int64, order::Int64)
 end
 
 """
-    quadrature_weights_boundary(d::Int64, order::Int64) -> Array{Float64,1}
+$(TYPEDSIGNATURES)
     
 Returns weights of the Gauss-Legendre quadrature points 
 on the (d-1)-dimensional FEM reference element 
@@ -478,7 +477,7 @@ function quadrature_weights_boundary(d::Int64, order::Int64)
 end
 
 """
-    quadrature_order(d::Int64, n::Int64) -> Int64
+$(TYPEDSIGNATURES)
     
 Returns highest quadrature order archived by using n points in d dimensions.
 """
@@ -487,12 +486,20 @@ function quadrature_order(d::Int64, n::Int64)
 end
 
 """
-    integral_over_reference_element(f::Function, d::Int64;order::Int64=1) -> Float64
+    integral_over_reference_element(
+        f::Function,
+        d::Int64;
+        order::Int64 = 1
+    ) -> Float64
     
 Returns integral of function f over the d-dimensional FEM reference element 
 computed with Gauss-Legendre quadrature exact at least for polynomials up to given order. 
 """
-function integral_over_reference_element(f::Function, d::Int64; order::Int64=1)
+function integral_over_reference_element(
+    f::Function,
+    d::Int64;
+    order::Int64 = 1
+)
     x = quadrature_points(d, order)
     w = quadrature_weights(d, order)
 
@@ -506,7 +513,7 @@ end
         region::Set{Int64} = Set{Int64}(),
         order::Int64 = 1, 
         qdim::Int64 = 1
-    )
+    ) -> Vector{Float64}
 
 Returns vector of function f evaluated at each elements quadrature points 
 of the given mesh for the specified order.
@@ -550,6 +557,19 @@ function evaluate_quadrature_function(
     return v
 end
 
+"""
+    evaluate_quadrature_function(
+        mesh::Mesh,
+        f::Function,
+        region::Set{Domain};
+        order::Int64 = 1, 
+        qdim::Int64 = 1
+    ) -> Vector{Float64}
+
+Same as previous $(FUNCTIONNAME)(...) but takes `Set{Domain}` as mandatory argument
+for the relevant region, which replaces the keyword argument using `Set{Int64}`.
+Extracts nodes from the domain and then passes them to the base function. 
+"""
 function evaluate_quadrature_function(
     mesh::Mesh,
     f::Function,
@@ -573,17 +593,10 @@ end
         region::Set{Int64} = Set{Int64}(),
         order::Int64 = 1, 
         qdim::Int64 = 1 
-    )
-    evaluate_quadrature_function_boundary(
-        mesh::Mesh,
-        f::Function,
-        region::Set{Boundary};
-        order::Int64 = 1, 
-        qdim::Int64 = 1
-    )
+    ) -> Vector{Float64}
 
-Returns vector of function f evaluated at each boundary elements quadrature points 
-of the given mesh for the specified order.
+Returns vector of function f with qdim components evaluated at each or specified boundary
+elements quadrature points of the given mesh for the specified order.
 """
 function evaluate_quadrature_function_boundary(
     mesh::Mesh,
@@ -624,6 +637,19 @@ function evaluate_quadrature_function_boundary(
     return v
 end
 
+"""
+    evaluate_quadrature_function_boundary(
+        mesh::Mesh,
+        f::Function,
+        region::Set{Boundary};
+        order::Int64 = 1, 
+        qdim::Int64 = 1
+    ) -> Vector{Float64}
+
+Same as previous $(FUNCTIONNAME)(...) but takes `Set{Boundary}` as mandatory argument
+for the relevant region, which replaces the keyword argument using `Set{Int64}`.
+Extracts elements from the boundary and then passes them to the base function. 
+"""
 function evaluate_quadrature_function_boundary(
     mesh::Mesh,
     f::Function,

@@ -26,10 +26,10 @@ function test_output()
     end
     mkpath(testDirPath)
 
-    write_to_txt(fh11, mesh1, testDirPath * "/test_f11.txt"; qdim=1)
-    write_to_txt(fh21, mesh2, testDirPath * "/test_f21.txt"; qdim=1)
+    write_to_txt(fh11, mesh1, testDirPath * "/test_f11"; qdim=1)
+    write_to_txt(fh21, mesh2, testDirPath * "/test_f21"; qdim=1)
     write_to_txt(fh22, mesh2, testDirPath * "/test_f22.txt"; qdim=2)
-    write_to_txt(fh31, mesh3, testDirPath * "/test_f31.txt"; qdim=1)
+    write_to_txt(fh31, mesh3, testDirPath * "/test_f31"; qdim=1)
     write_to_txt(fh32, mesh3, testDirPath * "/test_f32.txt"; qdim=2)
     write_to_txt(fh33, mesh3, testDirPath * "/test_f33.txt"; qdim=3)
 

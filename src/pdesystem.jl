@@ -1,14 +1,17 @@
 """
-    PDESystem
+$(TYPEDEF)
 
 Structure holding all information to describe simple PDEs 
 with Dirichlet boundary conditions.
+
+# Fields
+$(TYPEDFIELDS)
 """
 mutable struct PDESystem
-    "stiffness matrix"
+    "Stiffness matrix"
     A::SparseMatrixCSC{Float64,Int64}
 
-    "load vector"
+    "Load vector"
     b::Vector{Float64}
 
     "Dirichlet boundary values"
@@ -17,27 +20,32 @@ mutable struct PDESystem
     "Dirichlet nodes"
     DI::Set{Int64}
 
-    "dimension of vector-valued state"
+    "Components of vector-valued state"
     qdim::Int64
 
-    "system matrix factorization"
+    "System matrix factorization"
     Factors::Any
 
-    "system of stiffness matrix and Dirichlet conditinons"
+    "System of stiffness matrix and Dirichlet conditinons"
     SystemMatrix::SparseMatrixCSC{Float64,Int64}
 
     "Dirichlet projection matrix"
     B::SparseMatrixCSC{Float64,Int64}
 
-    "solution vector"
+    "Solution vector"
     state::Vector{Float64}
 
-    "rhs vector with source term and dirichlet conditions"
+    "Right hand side vector with source term and dirichlet conditions"
     rhs::Vector{Float64}
 
 end
 
-PDESystem(;
+"""
+$(TYPEDSIGNATURES)
+
+Constructor for [PDESystem](@ref). Allows to specify all fields by keyword arguments.
+"""
+function PDESystem(;
     A = spzeros(0,0),
     b = [],
     bc = [],
@@ -48,10 +56,12 @@ PDESystem(;
     B = spzeros(0,0),
     state = [],
     rhs = []
-) = PDESystem(A, b, bc, DI, qdim, Factors, SystemMatrix, B, state, rhs)
+) 
+    return PDESystem(A, b, bc, DI, qdim, Factors, SystemMatrix, B, state, rhs)
+end
 
 """
-    assemble!(S::PDESystem)
+$(TYPEDSIGNATURES)
 
 If the system has not been used before, sets up the system matrix 
 with multipliers for Dirichlet conditions and factorizes it.
@@ -74,9 +84,9 @@ function assemble!(S::PDESystem)
 end
 
 """
-    refresh!(S::PDESystem)
+$(TYPEDSIGNATURES)
 
-Recomputes the factorization of the stiffness matrix using `assemble!()`.
+Recomputes the factorization of the stiffness matrix using [assemble!](@ref).
 """
 function refresh!(S::PDESystem)
     S.Factors = []
@@ -84,13 +94,14 @@ function refresh!(S::PDESystem)
 end
 
 """
-    solve!(S::PDESystem)
+$(TYPEDSIGNATURES)
 
-First tries to set up the system matrix with multipliers for Dirichlet conditions.
+First tries to [assemble!](@ref) the system matrix with multipliers
+for Dirichlet conditions.
 If the system has already been used before, this step is skipped.
 This is determined depending on an existing factorization of the system matrix.
 If the stiffness matrix or Dirichlet conditions have changes, 
-one should invole refresh() first.
+one should invole [refresh!](@ref) first.
 Finally the system is solved via matrix factorization.
 """
 function solve!(S::PDESystem)

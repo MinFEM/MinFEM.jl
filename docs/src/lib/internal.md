@@ -13,7 +13,7 @@ See the [Public](public.md) page of the library for the documentation of the pub
 ## Contents
 
 ```@contents
-Pages = ["internals.md"]
+Pages = ["internal.md"]
 Depth = 2
 ```
 
@@ -43,13 +43,13 @@ parentcoordinates
 import_mesh1
 import_mesh2
 import_mesh4
-getDimFromGMSHElementType
-getGMSHElementTypeFromDim
-getParentBoundary
+gmsh_dimfromtype
+gmsh_typefromdim
+parentboundary
+sort_boundaryelement
 ```
 
 ## Mesh Utility
-
 ```@docs
 base_jacobian
 circleratio
@@ -58,14 +58,13 @@ circleratio
 ## FEM Utility
 
 ```@docs
-stressTensor
-strainTensor
+stress_tensor
+strain_tensor
 ```
 
 ## Index
 
 ```@index
-Pages = ["internals.md"]
-Module = ["MinFEM"]
+Pages = ["internal.md"]
 Order = [:type, :function]
 ```
