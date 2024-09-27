@@ -1,25 +1,28 @@
 """
-    Region
+$(TYPEDEF)
 
-Abstract type for structs specifing regions of a domain, i.e. mesh.
+Abstract supertype for structs specifing regions of a domain, i.e. mesh.
 Subtypes should contain at least Name, Nodes and Elements.
 """
 abstract type Region end
 
 """
-    Boundary
+$(TYPEDEF)
 
 Structure holding the name and sets of node and edge indices
 for one particular physical boundary.
+
+# Fields
+$(TYPEDFIELDS)
 """
 mutable struct Boundary <: Region
-    "unique physical name"
+    "Unique physical name"
     Name::String
     
-    "list of node indices"
+    "List of node indices"
     Nodes::Set{Int64}
     
-    "list of element indices"
+    "List of element indices"
     Elements::Set{Int64}
 end
 
@@ -27,35 +30,41 @@ Base.:(==)(a::Boundary, b::Boundary) = a.Nodes == b.Nodes &&
                                         a.Elements == b.Elements
 
 """
-    Domain
+$(TYPEDEF)
 
 Type holding the name and the set of element indices
 for one particular physical domain.
+
+# Fields
+$(TYPEDFIELDS)
 """
 mutable struct Domain <: Region
-    "unique physical name"
+    "Unique physical name"
     Name::String
 
-    "list of node indices"
+    "List of node indices"
     Nodes::Set{Int64}
 
-    "list of element indices"
+    "List of element indices"
     Elements::Set{Int64}
 end
 
 Base.:(==)(a::Domain, b::Domain) = a.Elements == b.Elements
 
 """
-    Entity
+$(TYPEDEF)
 
 Type holding the associated physical tag and the set of elements
 for one gmsh elementary entity.
+
+# Fields
+$(TYPEDFIELDS)
 """
 mutable struct Entity
-    "unique physical id"
+    "Unique physical id"
     PhysicalTag::Int64
     
-    "list of element indices"
+    "List of element indices"
     Elements::Set{Int64}
 end
 
@@ -63,45 +72,48 @@ Base.:(==)(a::Entity, b::Entity) = a.PhysicalTag == b.PhysicalTag &&
                                     a.Elements == b.Elements
 
 """
-    Mesh
+$(TYPEDEF)
 
 Type for a triangular finite element mesh with volume and boundary markers.
+
+# Fields
+$(TYPEDFIELDS)
 """
 mutable struct Mesh
-    "dimension"
+    "Spatial dimension"
     d::Int64
 
-    "number of nodes"
+    "Number of nodes"
     nnodes::Int64
 
-    "number of elements"
+    "Number of elements"
     nelems::Int64
 
-    "number of physical (marked) boundary elements"
+    "Number of physical (marked) boundary elements"
     nboundelems::Int64
 
-    "list of node coordinates"
+    "List of node coordinates"
     Nodes::Array{Array{Float64,1},1}
 
-    "list of element node indices"
+    "List of element node indices"
     Elements::Array{Array{Int64,1},1}
 
-    "list of boundary element node indices"
+    "List of boundary element node indices"
     BoundaryElements::Array{Array{Int64,1},1}
 
-    "list of parent elements to boundary elements"
+    "List of parent elements to boundary elements"
     ParentElements::Array{Int64,1}
 
-    "list of parent element local boundary to boundary elements"
+    "List of parent element local boundary to boundary elements"
     ParentBoundaries::Array{Int64,1}
 
-    "dictionary of marked boundaries"
+    "Dictionary of marked boundaries"
     Boundaries::Dict{Int64,Boundary}
 
-    "dictionary of marked volume regions"
+    "Dictionary of marked volume regions"
     Domains::Dict{Int64,Domain}
 
-    "dictionary of physical entities"
+    "Dictionary of physical entities"
     Entities::Array{Dict{Int64,Entity},1}
 end
 
@@ -117,12 +129,12 @@ Base.:(==)(a::Mesh, b::Mesh) = a.d == b.d &&
                                 a.Entities == b.Entities
 
 """
-    unit_interval(n::Int64) -> Mesh
+$(TYPEDSIGNATURES)
 
 Returns an n nodes quasi-uniform mesh for the 1D unit interval.
 The left boundary node is denoted by 1001 and the right one by 1002.
 """
-function unit_interval(n::Int64)
+function unit_interval(n::Int64) :: Mesh
     if (n < 2)
         n = 2
     end
@@ -177,12 +189,12 @@ function unit_interval(n::Int64)
 end
 
 """
-    unit_square(n::Int64) -> Mesh
+$(TYPEDSIGNATURES)
 
 Returns a n-by-n quasi-uniform mesh for the 2D unit square.
 The boundary indices are given in the order bottom, top, left, right from 1001 to 1004.
 """
-function unit_square(n::Int64)
+function unit_square(n::Int64) :: Mesh
     if (n < 2)
         n = 2
     end
@@ -302,12 +314,13 @@ function unit_square(n::Int64)
                 Boundaries, Domains, Entities)
 end
 
+
 """
-    import_mesh(fileName::String) -> Mesh
+$(TYPEDSIGNATURES)
 
 Returns a mesh imported from a gmsh file of version v1, v2 or v4.
 """
-function import_mesh(fileName::String)
+function import_mesh(fileName::String) :: Mesh
     f = open(fileName)
 
     v1::Bool = false
@@ -345,7 +358,7 @@ function import_mesh(fileName::String)
 end
 
 """
-    import_mesh1(f::IOStream) -> Mesh
+$(TYPEDSIGNATURES)
 
 Returns mesh by continuing import process started by `import_mesh()`
 for gmsh files of version 1. 
@@ -370,7 +383,7 @@ function import_mesh1(f::IOStream)
         l = readline(f)
         a = split(l, " ")
 
-        elemDim = getDimFromGMSHElementType(parse(Int64, a[2]))
+        elemDim = gmsh_dimfromtype(parse(Int64, a[2]))
         elemTag = parse(Int64, a[3])
         elemEntitity = parse(Int64, a[4])
         elemNodes = parse(Int64, a[5])
@@ -420,7 +433,7 @@ function import_mesh1(f::IOStream)
         _boundarynodes = copy(el[4:end])
 
         ParentElements[i] = findfirst(x -> issubset(_boundarynodes, x), Elements)
-        ParentBoundaries[i] = getParentBoundary(
+        ParentBoundaries[i] = parentboundary(
             _boundarynodes, 
             Elements[ParentElements[i]]
         )
@@ -460,7 +473,7 @@ function import_mesh1(f::IOStream)
   end
 
   """
-    import_mesh2(f::IOStream) -> Mesh
+$(TYPEDSIGNATURES)
 
 Returns mesh by continuing import process started by `import_mesh()`
 for gmsh files of version 2. 
@@ -510,7 +523,7 @@ function import_mesh2(f::IOStream)
         l = readline(f)
         a = split(l, " ")
 
-        elemDim = getDimFromGMSHElementType(parse(Int64, a[2]))
+        elemDim = gmsh_dimfromtype(parse(Int64, a[2]))
         val = parse.(Int64, a[3:(6+elemDim)])
         append!(_Elements[elemDim+1], [val])
     end
@@ -564,7 +577,7 @@ function import_mesh2(f::IOStream)
         _boundarynodes = copy(el[4:end])
 
         ParentElements[i] = findfirst(x -> issubset(_boundarynodes, x), Elements)
-        ParentBoundaries[i] = getParentBoundary(
+        ParentBoundaries[i] = parentboundary(
             _boundarynodes, 
             Elements[ParentElements[i]]
         )
@@ -605,7 +618,7 @@ function import_mesh2(f::IOStream)
 end
 
 """
-    import_mesh4(f::IOStream) -> Mesh
+$(TYPEDSIGNATURES)
 
 Returns mesh by continuing import process started by `import_mesh()` 
 for gmsh files of version 4. 
@@ -713,8 +726,8 @@ function import_mesh4(f::IOStream)
 
     _Elements = Array{Array{Int64,1},1}()
     _BoundaryElements = Array{Array{Int64,1},1}()
-    boundaryElementType = getGMSHElementTypeFromDim(d-1)
-    elementType = getGMSHElementTypeFromDim(d)
+    boundaryElementType = gmsh_typefromdim(d-1)
+    elementType = gmsh_typefromdim(d)
     for i = 1:blocks
         l = readline(f)
         a = split(l, " ")
@@ -768,7 +781,7 @@ function import_mesh4(f::IOStream)
         _boundarynodes = [NodeNumbering[n] for n in el[4:end]]
 
         ParentElements[i] = findfirst(x -> issubset(_boundarynodes, x), Elements)
-        ParentBoundaries[i] = getParentBoundary(
+        ParentBoundaries[i] = parentboundary(
             _boundarynodes, 
             Elements[ParentElements[i]]
         )
@@ -807,7 +820,7 @@ function import_mesh4(f::IOStream)
 end
 
 """
-    export_mesh(mesh::Mesh, fileName::String)
+$(TYPEDSIGNATURES)
 
 Exports a mesh to a gmsh file of version v2.
 """
@@ -864,7 +877,7 @@ function export_mesh(mesh::Mesh, fileName::String)
                 else
                     elem = mesh.Elements[el]
                 end
-                gmshElemType = getGMSHElementTypeFromDim(i-1) 
+                gmshElemType = gmsh_typefromdim(i-1) 
                 write(f, "$k $gmshElemType 2 $(val.PhysicalTag) $key")
                 for j in eachindex(elem)
                     write(f, " $(elem[j])")
@@ -880,11 +893,11 @@ function export_mesh(mesh::Mesh, fileName::String)
 end
 
 """
-    getGMSHElementTypeFromDim(d::Int64) -> Int64
+$(TYPEDSIGNATURES)
     
 Returns gmsh elementary element type for given dimension.
 """
-function getGMSHElementTypeFromDim(d::Int64)
+function gmsh_typefromdim(d::Int64)
     if d == 0
         return 15 # 1-node point
     elseif d == 1
@@ -900,11 +913,11 @@ function getGMSHElementTypeFromDim(d::Int64)
 end
 
 """
-    getDimFromGMSHElementType(t::Int64) -> Int64
+$(TYPEDSIGNATURES)
     
 Returns dimension of a gmsh elementary entitiy type.
 """
-function getDimFromGMSHElementType(t::Int64)
+function gmsh_dimfromtype(t::Int64)
     if t == 15
         return 0 # 1-node point
     elseif t == 1
@@ -921,11 +934,11 @@ function getDimFromGMSHElementType(t::Int64)
 end
 
 """
-    getParentBoundary(nodes::Vector{Int64}, parentNodes::Vector{Int64}) -> Int64
+$(TYPEDSIGNATURES)
     
 Returns index of the boundary of the parent element spanned by the nodes.
 """
-function getParentBoundary(nodes::Vector{Int64}, parentNodes::Vector{Int64})
+function parentboundary(nodes::Vector{Int64}, parentNodes::Vector{Int64})
     dim = length(nodes)
 
     localindex = zeros(Int64, dim)
@@ -960,9 +973,15 @@ function getParentBoundary(nodes::Vector{Int64}, parentNodes::Vector{Int64})
     end
 end
 
+"""
+$(TYPEDSIGNATURES)
+    
+Sort nodes in boundary element corresponding to the order they occur in the parent element.
+Can be used to determine orientation of the edge.
+"""
 function sort_boundaryelement(nodes::Array{Int64}, parent::Array{Int64})
     sorted = Array{Int64,1}(undef,length(nodes))
-    k=1
+    k = 1
     for node in parent
         if node in nodes
             sorted[k] = node
@@ -974,16 +993,16 @@ function sort_boundaryelement(nodes::Array{Int64}, parent::Array{Int64})
 end
 
 """
-    update_mesh!(mesh::Mesh, c::Array{Array{Float64,1},1})
+$(TYPEDSIGNATURES)
     
 Updates given mesh by shifting all nodes to new coordinates c.
 """
-function update_mesh!(mesh::Mesh, v::Array{Array{Float64,1},1})
-    if length(v) != mesh.nnodes
+function update_mesh!(mesh::Mesh, c::Array{Array{Float64,1},1})
+    if length(c) != mesh.nnodes
         throw(ArgumentError("Deformation vector does not have matching length."))
     end
 
-    mesh.Nodes = deepcopy(v)
+    mesh.Nodes = deepcopy(c)
 end
 
 """
@@ -1014,7 +1033,7 @@ function deform_mesh(mesh::Mesh, v::AbstractVector{Float64}; t::Float64=1.0)
 end
 
 """
-    select_boundaries(mesh::Mesh, args...) -> Set{Boundary}
+$(TYPEDSIGNATURES)
 
 Returns set of all or specified physical boundaries of the mesh.
 """
@@ -1039,7 +1058,7 @@ function select_boundaries(mesh::Mesh, args...)
 end
 
 """
-    select_domains(mesh::Mesh, args...) -> Set{Domain}
+ $(TYPEDSIGNATURES)
 
 Returns set of all or specified physical boundaries of the mesh.
 """
@@ -1064,10 +1083,9 @@ function select_domains(mesh::Mesh, args...)
 end
 
 """
-    extract_nodes(boundaries::Set{Boundary}) -> Set{Int64}
-    extract_nodes(domains::Set{Domain}) -> Set{Int64}
+$(TYPEDSIGNATURES)
 
-Returns set of node ids in set of physical regions.
+Returns set of node ids in set of physical boundaries.
 """
 function extract_nodes(boundaries::Set{Boundary})
     nodes = Set{Int64}()
@@ -1077,6 +1095,11 @@ function extract_nodes(boundaries::Set{Boundary})
     return nodes
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Returns set of node ids in set of physical domains.
+"""
 function extract_nodes(domains::Set{Domain})
     nodes = Set{Int64}()
     for domain in domains
@@ -1086,10 +1109,9 @@ function extract_nodes(domains::Set{Domain})
 end
 
 """
-    extract_elements(boundaries::Set{Boundary}) -> Set{Int64}
-    extract_elements(domains::Set{Domain}) -> Set{Int64}
+$(TYPEDSIGNATURES)
 
-Returns set of boundary element ids in set of physical regions.
+Returns set of boundary element ids in set of physical boundaries.
 """
 function extract_elements(boundaries::Set{Boundary})
     elements = Set{Int64}()
@@ -1099,6 +1121,11 @@ function extract_elements(boundaries::Set{Boundary})
     return elements
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Returns set of boundary element ids in set of physical domains.
+"""
 function extract_elements(domains::Set{Domain})
     elements = Set{Int64}()
     for domain in domains
@@ -1108,10 +1135,12 @@ function extract_elements(domains::Set{Domain})
 end
 
 """
-    evaluate_mesh_function(mesh::Mesh, f::Function;
-                            region=Set{Int64}(), qdim=1) -> Vector{Float64}
-    evaluate_mesh_function(mesh::Mesh, f::Function, region::Set{Boundary};
-                            qdim = 1) -> Vector{Float64}
+    evaluate_mesh_function(
+        mesh::Mesh,
+        f::Function,
+        region::Set{Boundary};
+        qdim::Int64 = 1
+    ) -> Vector{Float64}
 
 Returns evaluation of a given function object f on all or specified nodes of the mesh.
 Can be either called with set of physical boundaries or directly with a set of nodes 
@@ -1119,18 +1148,9 @@ when given with keyword argument region.
 """
 function evaluate_mesh_function(
     mesh::Mesh,
-    f::Function,
-    region::Set{Boundary}; 
-    qdim::Int64=1
-)
-    evaluate_mesh_function(mesh, f, region = extract_nodes(region), qdim = qdim)
-end
-
-function evaluate_mesh_function(
-    mesh::Mesh,
     f::Function; 
-    region::Set{Int64}=Set{Int64}(),
-    qdim::Int64=1
+    region::Set{Int64} = Set{Int64}(),
+    qdim::Int64 = 1
 )
     v = zeros(Float64, qdim * mesh.nnodes)
     nodes = 1:mesh.nnodes
@@ -1153,12 +1173,77 @@ function evaluate_mesh_function(
 end
 
 """
-    base_jacobian(coords::Vector{Vector{Float64}}) -> Matrix{Float64}
-    base_jacobian(mesh::Mesh, nodes::Array{Int64,1}) -> Matrix{Float64}
-    base_jacobian(mesh::Mesh, element::Int64) -> Matrix{Float64}
+    evaluate_mesh_function(
+        mesh::Mesh,
+        f::Function,
+        region::Set{Boundary};
+        qdim::Int64 = 1
+    ) -> Vector{Float64}
+
+Same as previous $(FUNCTIONNAME)(...) but takes `Set{Boundary}` as mandatory argument
+for the relevant region, which replaces the keyword argument using `Set{Int64}`.
+Extracts nodes from the boundary and then passes them to the base function. 
+"""
+function evaluate_mesh_function(
+    mesh::Mesh,
+    f::Function,
+    region::Set{Boundary};
+    qdim::Int64 = 1
+)
+    evaluate_mesh_function(mesh, f, region = extract_nodes(region), qdim = qdim)
+end
+
+"""
+    evaluate_function(
+        f::Vector{Float64},
+        node::Int64;
+        qdim::Int64 = 1
+    ) -> Vector{Float64}
+
+Evaluates discrete function give as FEM coefficient vector at a given node.
+Resulting vector has the lenght of the number of components of f. 
+"""
+function evaluate_function(
+    f::Vector{Float64},
+    node::Int64;
+    qdim::Int64 = 1
+)
+    return f[qdim*(node-1)+1 : qdim*node]
+end
+
+"""
+    evaluate_function(
+        f::Vector{Float64},
+        region::Set{Int64};
+        qdim::Int64 = 1
+    ) -> Vector{Float64}
+
+Evaluates discrete function give as FEM coefficient vector at all nodes in a given region.
+Resulting vector has the lenght of the full coefficient vector with the entries
+corresponding to non-evaluated nodes being zero. 
+"""
+function evaluate_function(
+    f::Vector{Float64},
+    region::Set{Int64};
+    qdim::Int64 = 1
+)
+    l = length(f)
+    v = zeros(Float64, l)
+
+    for i in region
+        v[qdim*(i-1)+1 : qdim*i] = f[qdim*(i-1)+1 : qdim*i]
+    end
+
+    return v
+end
+
+"""
+$(TYPEDSIGNATURES)
     
 Returns transformation matrix (jacobian) of the mapping 
-from the FEM reference element to an element spanned by the given nodes.
+from the FEM reference element to an element spanned by nodes at the given coordinates.
+
+Commonly the coordinates correspond to an element in a mesh, but not necessarily have to.
 """
 function base_jacobian(coords::Vector{Vector{Float64}})
     d = length(coords) - 1
@@ -1171,42 +1256,74 @@ function base_jacobian(coords::Vector{Vector{Float64}})
     return J
 end
 
+"""
+$(TYPEDSIGNATURES)
+    
+Same as previous `$(FUNCTIONNAME)(...)`, but takes a mesh and set of nodes as arguments.
+Extracts coordinates from the mesh and passes them to the base function.
+
+Commonly the coordinates correspond to one element in a mesh, but not necessarily have to.
+"""
 function base_jacobian(mesh::Mesh, nodes::Array{Int64,1})
     return base_jacobian(mesh.Nodes[nodes])
 end
 
+"""
+$(TYPEDSIGNATURES)
+    
+Same as previous `$(FUNCTIONNAME)(...)`, but takes a mesh and an element id as arguments.
+Extracts coordinates of the support nodes from the mesh
+and passes them to the base function.
+"""
 function base_jacobian(mesh::Mesh, element::Int64)
     return base_jacobian(mesh.Nodes[mesh.Elements[element]])
 end
 
 """
-    jacobian(coords::Vector{Vector{Float64}}) -> Float64, Matrix{Float64}
-    jacobian(mesh::Mesh, nodes::Array{Int64,1}) -> Float64, Matrix{Float64}
-    jacobian(mesh::Mesh, element::Int64) -> Float64, Matrix{Float64}
+$(TYPEDSIGNATURES)
     
 Returns determinant (i.e. element weight) and inverse transposed of the jacobian 
-of an FEM element spanned by the given nodes.
+of an FEM element spanned by nodes at the given coordinates.
+
+Commonly the coordinates correspond to one element in a mesh, but not necessarily have to.
 """
-function jacobian(coords::Vector{Vector{Float64}})
+function jacobian(
+    coords::Vector{Vector{Float64}}
+) :: Tuple{Float64, AbstractMatrix{Float64}}
     J = base_jacobian(coords)
     return det(J), inv(J)'
 end
 
+"""
+$(TYPEDSIGNATURES)
+    
+Same as previous `$(FUNCTIONNAME)(...)`, but takes a mesh and set of nodes as arguments.
+Extracts coordinates from the mesh and passes them to the base function.
+
+Commonly the coordinates correspond to one element in a mesh, but not necessarily have to.
+"""
 function jacobian(mesh::Mesh, nodes::Array{Int64,1})
     return jacobian(mesh.Nodes[nodes])
 end
 
+"""
+$(TYPEDSIGNATURES)
+    
+Same as previous `$(FUNCTIONNAME)(...)`, but takes a mesh and an element id as arguments.
+Extracts coordinates of the support nodes from the mesh
+and passes them to the base function.
+"""
 function jacobian(mesh::Mesh, element::Int64)
     return jacobian(mesh.Nodes[mesh.Elements[element]])
 end
 
 """
-    jacobian_boundary(coords::Vector{Vector{Float64}}) -> Float64
-    jacobian_boundary(mesh::Mesh, nodes::Array{Int64,1}) -> Float64
-    jacobian_boundary(mesh::Mesh, element::Int64) -> Float64
+$(TYPEDSIGNATURES)
     
-Returns determinant of the jacobian (i.e. element weight) 
-of an FEM boundary element (in d-1 dimensions) spanned by the given nodes.
+Returns determinant of the jacobian (i.e. element weight) of an FEM boundary element
+(in d-1 dimensions) spanned spanned by nodes at the given coordinates.
+
+Commonly the coordinates correspond to an element in a mesh, but not necessarily have to.
 """
 function jacobian_boundary(coords::Vector{Vector{Float64}})
     d = length(coords)
@@ -1220,21 +1337,52 @@ function jacobian_boundary(coords::Vector{Vector{Float64}})
     end
 end
 
+"""
+$(TYPEDSIGNATURES)
+    
+Same as previous `$(FUNCTIONNAME)(...)`, but takes a mesh and set of nodes as arguments.
+Extracts coordinates from the mesh and passes them to the base function.
+
+Commonly the coordinates correspond to one element in a mesh, but not necessarily have to.
+"""
 function jacobian_boundary(mesh::Mesh, nodes::Array{Int64,1})
     return jacobian_boundary(mesh.Nodes[nodes])
 end
 
+"""
+$(TYPEDSIGNATURES)
+    
+Same as previous `$(FUNCTIONNAME)(...)`, but takes a mesh and an element id as arguments.
+Extracts coordinates of the support nodes from the mesh
+and passes them to the base function.
+"""
 function jacobian_boundary(mesh::Mesh, element::Int64)
     return jacobian_boundary(mesh.Nodes[mesh.BoundaryElements[element]])
 end
 
 """
-    elementvolume(mesh::Mesh) -> Vector{Float64}
-    elementvolume(mesh::Mesh, element::Int64) -> Float64
-    elementvolume(d::Int64) -> Float64
+$(TYPEDSIGNATURES)
 
-Returns volume of all or one element(s) in a mesh 
-or of the d-dimensional reference element. 
+Returns volume of the d-dimensional reference element. 
+"""
+function elementvolume(d::Int64)
+    return 1 / factorial(d)
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Returns volume of the given element in the given mesh. 
+"""
+function elementvolume(mesh::Mesh, element::Int64)
+    detJ = det(base_jacobian(mesh, element))
+    return detJ * elementvolume(mesh.d)
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Returns vector of volumes of all elements in the given mesh.
 """
 function elementvolume(mesh::Mesh)
     v = zeros(mesh.nelems)
@@ -1248,21 +1396,29 @@ function elementvolume(mesh::Mesh)
     return v
 end
 
-function elementvolume(mesh::Mesh, element::Int64)
-    detJ = det(base_jacobian(mesh, element))
-    return detJ * elementvolume(mesh.d)
-end
+"""
+$(TYPEDSIGNATURES)
 
-function elementvolume(d::Int64)
-    return 1 / factorial(d)
+Returns volume of the (d-1)-dimensional boundary reference element. 
+"""
+function elementvolume_boundary(d::Int64)
+    return elementvolume(d-1)
 end
 
 """
-    elementvolume_boundary(mesh::Mesh) -> Vector{Float64}
-    elementvolume_boundary(mesh::Mesh, element::Int64) -> Float64
-    elementvolume_boundary(d::Int64) -> Float64
+$(TYPEDSIGNATURES)
 
-Returns volume of all or one boundary element(s) in a mesh. 
+Returns volume of the given boundary element in the given mesh. 
+"""
+function elementvolume_boundary(mesh::Mesh, element::Int64)
+    detJ = jacobian_boundary(mesh, element)
+    return detJ * elementvolume(mesh.d-1)
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Returns vector of volumes of all boundary elements in the given mesh.
 """
 function elementvolume_boundary(mesh::Mesh)
     v = zeros(mesh.nboundelems)
@@ -1276,22 +1432,33 @@ function elementvolume_boundary(mesh::Mesh)
     return v
 end
 
-function elementvolume_boundary(mesh::Mesh, element::Int64)
-    detJ = jacobian_boundary(mesh, element)
-    return detJ * elementvolume(mesh.d-1)
-end
+"""
+$(TYPEDSIGNATURES)
 
-function elementvolume_boundary(d::Int64)
-    return elementvolume(d-1)
+Returns barycenter vector of the d-dimensional reference element. 
+"""
+function elementbarycenter(d::Int64)
+    v = zeros(Float64, d)
+    v .= 1 / (d + 1)
+
+    return v
 end
 
 """
-    elementbarycenter(mesh::Mesh) -> Array{Array{Float64,1},1}
-    elementbarycenter(mesh::Mesh, element::Int64) -> Array{Float64,1}
-    elementbarycenter(d::Int64) -> Array{Float64,1}
+$(TYPEDSIGNATURES)
 
-Returns barycenter of all or one element(s) in a mesh 
-or of the d-dimensional reference element. 
+Returns barycenter of the given element in the given mesh. 
+"""
+function elementbarycenter(mesh::Mesh, element::Int64)
+    J = base_jacobian(mesh, element)
+    shift = mesh.Nodes[mesh.Elements[element][1]]
+    return J * elementbarycenter(mesh.d) + shift 
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Returns vector of all barycenters of all element in the given mesh. 
 """
 function elementbarycenter(mesh::Mesh)
     v = Array{Array{Float64,1},1}(undef, mesh.nelems)
@@ -1306,47 +1473,15 @@ function elementbarycenter(mesh::Mesh)
     return v
 end
 
-function elementbarycenter(mesh::Mesh, element::Int64)
-    J = base_jacobian(mesh, element)
-    shift = mesh.Nodes[mesh.Elements[element][1]]
-    return J * elementbarycenter(mesh.d) + shift 
-end
-
-function elementbarycenter(d::Int64)
-    v = zeros(Float64, d)
-    v .= 1 / (d + 1)
-
-    return v
-end
-
 """
-    elementdiameter(mesh::Mesh) -> Vector{Float64}
-    elementdiameter(mesh::Mesh, element::Int64) -> Float64
-    elementdiameter(mesh::Mesh, nodes::Vector{Int64}) -> Float64
-    elementdiameter(nodes::Vector{Vector{Float64}}) -> Float64
+$(TYPEDSIGNATURES)
+    
+Returns diameter (i.e. longest edge length) of an element
+spanned by nodes at the given coordinates.
 
-Returns diameter (i.e. longest edge length) of all or one element(s) in a mesh 
-or of an element spanned by the given nodes or coordinates
-(not necessarily of full dimension).
+The coordinates do not necessarily have to span an element of full dimension.
+Could also be used for boundary elements.
 """
-function elementdiameter(mesh::Mesh)
-    v = zeros(mesh.nelems)
-
-    for el in eachindex(v)
-        v[el] = elementdiameter(mesh, el)
-    end
-
-    return v
-end
-
-function elementdiameter(mesh::Mesh, element::Int64)
-    return elementdiameter(mesh, mesh.Elements[element])
-end
-
-function elementdiameter(mesh::Mesh, nodes::Vector{Int64})
-    return elementdiameter(mesh.Nodes[nodes])
-end
-
 function elementdiameter(coords::Vector{Vector{Float64}})
     max = 0
     for i = length(coords):-1:2
@@ -1362,10 +1497,95 @@ function elementdiameter(coords::Vector{Vector{Float64}})
 end
 
 """
-    elementdiameter_boundary(mesh::Mesh) -> Vector{Float64}
-    elementdiameter_boundary(mesh::Mesh, element::Int64) -> Float64
+$(TYPEDSIGNATURES)
+    
+Same as previous `$(FUNCTIONNAME)(...)`, but takes a mesh and set of nodes as arguments.
+Extracts coordinates from the mesh and passes them to the base function.
 
-Returns diameter (i.e. longest edge length) of all or one boundary element(s) in a mesh.
+Commonly the coordinates correspond to one (boundary) element in a mesh,
+but not necessarily have to.
+"""
+function elementdiameter(mesh::Mesh, nodes::Vector{Int64})
+    return elementdiameter(mesh.Nodes[nodes])
+end
+
+"""
+$(TYPEDSIGNATURES)
+    
+Same as previous `$(FUNCTIONNAME)(...)`, but takes a mesh and an element id
+as arguments. Extracts coordinates of the support nodes from the mesh
+and passes them to the base function.
+"""
+function elementdiameter(mesh::Mesh, element::Int64)
+    return elementdiameter(mesh, mesh.Elements[element])
+end
+
+"""
+$(TYPEDSIGNATURES)
+    
+Similar ot previous `$(FUNCTIONNAME)(...)`, but returns vector of elementdiameters for all 
+elements in the given mesh.
+"""
+function elementdiameter(mesh::Mesh)
+    v = zeros(mesh.nelems)
+
+    for el in eachindex(v)
+        v[el] = elementdiameter(mesh, el)
+    end
+
+    return v
+end
+
+"""
+$(TYPEDSIGNATURES)
+    
+Returns diameter (i.e. longest edge length) of a boundary element
+spanned by nodes at the given coordinates.
+
+Commonly the coordinates correspond to one boundary element in a mesh,
+but not necessarily have to.
+
+Since the number of nodes to span an element is not prescribed,
+the functionality is identical to `elementdiameter(args)`.
+However this function is kept for consistency and improved readability.
+"""
+function elementdiameter_boundary(coords::Vector{Vector{Float64}})
+    return elementdiameter(coords)
+end
+
+"""
+$(TYPEDSIGNATURES)
+    
+Same as previous `$(FUNCTIONNAME)(...)`, but takes a mesh and set of nodes as arguments.
+Extracts coordinates from the mesh and passes them to the base function.
+
+Commonly the coordinates correspond to one (boundary) element in a mesh,
+but not necessarily have to.
+
+Since the number of nodes to span an element is not prescribed,
+the functionality is identical to `elementdiameter(args)`.
+However this function is kept for consistency and improved readability.
+"""
+function elementdiameter_boundary(mesh::Mesh, nodes::Vector{Int64})
+    return elementdiameter_boundary(mesh.Nodes[nodes])
+end
+
+"""
+$(TYPEDSIGNATURES)
+    
+Same as previous `$(FUNCTIONNAME)(...)`, but takes a mesh and a boundary element id
+as arguments. Extracts coordinates of the support nodes from the mesh
+and passes them to the base function.
+"""
+function elementdiameter_boundary(mesh::Mesh, element::Int64)
+    return elementdiameter_boundary(mesh.Nodes[mesh.BoundaryElements[element]])
+end
+
+"""
+$(TYPEDSIGNATURES)
+    
+Similar ot previous `$(FUNCTIONNAME)(...)`, but returns vector of elementdiameters for all 
+elements in the given mesh.
 """
 function elementdiameter_boundary(mesh::Mesh)
     v = zeros(mesh.nboundelems)
@@ -1377,12 +1597,8 @@ function elementdiameter_boundary(mesh::Mesh)
     return v
 end
 
-function elementdiameter_boundary(mesh::Mesh, element::Int64)
-    return elementdiameter(mesh.Nodes[mesh.BoundaryElements[element]])
-end
-
 """
-    circleratio(coords::Array{Array{Float64,1},1})
+$(TYPEDSIGNATURES)
 
 Returns ratio of inscribed to circumscribed circle radii
 for triangular element spanned by three given coordinates.
@@ -1402,11 +1618,10 @@ function circleratio(coords::Array{Array{Float64,1},1})
 end
 
 """
-    elementratio(coords::Array{Array{Float64,1},1}) -> Float64
-    elementratio(mesh::Mesh) -> Array{Float64,1}
+$(TYPEDSIGNATURES)
 
 Returns ratio of inscribed to circumscribed circle or sphere
-for a specific element or all elements of a given mesh.
+for an element spanned by nodes at the given coordinates.
 """
 function elementratio(coords::Array{Array{Float64,1},1})
     dim = length(coords)-1
@@ -1419,6 +1634,12 @@ function elementratio(coords::Array{Array{Float64,1},1})
     end
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Same as previous `$(FUNCTIONNAME)(...)`,
+but returns vector of ratios for all elements in the given mesh.
+"""
 function elementratio(mesh::Mesh)
     ratios = zeros(mesh.nelems)
     for el=1:mesh.nelems
@@ -1429,10 +1650,9 @@ function elementratio(mesh::Mesh)
 end
 
 """
-    elementangle(coords::Array{Array{Float64,1},1}) -> Float64
-    elementangle(mesh::Mesh) -> Array{Float64,1}
+$(TYPEDSIGNATURES)
 
-Returns smallest interior angle for a specific element or all elements of a given mesh.
+Returns smallest interior angle for an element spanned by nodes at the given coordinates.
 """
 function elementangle(coords::Array{Array{Float64,1},1})
     n = length(coords)
@@ -1461,6 +1681,12 @@ function elementangle(coords::Array{Array{Float64,1},1})
     return min
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Same as previous `$(FUNCTIONNAME)(...)`,
+but returns vector of angles for all elements in the given mesh.
+"""
 function elementangle(mesh::Mesh)
     angles = zeros(mesh.nelems)
     for el=1:mesh.nelems
@@ -1471,19 +1697,69 @@ function elementangle(mesh::Mesh)
 end
 
 """
-    outernormalvector(mesh::Mesh; boundaryElements::Set{Int64}=Set{Int64}()) 
-        -> Vector{Float64}
-    outernormalvector(mesh::Mesh, boundaryElement::Int64) 
-        -> Vector{Float64}
-    outernormalvector(mesh::Mesh, boundaryElement::Int64, J::AbstractMatrix{Float64})
-        -> Vector{Float64}
-    outernormalvector(dim::Int64, ii::Int64) 
-        -> Vector{Float64}
+$(TYPEDSIGNATURES)
     
-Returns the outer normal vector at specified boundary element(s) of the boundary 
-of the mesh or at the ii-th boundary of the dim-dimensional reference element. 
+Returns the outer normal vector at the ii-th boundary of the
+dim-dimensional reference element. 
 """
-function outernormalvector(mesh::Mesh; boundaryElements::Set{Int64}=Set{Int64}())
+function outernormalvector(
+    dim::Int64,
+    ii::Int64
+)
+    if ii == dim+1
+        return ones(Float64, dim) ./ sqrt(dim)
+    else
+        eta = zeros(Float64, dim)
+        eta[dim+1-ii] = -1
+        return eta
+    end
+end
+
+"""
+$(TYPEDSIGNATURES)
+    
+Returns the outer normal vector at a boundary element of the given mesh using a
+pre-computed jacobian transformation matrix of the parent element.
+"""
+function outernormalvector(
+    mesh::Mesh,
+    boundaryElement::Int64,
+    J::AbstractMatrix{Float64}
+)
+    refNormal = outernormalvector(mesh.d, mesh.ParentBoundaries[boundaryElement])
+    
+    mesh.d == 1 && return refNormal
+
+    orth = J * refNormal
+    return orth ./ norm(orth,2)
+end
+
+"""
+$(TYPEDSIGNATURES)
+    
+Returns the outer normal vector at the given boundary element of the given mesh.
+"""
+function outernormalvector(
+    mesh::Mesh,
+    boundaryElement::Int64
+)
+    _, J = jacobian(mesh, mesh.Elements[mesh.ParentElements[boundaryElement]])
+    return outernormalvector(mesh, boundaryElement, J)
+end
+
+"""
+    outernormalvector(
+        mesh::Mesh;
+        boundaryElements::Set{Int64} = Set{Int64}()
+    ) -> Vector{Float64}
+    
+Returns coefficient vector of outer normal vectors at all or specified boundary elements
+of the given mesh.
+"""
+function outernormalvector(
+    mesh::Mesh;
+    boundaryElements::Set{Int64} = Set{Int64}()
+)
     if isempty(boundaryElements)
         boundaryElements = Set{Int64}(1 : mesh.nboundelems)
     end
@@ -1497,32 +1773,8 @@ function outernormalvector(mesh::Mesh; boundaryElements::Set{Int64}=Set{Int64}()
     return eta
 end
 
-function outernormalvector(mesh::Mesh, boundaryElement::Int64)
-    _, J = jacobian(mesh, mesh.Elements[mesh.ParentElements[boundaryElement]])
-    return outernormalvector(mesh, boundaryElement, J)
-end
-
-function outernormalvector(mesh::Mesh, boundaryElement::Int64, J::AbstractMatrix{Float64})
-    refNormal = outernormalvector(mesh.d, mesh.ParentBoundaries[boundaryElement])
-    
-    mesh.d == 1 && return refNormal
-
-    orth = J * refNormal
-    return orth ./ norm(orth,2)
-end
-
-function outernormalvector(dim::Int64, ii::Int64)
-    if ii == dim+1
-        return ones(Float64, dim) ./ sqrt(dim)
-    else
-        eta = zeros(Float64, dim)
-        eta[dim+1-ii] = -1
-        return eta
-    end
-end
-
 """
-    volume(mesh::Mesh) -> Float64
+$(TYPEDSIGNATURES)
     
 Returns the d-dimenional volume of the domain definded by the mesh. 
 """
@@ -1539,7 +1791,7 @@ function volume(mesh::Mesh)
 end
 
 """
-    barycenter(mesh::Mesh) -> Vector{Float64}
+$(TYPEDSIGNATURES)
     
 Returns the d-dimenional domain of the domain definded by the mesh. 
 """
@@ -1564,7 +1816,7 @@ function barycenter(mesh::Mesh)
 end
 
 """
-    stripwidth(mesh::Mesh) -> Float64
+$(TYPEDSIGNATURES)
 
 Return width L of a strip that the meshed domain fits into.
 """
@@ -1574,9 +1826,9 @@ function stripwidth(mesh::Mesh)
 end
 
 """
-    boundingbox(mesh::Mesh) -> Array{Float64}
+$(TYPEDSIGNATURES)
 
-Return two nodes, which span the bounding box of the mesh.
+Return two nodes which span the bounding box of the mesh.
 """
 function boundingbox(mesh::Mesh)
     min = Inf .* ones(mesh.d)

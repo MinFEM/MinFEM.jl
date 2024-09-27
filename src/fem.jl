@@ -1,5 +1,5 @@
 """
-    phi(ii::Int64, x::AbstractVector) -> Float64
+$(TYPEDSIGNATURES)
     
 Returns ii-th local basis function evaluated at x. 
 Dimension is determined by length(x). 
@@ -13,7 +13,7 @@ function phi(ii::Int64, x::AbstractVector)
 end
 
 """
-    grad_phi(d::Int64, ii::Int64) -> Float64
+$(TYPEDSIGNATURES)
     
 Gradient of ii-th local basis functions in d dimensions.
 Note that the gradient is constant on an element.
@@ -36,7 +36,7 @@ end
         block::Int64 = 1
     ) -> Vector{Float64}
     
-Restricts a multivector of qdim×block×m elements for qdim dimensions 
+Restricts a multivector of qdim×block×m elements for qdim components 
 to the regular vector of m blocks of size block.
 """
 function restrict_multivector(
@@ -74,7 +74,7 @@ end
     ) -> Vector{Float64}
     
 Prolongates a vector of m blocks of size block to a multivector 
-for qdim dimensions of length qdim×block×m.
+for qdim components of length qdim×block×m.
 """
 function prolong_multivector(
     x::AbstractVector{Float64},
@@ -109,7 +109,7 @@ end
         order::Int64 = 1
     ) -> Vector{Float64}
     
-Returns the vector of weights for all elements of mesh and image dimension qdim.
+Returns the vector of weights for all elements of mesh and qdim components.
 Weight is equal to volume if 1st order integration by mid-point rule is used.
 """
 function assemble_weightmultivector(
@@ -137,7 +137,7 @@ end
         order::Int64 = 1
     ) -> Vector{Float64}
     
-Returns the vector of weights for all boundary elements of mesh and image dimension qdim.
+Returns the vector of weights for all boundary elements of mesh and qdim components.
 Weight is equal to volume if 1st order integration by mid-point rule is used.
 """
 function assemble_weightmultivector_boundary(
@@ -161,7 +161,7 @@ end
 """
     assemble_derivativematrix(mesh::Mesh; qdim::Int64=1) -> SparseMatrixCSC{Float64, Int64}
     
-Returns the discrete derivative matrix for all elements of mesh and image dimension qdim.
+Returns the discrete derivative matrix for all elements of mesh and qdim components.
 """
 function assemble_derivativematrix(mesh::Mesh; qdim::Int64=1)   
     AA = zeros(Float64, mesh.d * qdim * mesh.nelems * (mesh.d+1))
@@ -201,13 +201,8 @@ end
         mesh::Mesh;
         qdim::Int64 = 1
     ) -> SparseMatrixCSC{Float64, Int64}
-    assemble_laplacian(
-        D::SparseMatrixCSC{Float64, Int64},
-        w::AbstractVector{Float64}
-    ) -> SparseMatrixCSC{Float64, Int64}
 
-Returns the Laplacian stiffness matrix for all elements of mesh and image dimension qdim.
-Can either be assembled directly or from derivative matrix and weight vector.
+Returns the Laplacian stiffness matrix for all elements of mesh and qdim components.
 """
 function assemble_laplacian(
     mesh::Mesh;
@@ -249,6 +244,18 @@ function assemble_laplacian(
     return dropzeros!(L)
 end
 
+"""
+    assemble_laplacian(
+        D::SparseMatrixCSC{Float64, Int64},
+        w::AbstractVector{Float64}
+    ) -> SparseMatrixCSC{Float64, Int64}
+
+Returns the Laplacian stiffness matrix for all elements of a mesh and qdim components.
+
+Takes existing derivative matrix D and weight vector w as arguments.
+Can yield performance benefits compared to direct assembly if D already exists.
+Note that number of components and quadrature order in D and w have to match.
+"""
 function assemble_laplacian(
     D::SparseMatrixCSC{Float64, Int64},
     w::AbstractVector{Float64}
@@ -266,9 +273,10 @@ end
     ) -> SparseMatrixCSC{Float64, Int64}
     
 Returns the discrete derivative matrix for all or specied boundary elements 
-of mesh and image dimension qdim.
-Workaround based on the derivate tensor for the corresponding full element
-and the fact that the gradient ist constant on the element. 
+of mesh and qdim components.
+
+The implementation is based on the derivate tensor for the corresponding full element
+and the fact that the gradient ist constant on the element for linear elements. 
 """
 function assemble_derivativematrix_boundary(
     mesh::Mesh; 
@@ -320,9 +328,10 @@ end
     ) -> SparseMatrixCSC{Float64, Int64}
     
 Returns the discrete normal derivative matrix for all or specied boundary elements 
-of mesh and image dimension qdim.
-Workaround based on the derivate tensor for the corresponding full element
-and the fact that the gradient ist constant on the element. 
+of mesh and qdim components.
+
+The implementation is based on the derivate tensor for the corresponding full element
+and the fact that the gradient ist constant on the element for linear elements. 
 """
 function assemble_normalderivativematrix(
     mesh::Mesh; 
@@ -372,7 +381,7 @@ end
     ) -> SparseMatrixCSC{Float64, Int64}
     
 Returns the discrete basis matrix with given local integration order 
-for all elements of mesh and image dimension qdim.
+for all elements of mesh and qdim components.
 """
 function assemble_basismatrix(
     mesh::Mesh;
@@ -419,14 +428,9 @@ end
         qdim::Int64 = 1,
         order::Int64 = 1
     ) -> SparseMatrixCSC{Float64, Int64}
-    assemble_massmatrix(
-        E::SparseMatrixCSC{Float64, Int64},
-        w::AbstractVector{Float64}
-    ) -> SparseMatrixCSC{Float64, Int64}
 
 Returns the mass matrix with given local integration order for all elements 
-of mesh and image dimension qdim.
-Can either be assembled directly or from derivative matrix and weight vector.
+of mesh and qdim components.
 """
 function assemble_massmatrix(
     mesh::Mesh;
@@ -470,6 +474,16 @@ function assemble_massmatrix(
     return M
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Returns the mass matrix with given local integration order for all elements 
+of mesh and qdim components.
+
+Takes existing basis matrix E and weight vector w as arguments.
+Can yield performance benefits compared to direct assembly if E already exists.
+Note that number of components and quadrature order in E and w have to match.
+"""
 function assemble_massmatrix(
     E::SparseMatrixCSC{Float64, Int64}, 
     w::AbstractVector{Float64}
@@ -489,7 +503,7 @@ end
     ) -> SparseMatrixCSC{Float64, Int64}
     
 Returns the discrete basis matrix with given local integration order
-for all or specified boundary elements of mesh and image dimension qdim.
+for all or specified boundary elements of mesh and qdim components.
 """
 function assemble_basismatrix_boundary(
     mesh::Mesh; 
@@ -542,14 +556,9 @@ end
         qdim::Int64 = 1,
         order::Int64 = 1
     ) -> SparseMatrixCSC{Float64, Int64}
-    assemble_massmatrix_boundary(
-        E::SparseMatrixCSC{Float64, Int64},
-        w::AbstractVector{Float64}
-    ) -> SparseMatrixCSC{Float64, Int64}
 
 Returns the mass matrix with given local integration order 
-for all or specified boundary elements of mesh and image dimension qdim.
-Can either be assembled directly or from derivative matrix and weight vector.
+for all or specified boundary elements of mesh and image dimension qdim components.
 """
 function assemble_massmatrix_boundary(
     mesh::Mesh; 
@@ -596,6 +605,16 @@ function assemble_massmatrix_boundary(
     return sparse(II[1:n],JJ[1:n],AA[1:n], qdim*mesh.nnodes, qdim*mesh.nnodes)
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Returns the mass matrix with given local integration order 
+for all or specified boundary elements of mesh and image dimension qdim components.
+
+Takes existing boundary basis matrix E and weight vector w as arguments.
+Can yield performance benefits compared to direct assembly if E already exists.
+Note that number of components and quadrature order in E and w have to match.
+"""
 function assemble_massmatrix_boundary(
     E::SparseMatrixCSC{Float64, Int64},
     w::AbstractVector{Float64}
@@ -767,32 +786,34 @@ function assemble_cubicsecondderivativematrix(
 end
 
 """
-    strainTensor(grad::AbstractMatrix) -> AbstractMatrix
+$(TYPEDSIGNATURES)
 
 Returns the local strain tensor for linear elasticity with gradient as argument.
 """
-function strainTensor(grad::AbstractMatrix)
+function strain_tensor(
+    grad::AbstractMatrix
+) :: AbstractMatrix
     return 0.5 * (grad + grad')
 end
 
 """
-    stressTensor(grad::AbstractMatrix, lambda::Float64, mu::Float64) -> AbstractMatrix
+$(TYPEDSIGNATURES)
 
 Returns the local stress tensor for linear elasticity 
 with constant coefficients λ, μ and gradient as argument.
 """
-function stressTensor(grad::AbstractMatrix, lambda::Float64, mu::Float64)
+function stress_tensor(
+    grad::AbstractMatrix,
+    lambda::Float64,
+    mu::Float64
+) :: AbstractMatrix
     d = size(grad, 1)
-    epsilon = strainTensor(grad)
+    epsilon = strain_tensor(grad)
     return lambda * tr(epsilon) * Matrix{Float64}(I, d, d) + 2.0 * mu * epsilon
 end
 
 """
-    assemble_elasticity(
-        mesh::Mesh,
-        lambda::Float64,
-        mu::Float64
-    ) -> SparseMatrixCSC{Float64, Int64}
+$(TYPEDSIGNATURES)
 
 Returns the linear elasticity stiffness matrix with constant coefficients λ and μ 
 for all elements of mesh and image dimension qdim.
@@ -822,7 +843,7 @@ function assemble_elasticity(
                         grad_j = zeros(mesh.d, mesh.d)
                         grad_j[:,jc] = J * grad_phi(mesh.d, j)
                         elemMat[qdim*(i-1)+ic, qdim*(j-1)+jc] += 
-                            dot(stressTensor(grad_j, lambda, mu), strainTensor(grad_i))
+                            dot(stress_tensor(grad_j, lambda, mu), strain_tensor(grad_i))
                     end
                 end
             end
@@ -848,15 +869,8 @@ end
 
 """
     assemble_dirichletcondition!(
-        A,
+        A::SparseMatrixCSC{Float64, Int64},
         DI::Set{Int64}; 
-        rhs = [],
-        bc = [],
-        qdim::Int64 = 1,
-        insert = 1.0)
-    assemble_dirichletcondition!(
-        A,
-        DI::Set{Boundary};
         rhs = [],
         bc = [],
         qdim::Int64 = 1,
@@ -864,16 +878,18 @@ end
     )
 
 Modify a stiffness matrix and a right hand side according to the given Dirichlet conditions.
+
 DI has to be the set of node indices for which the condition should be active.
 For vector valued states either DI can be set to each component that should have a
 Dirichlet condtion or qdim is set, if all components should have the condition.
+If the rhs shall be updated bc needs to be specified explicitly as well.
 The value insert is put as diagonal element. Usually you want a 1.0 here.
 """
 function assemble_dirichletcondition!(
-    A,
+    A::SparseMatrixCSC{Float64, Int64},
     DI::Set{Int64}; 
-    rhs=[],
-    bc=[],
+    rhs = [],
+    bc = [],
     qdim::Int64 = 1,
     insert = 1.0
 )
@@ -892,6 +908,7 @@ function assemble_dirichletcondition!(
             end
         end
     end
+
     for i in DI
         for d = 1:qdim
             ii = qdim * (i-1) + d
@@ -903,8 +920,22 @@ function assemble_dirichletcondition!(
     dropzeros!(A)
 end
 
+"""
+    assemble_dirichletcondition!(
+        A::SparseMatrixCSC{Float64, Int64},
+        DI::Set{Boundary};
+        rhs = [],
+        bc = [],
+        qdim::Int64 = 1,
+        insert = 1.0
+    )
+
+Same as previous `$(FUNCTIONNAME)(...)`, but takes `Set{Boundary}` instead of `Set{Int64}`
+as argument for the Dirichlet nodes.
+Thus extracts the nodes first and then passes them to the base function.
+"""
 function assemble_dirichletcondition!(
-    A,
+    A::SparseMatrixCSC{Float64, Int64},
     DI::Set{Boundary};
     rhs = [],
     bc = [],
@@ -918,6 +949,78 @@ function assemble_dirichletcondition!(
         bc = bc,
         qdim = qdim,
         insert = insert
+    )
+end
+
+"""
+    assemble_dirichletcondition_rhs!(
+        A::SparseMatrixCSC{Float64, Int64},
+        rhs::AbstractVector{Float64},
+        DI::Set{Int64},
+        bc::AbstractVector{Float64};
+        qdim::Int64 = 1
+    )
+
+Modify a right hand side according to the given Dirichlet conditions.
+Behaviour is similar to `assemble_dirichletcondition!(...)` however the system matrix A is
+not updated. Can be relevant for iterative algorithm, where the system matrix is constant
+and only the right hand side changes. Then one can store the modified matrix and
+only assemble the right hand side in every iteration.
+
+DI has to be the set of node indices for which the condition should be active.
+For vector valued states either DI can be set to each component that should have a
+Dirichlet condtion or qdim is set, if all components should have the condition.
+"""
+function assemble_dirichletcondition_rhs!(
+    A::SparseMatrixCSC{Float64, Int64},
+    rhs::AbstractVector{Float64},
+    DI::Set{Int64},
+    bc::AbstractVector{Float64};
+    qdim::Int64 = 1
+)
+    if rhs != [] && bc != []
+        for i in DI
+            for d = 1:qdim
+                ii = qdim * (i-1) + d
+                bcind = A[:, ii].nzind
+                rhs[bcind] -= A[bcind, ii] * bc[ii]
+            end
+        end
+        for i in DI
+            for d = 1:qdim
+                ii = qdim * (i-1) + d
+                rhs[ii] = bc[ii]
+            end
+        end
+    end
+end
+
+"""
+    assemble_dirichletcondition_rhs!(
+        A::SparseMatrixCSC{Float64, Int64},
+        rhs::AbstractVector{Float64},
+        DI::Set{Boundary},
+        bc::AbstractVector{Float64};
+        qdim::Int64 = 1
+    )
+
+Same as previous `$(FUNCTIONNAME)(...)`, but takes `Set{Boundary}` instead of `Set{Int64}`
+as argument for the Dirichlet nodes.
+Thus extracts the nodes first and then passes them to the base function.
+"""
+function assemble_dirichletcondition_rhs!(
+    A::SparseMatrixCSC{Float64, Int64},
+    rhs::AbstractVector{Float64},
+    DI::Set{Boundary},
+    bc::AbstractVector{Float64};
+    qdim::Int64 = 1
+)
+    return assemble_dirichletcondition_rhs!(
+        A,
+        rhs,
+        extract_nodes(DI),
+        bc,
+        qdim = qdim
     )
 end
 
