@@ -117,7 +117,7 @@ function write_to_vtk_boundary(
     data_names::Array{String}, 
     file_name::String, 
     qdim::Array{Int64};
-    boundary=Set{Boundary}()
+    boundary = Set{Boundary}()
 )
     if isempty(boundary)
         boundaryElements = Set{Int64}(1 : mesh.nboundelems)
@@ -174,7 +174,7 @@ function write_to_vtk_boundary(
         data_names,
         file_name, 
         ones(Int64, length(x)) * qdim,
-        boundary=boundary
+        boundary = boundary
     )
 end
 

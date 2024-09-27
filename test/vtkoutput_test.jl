@@ -72,6 +72,7 @@ function test_vtk()
 
         write_to_vtk_boundary(bfh11, mesh1, "f", testDirPath * "/test_bf11a")
         write_to_vtk_boundary(bfh11, mesh1, "f", testDirPath * "/test_bf11b", qdim=1)
+        write_to_vtk_boundary(bfh11, mesh1, "f", testDirPath * "/test_bf11c", qdim=1, boundary=select_boundaries(mesh1))
 
         write_to_vtk(fh21, mesh2, "f", testDirPath * "/test_f21")
         write_to_vtk(fh22, mesh2, "f", testDirPath * "/test_f22a", qdim=2)
@@ -108,6 +109,16 @@ function test_vtk()
         write_to_vtk_boundary([bfh33, bfh32, bfh31], mesh3, ["f33","f32","f31"], testDirPath * "/test_bf3", [3,2,1])
     catch
         success = false
+    end
+
+    try
+        fh11mod = fh11[1:(end-2)]
+        write_to_vtk(fh11mod, mesh1, "f", testDirPath * "/test_f11mod")
+        success = false # fail if error was not thrown
+    catch e
+        if !isa(e, DimensionMismatch) || !occursin("vector does not match", e.msg)
+            success = false
+        end
     end
 
     rm(testDirPath, recursive=true, force=true)
