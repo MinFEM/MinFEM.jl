@@ -267,8 +267,6 @@ function open_vtkfile_boundary(
         type = VTKCellTypes.VTK_LINE
     elseif mesh.d == 3
         type = VTKCellTypes.VTK_TRIANGLE
-    else
-        throw(DomainError(mesh.d, "Invalid dimension."))
     end
 
     cells = Array{MeshCell,1}(undef, length(support))
