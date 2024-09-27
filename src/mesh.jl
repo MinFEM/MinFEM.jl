@@ -1314,7 +1314,7 @@ Extracts coordinates of the support nodes from the mesh
 and passes them to the base function.
 """
 function jacobian(mesh::Mesh, element::Int64)
-    return jacobian(mesh.Nodes[mesh.Elements[element]])
+    return jacobian(mesh, mesh.Elements[element])
 end
 
 """
