@@ -106,6 +106,34 @@ function test_mesh_fallbacks()
     return true
 end
 
+function test_mesh_jacobians()
+    mesh = import_mesh("test_line_v4.msh")
+    el = 1
+    j1,_ = jacobian(mesh, el)
+    j2,_ = jacobian(mesh, mesh.Elements[el])
+    j3,_ = jacobian(mesh.Nodes[mesh.Elements[el]])
+    (j1 != j2) && return false
+    (j2 != j3) && return false
+
+    mesh = import_mesh("test_square_v4.msh")
+    el = mesh.nelems
+    j1,_ = jacobian(mesh, el)
+    j2,_ = jacobian(mesh, mesh.Elements[el])
+    j3,_ = jacobian(mesh.Nodes[mesh.Elements[el]])
+    (j1 != j2) && return false
+    (j2 != j3) && return false
+
+    mesh = import_mesh("test_cube_v4.msh")
+    el = 1
+    j1,_ = jacobian(mesh, el)
+    j2,_ = jacobian(mesh, mesh.Elements[el])
+    j3,_ = jacobian(mesh.Nodes[mesh.Elements[el]])
+    (j1 != j2) && return false
+    (j2 != j3) && return false
+    
+    return true
+end
+
 function test_mesh_regions()
     mesh = unit_square(3)
 
@@ -186,5 +214,6 @@ end
 @test test_mesh("test_square")
 @test test_mesh("test_cube")
 @test test_mesh_fallbacks()
+@test test_mesh_jacobians()
 @test test_mesh_regions()
 @test test_mesh_quality()
