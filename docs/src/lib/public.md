@@ -8,7 +8,7 @@ CurrentModule = MinFEM
 
 Documentation for `MinFEM.jl`'s public interface.
 
-See the [Internals](internals.md) page of the library for the documentation 
+See the [Internal](internal.md) page of the library for the documentation 
 of internal types and functions.
 
 ## Contents
@@ -57,6 +57,7 @@ extract_nodes
 ### Function Discretization
 ```@docs
 evaluate_mesh_function
+evaluate_function
 evaluate_quadrature_function
 evaluate_quadrature_function_boundary
 ```
@@ -126,6 +127,7 @@ assemble_elasticity
 ### Boundary Condition Handling
 ```@docs
 assemble_dirichletcondition!
+assemble_dirichletcondition_rhs!
 assemble_dirichletprojection
 ```
 
@@ -133,8 +135,10 @@ assemble_dirichletprojection
 ```@docs
 pnorm
 qnorm
+twonorm
 pnorm_boundary
 qnorm_boundary
+twonorm_boundary
 conjugated_exponent
 ```
 
@@ -162,6 +166,5 @@ read_from_txt
 
 ```@index
 Pages = ["public.md"]
-Module = ["MinFEM"]
 Order = [:type, :function]
 ```

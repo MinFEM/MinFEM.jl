@@ -48,6 +48,6 @@ This also includes extensions of the finite element method not used for the tuto
 showed in this documentation.
 
 ```@contents
-Pages = ["lib/public.md", "lib/internals.md"]
+Pages = ["lib/public.md", "lib/internal.md"]
 Depth = 1
 ```
