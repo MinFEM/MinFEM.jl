@@ -1578,7 +1578,7 @@ as arguments. Extracts coordinates of the support nodes from the mesh
 and passes them to the base function.
 """
 function elementdiameter_boundary(mesh::Mesh, element::Int64)
-    return elementdiameter_boundary(mesh.Nodes[mesh.BoundaryElements[element]])
+    return elementdiameter_boundary(mesh, mesh.BoundaryElements[element])
 end
 
 """
