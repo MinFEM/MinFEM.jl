@@ -1818,7 +1818,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Return width L of a strip that the meshed domain fits into.
+Returns width L of a strip that the meshed domain fits into.
 """
 function stripwidth(mesh::Mesh)
     points = boundingbox(mesh)
@@ -1828,7 +1828,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Return two nodes which span the bounding box of the mesh.
+Returns two nodes which span the bounding box of the mesh.
 """
 function boundingbox(mesh::Mesh)
     min = Inf .* ones(mesh.d)
@@ -1844,4 +1844,30 @@ function boundingbox(mesh::Mesh)
         end
     end
     return Array[min,max]
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Returns gridsize parameter h of the given mesh.
+"""
+function gridsize(mesh::Mesh)
+    w = assemble_weightmultivector(mesh)
+    h = minimum((factorial(mesh.d).* w).^(1/mesh.d))
+
+    return h
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Returns quasi-uniformity parameter ρ of the given mesh.
+"""
+function quasiuniformity(mesh::Mesh)
+    w = assemble_weightmultivector(mesh)
+    h = minimum((factorial(mesh.d).* w).^(1/mesh.d))
+    
+    rho = maximum((factorial(mesh.d).* w).^(1/mesh.d)) / h
+    
+    return rho
 end
