@@ -1137,8 +1137,8 @@ end
 """
     evaluate_mesh_function(
         mesh::Mesh,
-        f::Function,
-        region::Set{Boundary};
+        f::Function; 
+        region::Set{Int64} = Set{Int64}(),
         qdim::Int64 = 1
     ) -> Vector{Float64}
 
