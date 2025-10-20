@@ -71,69 +71,88 @@ function test_norms()
     fh = evaluate_mesh_function(mesh, f)
     fe = evaluate_quadrature_function(mesh, f, order=5)
 
-    abs(pnorm(1.0, fh, mesh, order=1) - 1/2) >  1e-15 && return false
-    abs(pnorm(2.0, fh, mesh, order=2) - 3^(-1/2)) >  1e-15 && return false
-    abs(pnorm(3.0, fh, mesh, order=3) - 4^(-1/3)) >  1e-15 && return false
-    abs(pnorm(4.0, fh, mesh, order=4) - 5^(-1/4)) >  1e-15 && return false
-    abs(pnorm(5.0, fh, mesh, order=5) - 6^(-1/5)) >  1e-15 && return false
-    abs(pnorm(6.0, fh, mesh, order=6) - 7^(-1/6)) >  1e-15 && return false
-    abs(pnorm(7.0, fh, mesh, order=7) - 8^(-1/7)) >  1e-15 && return false
-    abs(pnorm(8.0, fh, mesh, order=8) - 9^(-1/8)) >  1e-15 && return false
-    abs(pnorm(9.0, fh, mesh, order=9) - 10^(-1/9)) >  1e-15 && return false
+    sol1(p) = (1/(p+1))^(1/p)
+
+    abs(pnorm(1.0, fh, mesh, order=1) - sol1(1.0)) >  1e-15 && return false
+    abs(pnorm(2.0, fh, mesh, order=2) - sol1(2.0)) >  1e-15 && return false
+    abs(pnorm(3.0, fh, mesh, order=3) - sol1(3.0)) >  1e-15 && return false
+    abs(pnorm(4.0, fh, mesh, order=4) - sol1(4.0)) >  1e-15 && return false
+    abs(pnorm(5.0, fh, mesh, order=5) - sol1(5.0)) >  1e-15 && return false
+    abs(pnorm(6.0, fh, mesh, order=6) - sol1(6.0)) >  1e-15 && return false
+    abs(pnorm(7.0, fh, mesh, order=7) - sol1(7.0)) >  1e-15 && return false
+    abs(pnorm(8.0, fh, mesh, order=8) - sol1(8.0)) >  1e-15 && return false
+    abs(pnorm(9.0, fh, mesh, order=9) - sol1(9.0)) >  1e-15 && return false
+
+    
     abs(pnorm(Inf, fh, mesh, order=1) - 1) >  1e-15 && return false
 
-    abs(pnorm(1.0, fe, mesh) - 1/2) >  1e-15 && return false
-    abs(pnorm(2.0, fe, mesh) - 3^(-1/2)) >  1e-15 && return false
-    abs(pnorm(3.0, fe, mesh) - 4^(-1/3)) >  1e-15 && return false
-    abs(pnorm(4.0, fe, mesh) - 5^(-1/4)) >  1e-15 && return false
-    abs(pnorm(5.0, fe, mesh) - 6^(-1/5)) >  1e-15 && return false
+    abs(pnorm(1.0, fe, mesh) - sol1(1.0)) >  1e-15 && return false
+    abs(pnorm(2.0, fe, mesh) - sol1(2.0)) >  1e-15 && return false
+    abs(pnorm(3.0, fe, mesh) - sol1(3.0)) >  1e-15 && return false
+    abs(pnorm(4.0, fe, mesh) - sol1(4.0)) >  1e-15 && return false
+    abs(pnorm(5.0, fe, mesh) - sol1(5.0)) >  1e-15 && return false
+    
     abs(pnorm(Inf, fe, mesh) - 0.996) >  1e-3 && return false
 
-    abs(twonorm(fh, mesh, order=2) - 3^(-1/2)) >  1e-15 && return false
+    abs(twonorm(fh, mesh, order=2) - sol1(2.0)) >  1e-15 && return false
+
 
     mesh = import_mesh("test_square_v4.msh")
     fh = evaluate_mesh_function(mesh, f)
     gh = evaluate_mesh_function(mesh, g, qdim=2)
 
-    abs(pnorm(1.0, fh, mesh, order=1) - 1/2) >  1e-15 && return false
-    abs(pnorm(2.0, fh, mesh, order=2) - 3^(-1/2)) >  1e-15 && return false
-    abs(pnorm(3.0, fh, mesh, order=3) - 4^(-1/3)) >  1e-15 && return false
-    abs(pnorm(4.0, fh, mesh, order=4) - 5^(-1/4)) >  1e-15 && return false
-    abs(pnorm(5.0, fh, mesh, order=5) - 6^(-1/5)) >  1e-15 && return false
-    abs(pnorm(6.0, fh, mesh, order=6) - 7^(-1/6)) >  1e-15 && return false
-    abs(pnorm(7.0, fh, mesh, order=7) - 8^(-1/7)) >  1e-15 && return false
-    abs(pnorm(8.0, fh, mesh, order=8) - 9^(-1/8)) >  1e-15 && return false
+    sol2(p) = (1/(p+1))^(1/p)
+
+    abs(pnorm(1.0, fh, mesh, order=1) - sol2(1.0)) >  1e-15 && return false
+    abs(pnorm(2.0, fh, mesh, order=2) - sol2(2.0)) >  1e-15 && return false
+    abs(pnorm(3.0, fh, mesh, order=3) - sol2(3.0)) >  1e-15 && return false
+    abs(pnorm(4.0, fh, mesh, order=4) - sol2(4.0)) >  1e-15 && return false
+    abs(pnorm(5.0, fh, mesh, order=5) - sol2(5.0)) >  1e-15 && return false
+    abs(pnorm(6.0, fh, mesh, order=6) - sol2(6.0)) >  1e-15 && return false
+    abs(pnorm(7.0, fh, mesh, order=7) - sol2(7.0)) >  1e-15 && return false
+    abs(pnorm(8.0, fh, mesh, order=8) - sol2(8.0)) >  1e-15 && return false
+    
     abs(pnorm(Inf, fh, mesh, order=1) - 1) >  1e-15 && return false
 
-    abs(pnorm(1.0, gh, mesh, order=1, qdim=2) - 2^(-1/2)) >  1e-15 && return false
-    abs(pnorm(2.0, gh, mesh, order=2, qdim=2) - (2/3)^(1/2)) >  1e-15 && return false
-    abs(pnorm(3.0, gh, mesh, order=3, qdim=2) - 2^(-1/6)) >  1e-15 && return false
-    abs(pnorm(4.0, gh, mesh, order=4, qdim=2) - (4/5)^(1/4)) >  1e-15 && return false
-    abs(pnorm(Inf, gh, mesh, order=1, qdim=2) - 2^(1/2)) >  1e-15 && return false
+    abs(twonorm(fh, mesh, order=2) - sol2(2.0)) >  1e-15 && return false
 
-    abs(qnorm(3.0, fh, mesh, order=3) - (2/5)^(2/3)) >  1e-5 && return false
-    abs(qnorm(4.0, fh, mesh, order=4) - (3/7)^(3/4)) >  1e-5 && return false
-    abs(qnorm(5.0, fh, mesh, order=5) - (4/9)^(4/5)) >  1e-5 && return false
-    abs(qnorm(6.0, fh, mesh, order=6) - (5/11)^(5/6)) >  1e-5 && return false
-    abs(qnorm(7.0, fh, mesh, order=7) - (6/13)^(6/7)) >  1e-5 && return false
-    abs(qnorm(8.0, fh, mesh, order=8) - (7/15)^(7/8)) >  1e-5 && return false
+    sol3(p) = (2/(p+1))^(1/p)
 
-    abs(twonorm(fh, mesh, order=2) - 3^(-1/2)) >  1e-15 && return false
-    abs(twonorm(gh, mesh, order=2, qdim=2) - (2/3)^(1/2)) >  1e-15 && return false
+    abs(pnorm(1.0, gh, mesh, order=1, qdim=2) - sol3(1.0)) >  1e-15 && return false
+    abs(pnorm(2.0, gh, mesh, order=2, qdim=2) - sol3(2.0)) >  1e-15 && return false
+    abs(pnorm(3.0, gh, mesh, order=3, qdim=2) - sol3(3.0)) >  1e-15 && return false
+    abs(pnorm(4.0, gh, mesh, order=4, qdim=2) - sol3(4.0)) >  1e-15 && return false
+    
+    abs(pnorm(Inf, gh, mesh, order=1, qdim=2) - 1) >  1e-15 && return false
+
+    abs(twonorm(gh, mesh, order=2, qdim=2) - sol3(2.0)) >  1e-15 && return false
+
+    q(p) = p / (p-1)
+    sol4(p) = (1/(q(p)+1))^(1/q(p))
+
+    abs(qnorm(3.0, fh, mesh, order=3) - sol4(3.0)) >  1e-5 && return false
+    abs(qnorm(4.0, fh, mesh, order=4) - sol4(4.0)) >  1e-5 && return false
+    abs(qnorm(5.0, fh, mesh, order=5) - sol4(5.0)) >  1e-5 && return false
+    abs(qnorm(6.0, fh, mesh, order=6) - sol4(6.0)) >  1e-5 && return false
+    abs(qnorm(7.0, fh, mesh, order=7) - sol4(7.0)) >  1e-5 && return false
+    abs(qnorm(8.0, fh, mesh, order=8) - sol4(8.0)) >  1e-5 && return false
 
     mesh = import_mesh("test_cube_v4.msh")
     fh = evaluate_mesh_function(mesh, f)
 
-    abs(pnorm(1.0, fh, mesh, order=1) - 1/2) >  1e-15 && return false
-    abs(pnorm(2.0, fh, mesh, order=2) - 3^(-1/2)) >  1e-15 && return false
-    abs(pnorm(3.0, fh, mesh, order=3) - 4^(-1/3)) >  1e-15 && return false
-    abs(pnorm(4.0, fh, mesh, order=4) - 5^(-1/4)) >  1e-15 && return false
-    abs(pnorm(5.0, fh, mesh, order=5) - 6^(-1/5)) >  1e-15 && return false
-    abs(pnorm(6.0, fh, mesh, order=6) - 7^(-1/6)) >  1e-15 && return false
-    abs(pnorm(7.0, fh, mesh, order=7) - 8^(-1/7)) >  1e-15 && return false
+    sol5(p) = (1/(p+1))^(1/p)
+
+    abs(pnorm(1.0, fh, mesh, order=1) - sol5(1.0)) >  1e-15 && return false
+    abs(pnorm(2.0, fh, mesh, order=2) - sol5(2.0)) >  1e-15 && return false
+    abs(pnorm(3.0, fh, mesh, order=3) - sol5(3.0)) >  1e-15 && return false
+    abs(pnorm(4.0, fh, mesh, order=4) - sol5(4.0)) >  1e-15 && return false
+    abs(pnorm(5.0, fh, mesh, order=5) - sol5(5.0)) >  1e-15 && return false
+    abs(pnorm(6.0, fh, mesh, order=6) - sol5(6.0)) >  1e-15 && return false
+    abs(pnorm(7.0, fh, mesh, order=7) - sol5(7.0)) >  1e-15 && return false
+    
     abs(pnorm(Inf, fh, mesh, order=1) - 1) >  1e-15 && return false
 
-    abs(twonorm(fh, mesh, order=2) - 3^(-1/2)) >  1e-15 && return false
+    abs(twonorm(fh, mesh, order=2) - sol5(2.0)) >  1e-15 && return false
 
     return true
 end
@@ -148,51 +167,65 @@ function test_boundary_norms()
     gh = evaluate_mesh_function(mesh, g, qdim=2)
     belems = extract_elements(select_boundaries(mesh))
 
-    abs(pnorm_boundary(1.0, fh, mesh, boundaryElements=belems, order=1) - 2) >  1e-15 && return false
-    abs(pnorm_boundary(2.0, fh, mesh, boundaryElements=belems, order=2) - (2/3+1)^(1/2)) >  1e-15 && return false
-    abs(twonorm_boundary(fh, mesh, boundaryElements=belems, order=2) - (2/3+1)^(1/2)) >  1e-15 && return false
-    abs(pnorm_boundary(3.0, fh, mesh, boundaryElements=belems, order=3) - (2/4+1)^(1/3)) >  1e-15 && return false
-    abs(pnorm_boundary(4.0, fh, mesh, boundaryElements=belems, order=4) - (2/5+1)^(1/4)) >  1e-15 && return false
-    abs(pnorm_boundary(5.0, fh, mesh, boundaryElements=belems, order=5) - (2/6+1)^(1/5)) >  1e-15 && return false
-    abs(pnorm_boundary(6.0, fh, mesh, boundaryElements=belems, order=6) - (2/7+1)^(1/6)) >  1e-15 && return false
-    abs(pnorm_boundary(7.0, fh, mesh, boundaryElements=belems, order=7) - (2/8+1)^(1/7)) >  1e-15 && return false
-    abs(pnorm_boundary(8.0, fh, mesh, boundaryElements=belems, order=8) - (2/9+1)^(1/8)) >  1e-15 && return false
-    abs(pnorm_boundary(9.0, fh, mesh, boundaryElements=belems, order=9) - (2/10+1)^(1/9)) >  1e-15 && return false
+    sol1(p) = (2/(p+1) + 1)^(1/p)
+
+    abs(pnorm_boundary(1.0, fh, mesh, boundaryElements=belems, order=1) - sol1(1.0)) >  1e-15 && return false
+    abs(pnorm_boundary(2.0, fh, mesh, boundaryElements=belems, order=2) - sol1(2.0)) >  1e-15 && return false
+    abs(pnorm_boundary(3.0, fh, mesh, boundaryElements=belems, order=3) - sol1(3.0)) >  1e-15 && return false
+    abs(pnorm_boundary(4.0, fh, mesh, boundaryElements=belems, order=4) - sol1(4.0)) >  1e-15 && return false
+    abs(pnorm_boundary(5.0, fh, mesh, boundaryElements=belems, order=5) - sol1(5.0)) >  1e-15 && return false
+    abs(pnorm_boundary(6.0, fh, mesh, boundaryElements=belems, order=6) - sol1(6.0)) >  1e-15 && return false
+    abs(pnorm_boundary(7.0, fh, mesh, boundaryElements=belems, order=7) - sol1(7.0)) >  1e-15 && return false
+    abs(pnorm_boundary(8.0, fh, mesh, boundaryElements=belems, order=8) - sol1(8.0)) >  1e-15 && return false
+    abs(pnorm_boundary(9.0, fh, mesh, boundaryElements=belems, order=9) - sol1(9.0)) >  1e-15 && return false
+    
     abs(pnorm_boundary(Inf, fh, mesh, boundaryElements=belems, order=1) - 1) >  1e-15 && return false
 
-    abs(pnorm_boundary(1.0, fe, mesh, boundaryElements=belems) - 2) >  1e-15 && return false
-    abs(pnorm_boundary(2.0, fe, mesh, boundaryElements=belems) - (2/3+1)^(1/2)) >  1e-15 && return false
-    abs(pnorm_boundary(3.0, fe, mesh, boundaryElements=belems) - (2/4+1)^(1/3)) >  1e-15 && return false
-    abs(pnorm_boundary(4.0, fe, mesh, boundaryElements=belems) - (2/5+1)^(1/4)) >  1e-15 && return false
-    abs(pnorm_boundary(5.0, fe, mesh, boundaryElements=belems) - (2/6+1)^(1/5)) >  1e-15 && return false
+    abs(pnorm_boundary(1.0, fe, mesh, boundaryElements=belems) - sol1(1.0)) >  1e-15 && return false
+    abs(pnorm_boundary(2.0, fe, mesh, boundaryElements=belems) - sol1(2.0)) >  1e-15 && return false
+    abs(pnorm_boundary(3.0, fe, mesh, boundaryElements=belems) - sol1(3.0)) >  1e-15 && return false
+    abs(pnorm_boundary(4.0, fe, mesh, boundaryElements=belems) - sol1(4.0)) >  1e-15 && return false
+    abs(pnorm_boundary(5.0, fe, mesh, boundaryElements=belems) - sol1(5.0)) >  1e-15 && return false
+    
     abs(pnorm_boundary(Inf, fe, mesh, boundaryElements=belems) - 1.0) >  1e-15 && return false
 
-    abs(pnorm_boundary(1.0, gh, mesh, boundaryElements=belems, order=1, qdim=2) - 2*(2^(1/2))) >  1e-15 && return false
-    abs(pnorm_boundary(2.0, gh, mesh, boundaryElements=belems, order=2, qdim=2) - (4/3+2)^(1/2)) >  1e-15 && return false
-    abs(twonorm_boundary(gh, mesh, boundaryElements=belems, order=2, qdim=2) - (4/3+2)^(1/2)) >  1e-15 && return false
-    abs(pnorm_boundary(3.0, gh, mesh, boundaryElements=belems, order=3, qdim=2) - (2^(1/2)+2^(3/2))^(1/3)) >  1e-15 && return false
-    abs(pnorm_boundary(4.0, gh, mesh, boundaryElements=belems, order=4, qdim=2) - (8/5+4)^(1/4)) >  1e-15 && return false
-    abs(pnorm_boundary(Inf, gh, mesh, boundaryElements=belems, order=1, qdim=2) - 2^(1/2)) >  1e-15 && return false
+    abs(twonorm_boundary(fh, mesh, boundaryElements=belems, order=2) - sol1(2.0)) >  1e-15 && return false
 
-    abs(qnorm_boundary(3.0, fh, mesh, boundaryElements=belems, order=3) - (4/5+1)^(1-(1/3))) >  1e-5 && return false
-    abs(qnorm_boundary(4.0, fh, mesh, boundaryElements=belems, order=4) - (6/7+1)^(1-(1/4))) >  1e-5 && return false
-    abs(qnorm_boundary(5.0, fh, mesh, boundaryElements=belems, order=5) - (8/9+1)^(1-(1/5))) >  1e-5 && return false
-    abs(qnorm_boundary(6.0, fh, mesh, boundaryElements=belems, order=6) - (10/11+1)^(1-(1/6))) >  1e-5 && return false
-    abs(qnorm_boundary(7.0, fh, mesh, boundaryElements=belems, order=7) - (12/13+1)^(1-(1/7))) >  1e-5 && return false
-    abs(qnorm_boundary(8.0, fh, mesh, boundaryElements=belems, order=8) - (14/15+1)^(1-(1/8))) >  1e-5 && return false
+    sol2(p) = (4/(p+1) + 2)^(1/p)
+
+    abs(pnorm_boundary(1.0, gh, mesh, boundaryElements=belems, order=1, qdim=2) - sol2(1.0)) >  1e-15 && return false
+    abs(pnorm_boundary(2.0, gh, mesh, boundaryElements=belems, order=2, qdim=2) - sol2(2.0)) >  1e-15 && return false
+    abs(pnorm_boundary(3.0, gh, mesh, boundaryElements=belems, order=3, qdim=2) - sol2(3.0)) >  1e-15 && return false
+    abs(pnorm_boundary(4.0, gh, mesh, boundaryElements=belems, order=4, qdim=2) - sol2(4.0)) >  1e-15 && return false
+    abs(pnorm_boundary(Inf, gh, mesh, boundaryElements=belems, order=1, qdim=2) - 1) >  1e-15 && return false
+
+    abs(twonorm_boundary(gh, mesh, boundaryElements=belems, order=2, qdim=2) - sol2(2.0)) >  1e-15 && return false
+
+    q(p) = p / (p-1)
+    sol3(p) = (2/(q(p)+1) + 1)^(1/q(p))
+
+    abs(qnorm_boundary(3.0, fh, mesh, boundaryElements=belems, order=3) - sol3(3.0)) >  1e-5 && return false
+    abs(qnorm_boundary(4.0, fh, mesh, boundaryElements=belems, order=4) - sol3(4.0)) >  1e-5 && return false
+    abs(qnorm_boundary(5.0, fh, mesh, boundaryElements=belems, order=5) - sol3(5.0)) >  1e-5 && return false
+    abs(qnorm_boundary(6.0, fh, mesh, boundaryElements=belems, order=6) - sol3(6.0)) >  1e-5 && return false
+    abs(qnorm_boundary(7.0, fh, mesh, boundaryElements=belems, order=7) - sol3(7.0)) >  1e-5 && return false
+    abs(qnorm_boundary(8.0, fh, mesh, boundaryElements=belems, order=8) - sol3(8.0)) >  1e-5 && return false
 
     mesh = import_mesh("test_cube_v4.msh")
     fh = evaluate_mesh_function(mesh, f)
     belems = extract_elements(select_boundaries(mesh))
 
-    abs(pnorm_boundary(1.0, fh, mesh, boundaryElements=belems, order=1) - (4/2+1)^(1/1)) >  1e-15 && return false
-    abs(pnorm_boundary(2.0, fh, mesh, boundaryElements=belems, order=2) - (4/3+1)^(1/2)) >  1e-15 && return false
-    abs(pnorm_boundary(3.0, fh, mesh, boundaryElements=belems, order=3) - (4/4+1)^(1/3)) >  1e-15 && return false
-    abs(pnorm_boundary(4.0, fh, mesh, boundaryElements=belems, order=4) - (4/5+1)^(1/4)) >  1e-15 && return false
-    abs(pnorm_boundary(5.0, fh, mesh, boundaryElements=belems, order=5) - (4/6+1)^(1/5)) >  1e-15 && return false
-    abs(pnorm_boundary(6.0, fh, mesh, boundaryElements=belems, order=6) - (4/7+1)^(1/6)) >  1e-15 && return false
-    abs(pnorm_boundary(7.0, fh, mesh, boundaryElements=belems, order=7) - (4/8+1)^(1/7)) >  1e-15 && return false
-    abs(pnorm_boundary(8.0, fh, mesh, boundaryElements=belems, order=8) - (4/9+1)^(1/8)) >  1e-15 && return false
+    sol4(p) = (4/(p+1) + 1)^(1/p)
+
+    abs(pnorm_boundary(1.0, fh, mesh, boundaryElements=belems, order=1) - sol4(1.0)) >  1e-15 && return false
+    abs(pnorm_boundary(2.0, fh, mesh, boundaryElements=belems, order=2) - sol4(2.0)) >  1e-15 && return false
+    abs(pnorm_boundary(3.0, fh, mesh, boundaryElements=belems, order=3) - sol4(3.0)) >  1e-15 && return false
+    abs(pnorm_boundary(4.0, fh, mesh, boundaryElements=belems, order=4) - sol4(4.0)) >  1e-15 && return false
+    abs(pnorm_boundary(5.0, fh, mesh, boundaryElements=belems, order=5) - sol4(5.0)) >  1e-15 && return false
+    abs(pnorm_boundary(6.0, fh, mesh, boundaryElements=belems, order=6) - sol4(6.0)) >  1e-15 && return false
+    abs(pnorm_boundary(7.0, fh, mesh, boundaryElements=belems, order=7) - sol4(7.0)) >  1e-15 && return false
+    abs(pnorm_boundary(8.0, fh, mesh, boundaryElements=belems, order=8) - sol4(8.0)) >  1e-15 && return false
+
     abs(pnorm_boundary(Inf, fh, mesh, boundaryElements=belems, order=1) - 1) >  1e-15 && return false
 
     return true
