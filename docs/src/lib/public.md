@@ -94,6 +94,7 @@ integral_over_reference_element
 ```@docs
 prolong_multivector
 restrict_multivector
+norm_multivector
 ```
 
 ### Weight Computation

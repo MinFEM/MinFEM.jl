@@ -1,4 +1,34 @@
 """
+    norm_multivector(
+        v::AbstractVector{Float64},
+        length::Int64,
+        qdim::Int64,
+        p::Float64 = 2
+    ) -> Vector{Float64}
+
+Returns vector with length, containing the p-norms of multi-entries in a multi-vector v,
+i.e., computes locally the p-norm of the qdim components at each designated entry.
+Defaults to the Eucledian norm p=2, but takes arbitrary parameter p as input. 
+"""
+function norm_multivector(
+        v::AbstractVector{Float64},
+        length::Int64,
+        qdim::Int64,
+        p::Float64 = 2
+    )
+
+    if isinf(p)
+        t = zeros(length)
+        for i = 1:length
+            t[i] = maximum(abs.(v[qdim*(i-1)+1:qdim*i]))
+        end
+        return t
+    else
+        return restrict_multivector(v.^p, length, qdim).^(1/p)
+    end
+end
+
+"""
     pnorm(
         p::Float64,
         v::AbstractVector{Float64},
@@ -43,7 +73,7 @@ function pnorm(
     end
 
     if qdim != 1
-        t = sqrt.(restrict_multivector(t.^2, le, qdim))
+        t = norm_multivector(t, le, qdim, p)
     end
     
     
@@ -154,7 +184,7 @@ function pnorm_boundary(
     end
     
     if qdim != 1
-        t = sqrt.(restrict_multivector(t.^2, le, qdim))
+        t = norm_multivector(t, le, qdim, p)
     end
 
     if isinf(p)
