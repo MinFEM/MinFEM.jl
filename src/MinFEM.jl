@@ -68,7 +68,8 @@ module MinFEM
             evaluate_quadrature_function_boundary
 
     export  prolong_multivector,
-            restrict_multivector
+            restrict_multivector,
+            norm_multivector
 
     export  assemble_weightmultivector,
             assemble_weightmultivector_boundary
