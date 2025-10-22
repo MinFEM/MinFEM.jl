@@ -24,7 +24,7 @@ function norm_multivector(
         end
         return t
     else
-        return restrict_multivector(v.^p, length, qdim).^(1/p)
+        return restrict_multivector(abs.(v).^p, length, qdim).^(1/p)
     end
 end
 
@@ -55,15 +55,15 @@ function pnorm(
     
     if length(v) == mesh.nnodes * qdim
         if isinf(p)
-            t = abs.(v)
+            t = v
             le = mesh.nnodes
         else
             E = assemble_basismatrix(mesh, qdim=qdim, order=order)
-            t = abs.(E * v)
+            t = E * v
             le = mesh.nelems * length(quadrature_weights(mesh.d, order))
         end
     elseif mod(length(v), mesh.nelems*qdim) == 0
-        t = abs.(v)
+        t = v
 
         nPoints = div(length(v), mesh.nelems * qdim)
         order = quadrature_order(mesh.d, nPoints)
@@ -72,7 +72,9 @@ function pnorm(
         throw(ArgumentError("The vector v does not have a valid length."))
     end
 
-    if qdim != 1
+    if qdim == 1
+        t = abs.(t)
+    else
         t = norm_multivector(t, le, qdim, p)
     end
     
