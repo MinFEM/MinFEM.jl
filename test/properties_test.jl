@@ -89,6 +89,17 @@ function test_properties()
     end
     abs(stripwidth(mesh) - 1) > 1e-15 && return false
 
+    reg_tetrahedron = [[0.0,0.0,0.0],[1.0,0.0,0.0],[0.0,1.0,0.0],[0.0,0.0,1.0]]
+    abs(inscribedball(reg_tetrahedron) - (1/(3+sqrt(3)))) > 1e-14 && return false
+
+    try
+        r = inscribedball([[0.0],[0.0],[0.0],[0.0],[0.0]])
+    catch e
+        if !isa(e, ArgumentError) || !occursin("Unsuitable set of coordinates", e.msg)
+            return false
+        end
+    end
+
     return true
 end
 

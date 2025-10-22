@@ -1897,11 +1897,6 @@ function inscribedball3d(coords::Array{Array{Float64,1},1})
     surface = s123 + s124 + s134 + s234
 
     volume =  det(base_jacobian(coords)) * elementvolume(3)
-    println(volume)
-    println(s123)
-    println(s124)
-    println(s134)
-    println(s234)
 
     radius_inscribed = 3 * volume / surface
 
@@ -1922,7 +1917,7 @@ function inscribedball(coords::Array{Array{Float64,1},1})
     elseif dim == 3
         return inscribedball3d(coords)
     else
-        throw(ErrorException("Unsuitable set of coordinates to span element."))
+        throw(ArgumentError("Unsuitable set of coordinates to span element."))
     end
 end
 
@@ -1946,7 +1941,7 @@ Extracts coordinates of the support nodes from the mesh
 and passes them to the base function.
 """
 function inscribedball(mesh::Mesh, element::Int64)
-    return inscribedball(mesh.Nodes[mesh.Elements[element]])
+    return inscribedball(mesh, mesh.Elements[element])
 end
 
 """
