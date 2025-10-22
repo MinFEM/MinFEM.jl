@@ -53,6 +53,9 @@ sort_boundaryelement
 ```@docs
 base_jacobian
 circleratio
+inscribedball1d
+inscribedball2d
+inscribedball3d
 ```
 
 ## FEM Utility

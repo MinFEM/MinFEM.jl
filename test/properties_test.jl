@@ -25,6 +25,7 @@ function test_properties()
         abs(bvols[i] - elementvolume_boundary(mesh, i)) > 1e-13 && return false
     end
     abs(gridsize(mesh) - 0.1) > 1e-14 && return false
+    abs(shaperegularity(mesh) - 2.0) > 1e-14 && return false
     abs(quasiuniformity(mesh) - 1.0) > 1e-14 && return false
 
     mesh = unit_square(2)
@@ -50,7 +51,9 @@ function test_properties()
         abs(bdiams[i] - 1/10) > 1e-15 && return false
         abs(bvols[i] - elementvolume_boundary(mesh, i)) > 1e-15 && return false
     end
-    abs(gridsize(mesh) - 0.1) > 1e-14 && return false
+ 
+    abs(gridsize(mesh) - 0.1*sqrt(2)) > 1e-14 && return false
+    abs(shaperegularity(mesh) - (2+2*sqrt(2))) > 1e-14 && return false
     abs(quasiuniformity(mesh) - 1.0) > 1e-14 && return false
 
     mesh = import_mesh("test_line_v4.msh")

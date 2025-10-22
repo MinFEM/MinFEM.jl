@@ -51,7 +51,9 @@ module MinFEM
             outernormalvector,
             stripwidth,
             boundingbox,
+            inscribedball,
             gridsize,
+            shaperegularity,
             quasiuniformity,
             volume,
             barycenter

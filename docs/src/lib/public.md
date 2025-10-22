@@ -76,6 +76,10 @@ elementangle
 outernormalvector
 stripwidth
 boundingbox
+inscribedball
+gridsize
+shaperegularity
+quasiuniformity
 volume
 barycenter
 ```

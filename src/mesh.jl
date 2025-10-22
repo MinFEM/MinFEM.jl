@@ -1849,25 +1849,169 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Returns gridsize parameter h of the given mesh.
+Returns the radius of the inscribed ball in the one-dimenional element
+spanned by two one-dimensional coords. In one dimension, 
+this reduces to half the elements length. 
 """
-function gridsize(mesh::Mesh)
-    w = assemble_weightmultivector(mesh)
-    h = minimum((factorial(mesh.d).* w).^(1/mesh.d))
-
-    return h
+function inscribedball1d(coords::Array{Array{Float64,1},1})
+    return abs(coords[2][1] - coords[1][1]) / 2
 end
 
 """
 $(TYPEDSIGNATURES)
 
-Returns quasi-uniformity parameter ρ of the given mesh.
+Returns the radius of the inscribed ball in the two-dimenional element
+spanned by three two-dimensional coords.
+"""
+function inscribedball2d(coords::Array{Array{Float64,1},1})
+    l3 = norm(coords[1]-coords[2])
+    l2 = norm(coords[1]-coords[3])
+    l1 = norm(coords[2]-coords[3])
+
+    lc = 0.5 * (l1+l2+l3)
+    area = sqrt(lc*(lc-l1)*(lc-l2)*(lc-l3))
+
+    radius_inscribed = area / lc
+
+    return radius_inscribed
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Returns the radius of the inscribed ball in the three-dimenional element
+spanned by four three-dimensional coords.
+"""
+function inscribedball3d(coords::Array{Array{Float64,1},1})
+    e12 = coords[2]-coords[1]
+    e13 = coords[3]-coords[1]
+    e14 = coords[4]-coords[1]
+    e23 = coords[3]-coords[2]
+    e24 = coords[4]-coords[2]
+
+    s123 = 0.5 * norm(cross(e12, e13))
+    s124 = 0.5 * norm(cross(e12, e14))
+    s134 = 0.5 * norm(cross(e13, e14))
+    s234 = 0.5 * norm(cross(e23, e24))
+
+    surface = s123 + s124 + s134 + s234
+
+    volume =  det(base_jacobian(coords)) * elementvolume(3)
+    println(volume)
+    println(s123)
+    println(s124)
+    println(s134)
+    println(s234)
+
+    radius_inscribed = 3 * volume / surface
+
+    return radius_inscribed
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Returns the radius of the inscribed ball for an element spanned by the given coordinates.
+"""
+function inscribedball(coords::Array{Array{Float64,1},1})
+    dim = length(coords)-1
+    if dim == 1
+        return inscribedball1d(coords)
+    elseif dim == 2
+        return inscribedball2d(coords)
+    elseif dim == 3
+        return inscribedball3d(coords)
+    else
+        throw(ErrorException("Unsuitable set of coordinates to span element."))
+    end
+end
+
+"""
+$(TYPEDSIGNATURES)
+    
+Same as previous `$(FUNCTIONNAME)(...)`, but takes a mesh and set of nodes as arguments.
+Extracts coordinates from the mesh and passes them to the base function.
+
+Commonly the coordinates correspond to one element in a mesh, but not necessarily have to.
+"""
+function inscribedball(mesh::Mesh, nodes::Array{Int64,1})
+    return inscribedball(mesh.Nodes[nodes])
+end
+
+"""
+$(TYPEDSIGNATURES)
+    
+Same as previous `$(FUNCTIONNAME)(...)`, but takes a mesh and an element id as arguments.
+Extracts coordinates of the support nodes from the mesh
+and passes them to the base function.
+"""
+function inscribedball(mesh::Mesh, element::Int64)
+    return inscribedball(mesh.Nodes[mesh.Elements[element]])
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Returns a vector of the radii of the inscribed balls of each element in the given mesh.
+"""
+function inscribedball(mesh::Mesh)
+    v = zeros(mesh.nelems)
+    ref_vol = elementvolume(mesh.d)
+
+    for el in eachindex(v)
+        v[el] = inscribedball(mesh, el)
+    end
+
+    return v
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Returns gridsize parameter h of the mesh,
+which is given by the maximum of all element diameters.
+Since we consider only tetrahedral elements,
+the diameters correspond to the longest edge length.
+Hence, the gridsize is the overall longest edge in the mesh.
+"""
+function gridsize(mesh::Mesh)
+    return maximum(elementdiameter(mesh))
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Returns shape regularity constant in the sense
+
+```math
+    \\max_{K \\in T_h} \\frac{h_K}{\\rho_K} \\leq C
+```
+
+where ``h_K`` is the diameter of element ``K``
+and ``\\rho_K`` denotes the radius of the largest inscribed cirlce in ``h_K``.
+"""
+function shaperegularity(mesh::Mesh)
+    hi = elementdiameter(mesh)
+    ri = inscribedball(mesh)
+    
+    return maximum(hi ./ ri)
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Returns quasi-uniformity constant in the sense
+
+```math
+    \\min_{K \\in T_h} \\frac{h_K}{h} \\geq C
+```
+
+where ``h_K`` is the diameter of element ``K``
+and ``h`` the gridsize of the mesh ``T_h``, i.e., the maximum over all diameters..
 """
 function quasiuniformity(mesh::Mesh)
-    w = assemble_weightmultivector(mesh)
-    h = minimum((factorial(mesh.d).* w).^(1/mesh.d))
+    hi = elementdiameter(mesh)
+    h = maximum(hi)
     
-    rho = maximum((factorial(mesh.d).* w).^(1/mesh.d)) / h
-    
-    return rho
+    return minimum(hi ./ h)
 end
