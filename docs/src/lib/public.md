@@ -66,22 +66,23 @@ evaluate_quadrature_function_boundary
 ```@docs
 jacobian
 jacobian_boundary
+outernormalvector
 elementvolume
 elementvolume_boundary
 elementbarycenter
 elementdiameter
 elementdiameter_boundary
-elementratio
-elementangle
-outernormalvector
-stripwidth
-boundingbox
+circumscribedball
 inscribedball
 gridsize
-shaperegularity
 quasiuniformity
+shaperegularity
+elementratio
+elementangle
 volume
 barycenter
+stripwidth
+boundingbox
 ```
 
 ### Local Quadrature

@@ -9,6 +9,8 @@ function test_properties_1d()
         any(abs.(bcs[i] .- elementbarycenter(mesh, i)) .> 1e-15) && return false
     end
     any(x -> abs(x - 1.0) > 1e-15, elementratio(mesh)) && return false
+    any(abs.(inscribedball(mesh) .- (1/4)) .> 1e-14) && return false
+    any(abs.(circumscribedball(mesh) .- (1/4)) .> 1e-14) && return false
 
     mesh = unit_interval(11)
     vols = elementvolume(mesh)
@@ -39,6 +41,11 @@ function test_properties_1d()
         end
     end
     abs(stripwidth(mesh) - 1) > 1e-15 && return false
+
+    reg_interval = [[0.0],[1.0]]
+    abs(inscribedball(reg_interval) - (1/2)) > 1e-14 && return false
+    abs(circumscribedball(reg_interval) - (1/2)) > 1e-14 && return false
+    abs(elementratio(reg_interval) - 1.0) > 1e-14 && return false
 
     return true
 end
@@ -84,6 +91,11 @@ function test_properties_2d()
         end
     end
     abs(stripwidth(mesh) - 1) > 1e-15 && return false
+
+    reg_triangle = [[0.0,0.0],[1.0,0.0],[0.0,1.0]]
+    abs(inscribedball(reg_triangle) - (1/(2+sqrt(2)))) > 1e-14 && return false
+    abs(circumscribedball(reg_triangle) - (sqrt(2)/2)) > 1e-14 && return false
+    abs(elementratio(reg_triangle) - (sqrt(2)+1)) > 1e-14 && return false
 
     return true
 end
