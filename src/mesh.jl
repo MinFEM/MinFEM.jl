@@ -1362,6 +1362,83 @@ end
 
 """
 $(TYPEDSIGNATURES)
+    
+Returns the outer normal vector at the ii-th boundary of the
+dim-dimensional reference element. 
+"""
+function outernormalvector(
+    dim::Int64,
+    ii::Int64
+)
+    if ii == dim+1
+        return ones(Float64, dim) ./ sqrt(dim)
+    else
+        eta = zeros(Float64, dim)
+        eta[dim+1-ii] = -1
+        return eta
+    end
+end
+
+"""
+$(TYPEDSIGNATURES)
+    
+Returns the outer normal vector at a boundary element of the given mesh using a
+pre-computed jacobian transformation matrix of the parent element.
+"""
+function outernormalvector(
+    mesh::Mesh,
+    boundaryElement::Int64,
+    J::AbstractMatrix{Float64}
+)
+    refNormal = outernormalvector(mesh.d, mesh.ParentBoundaries[boundaryElement])
+    
+    mesh.d == 1 && return refNormal
+
+    orth = J * refNormal
+    return orth ./ norm(orth,2)
+end
+
+"""
+$(TYPEDSIGNATURES)
+    
+Returns the outer normal vector at the given boundary element of the given mesh.
+"""
+function outernormalvector(
+    mesh::Mesh,
+    boundaryElement::Int64
+)
+    _, J = jacobian(mesh, mesh.Elements[mesh.ParentElements[boundaryElement]])
+    return outernormalvector(mesh, boundaryElement, J)
+end
+
+"""
+    outernormalvector(
+        mesh::Mesh;
+        boundaryElements::Set{Int64} = Set{Int64}()
+    ) -> Vector{Float64}
+    
+Returns coefficient vector of outer normal vectors at all or specified boundary elements
+of the given mesh.
+"""
+function outernormalvector(
+    mesh::Mesh;
+    boundaryElements::Set{Int64} = Set{Int64}()
+)
+    if isempty(boundaryElements)
+        boundaryElements = Set{Int64}(1 : mesh.nboundelems)
+    end
+    
+    eta = zeros(Float64, mesh.d * mesh.nboundelems)
+    
+    for bel in boundaryElements
+        eta[mesh.d*(bel-1)+1 : mesh.d*bel] += outernormalvector(mesh, bel)
+    end
+
+    return eta
+end
+
+"""
+$(TYPEDSIGNATURES)
 
 Returns volume of the d-dimensional reference element. 
 """
@@ -1600,37 +1677,286 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Returns ratio of inscribed to circumscribed circle radii
-for triangular element spanned by three given coordinates.
+Returns the radius of the circumscribed ball of the one-dimenional element
+spanned by two one-dimensional coords. In one dimension, 
+this reduces to half the elements length. 
 """
-function circleratio(coords::Array{Array{Float64,1},1})
-    l3 = norm(coords[1]-coords[2])
-    l2 = norm(coords[1]-coords[3])
-    l1 = norm(coords[2]-coords[3])
-
-    lc = 0.5 * (l1+l2+l3)
-    area = sqrt(lc*(lc-l1)*(lc-l2)*(lc-l3))
-
-    radius_circumsribed = l1*l2*l3 / (4*area)
-    radius_inscribed = area / lc
-
-    return radius_inscribed / radius_circumsribed
+function circumscribedball1d(coords::Array{Array{Float64,1},1})
+    return abs(coords[2][1] - coords[1][1]) / 2
 end
 
 """
 $(TYPEDSIGNATURES)
 
-Returns ratio of inscribed to circumscribed circle or sphere
+Returns the radius of the circumscribed ball of the two-dimenional element
+spanned by three two-dimensional coords.
+"""
+function circumscribedball2d(coords::Array{Array{Float64,1},1})
+    l12 = norm(coords[2] - coords[1])
+    l13 = norm(coords[3] - coords[1])
+    l23 = norm(coords[3] - coords[2])
+
+    lc = 0.5 * (l12+l13+l23)
+    area = sqrt(lc*(lc-l12)*(lc-l13)*(lc-l23))
+
+    return l12*l13*l23 / (4*area)
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Returns the radius of the circumscribed ball of the three-dimenional element
+spanned by four three-dimensional coords.
+"""
+function circumscribedball3d(coords::Array{Array{Float64,1},1})
+    e12 = coords[2]-coords[1]
+    e13 = coords[3]-coords[1]
+    e14 = coords[4]-coords[1]
+    
+    J = [e12 e13 e14]
+    v = [norm(e12)^2, norm(e13)^2, norm(e14)^2]
+
+    return 0.5 * norm(inv(J)' * v)
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Returns the radius of the circumscribed ball for an element spanned by the given coordinates.
+"""
+function circumscribedball(coords::Array{Array{Float64,1},1})
+    dim = length(coords)-1
+    if dim == 1
+        return circumscribedball1d(coords)
+    elseif dim == 2
+        return circumscribedball2d(coords)
+    elseif dim == 3
+        return circumscribedball3d(coords)
+    else
+        throw(ArgumentError("Unsuitable set of coordinates to span element."))
+    end
+end
+
+"""
+$(TYPEDSIGNATURES)
+    
+Same as previous `$(FUNCTIONNAME)(...)`, but takes a mesh and set of nodes as arguments.
+Extracts coordinates from the mesh and passes them to the base function.
+
+Commonly the coordinates correspond to one element in a mesh, but not necessarily have to.
+"""
+function circumscribedball(mesh::Mesh, nodes::Array{Int64,1})
+    return circumscribedball(mesh.Nodes[nodes])
+end
+
+"""
+$(TYPEDSIGNATURES)
+    
+Same as previous `$(FUNCTIONNAME)(...)`, but takes a mesh and an element id as arguments.
+Extracts coordinates of the support nodes from the mesh
+and passes them to the base function.
+"""
+function circumscribedball(mesh::Mesh, element::Int64)
+    return circumscribedball(mesh, mesh.Elements[element])
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Returns a vector of the radii of the circumscribed balls of each element in the given mesh.
+"""
+function circumscribedball(mesh::Mesh)
+    v = zeros(mesh.nelems)
+    ref_vol = elementvolume(mesh.d)
+
+    for el in eachindex(v)
+        v[el] = circumscribedball(mesh, el)
+    end
+
+    return v
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Returns the radius of the inscribed ball in the one-dimenional element
+spanned by two one-dimensional coords. In one dimension, 
+this reduces to half the elements length. 
+"""
+function inscribedball1d(coords::Array{Array{Float64,1},1})
+    return abs(coords[2][1] - coords[1][1]) / 2
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Returns the radius of the inscribed ball in the two-dimenional element
+spanned by three two-dimensional coords.
+"""
+function inscribedball2d(coords::Array{Array{Float64,1},1})
+    l12 = norm(coords[2] - coords[1])
+    l13 = norm(coords[3] - coords[1])
+    l23 = norm(coords[3] - coords[2])
+
+    lc = 0.5 * (l12+l13+l23)
+    area = sqrt(lc*(lc-l12)*(lc-l13)*(lc-l23))
+
+    return area / lc
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Returns the radius of the inscribed ball in the three-dimenional element
+spanned by four three-dimensional coords.
+"""
+function inscribedball3d(coords::Array{Array{Float64,1},1})
+    e12 = coords[2]-coords[1]
+    e13 = coords[3]-coords[1]
+    e14 = coords[4]-coords[1]
+    e23 = coords[3]-coords[2]
+    e24 = coords[4]-coords[2]
+
+    s123 = 0.5 * norm(cross(e12, e13))
+    s124 = 0.5 * norm(cross(e12, e14))
+    s134 = 0.5 * norm(cross(e13, e14))
+    s234 = 0.5 * norm(cross(e23, e24))
+    surface = s123 + s124 + s134 + s234
+
+    J = [e12 e13 e14]
+    volume =  det(J) * elementvolume(3)
+
+    return 3 * volume / surface
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Returns the radius of the inscribed ball for an element spanned by the given coordinates.
+"""
+function inscribedball(coords::Array{Array{Float64,1},1})
+    dim = length(coords)-1
+    if dim == 1
+        return inscribedball1d(coords)
+    elseif dim == 2
+        return inscribedball2d(coords)
+    elseif dim == 3
+        return inscribedball3d(coords)
+    else
+        throw(ArgumentError("Unsuitable set of coordinates to span element."))
+    end
+end
+
+"""
+$(TYPEDSIGNATURES)
+    
+Same as previous `$(FUNCTIONNAME)(...)`, but takes a mesh and set of nodes as arguments.
+Extracts coordinates from the mesh and passes them to the base function.
+
+Commonly the coordinates correspond to one element in a mesh, but not necessarily have to.
+"""
+function inscribedball(mesh::Mesh, nodes::Array{Int64,1})
+    return inscribedball(mesh.Nodes[nodes])
+end
+
+"""
+$(TYPEDSIGNATURES)
+    
+Same as previous `$(FUNCTIONNAME)(...)`, but takes a mesh and an element id as arguments.
+Extracts coordinates of the support nodes from the mesh
+and passes them to the base function.
+"""
+function inscribedball(mesh::Mesh, element::Int64)
+    return inscribedball(mesh, mesh.Elements[element])
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Returns a vector of the radii of the inscribed balls of each element in the given mesh.
+"""
+function inscribedball(mesh::Mesh)
+    v = zeros(mesh.nelems)
+    ref_vol = elementvolume(mesh.d)
+
+    for el in eachindex(v)
+        v[el] = inscribedball(mesh, el)
+    end
+
+    return v
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Returns gridsize parameter h of the mesh,
+which is given by the maximum of all element diameters.
+Since we consider only tetrahedral elements,
+the diameters correspond to the longest edge length.
+Hence, the gridsize is the overall longest edge in the mesh.
+"""
+function gridsize(mesh::Mesh)
+    return maximum(elementdiameter(mesh))
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Returns quasi-uniformity constant in the sense
+
+```math
+    \\min_{K \\in T_h} \\frac{h_K}{h} \\geq C
+```
+
+where ``h_K`` is the diameter of element ``K``
+and ``h`` the gridsize of the mesh ``T_h``, i.e., the maximum over all diameters..
+"""
+function quasiuniformity(mesh::Mesh)
+    hi = elementdiameter(mesh)
+    h = maximum(hi)
+    
+    return minimum(hi ./ h)
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Returns shape regularity constant in the sense
+
+```math
+    \\max_{K \\in T_h} \\frac{h_K}{\\rho_K} \\leq C
+```
+
+where ``h_K`` is the diameter of element ``K``
+and ``\\rho_K`` denotes the radius of the largest inscribed cirlce in ``h_K``.
+"""
+function shaperegularity(mesh::Mesh)
+    hi = elementdiameter(mesh)
+    ri = inscribedball(mesh)
+    
+    return maximum(hi ./ ri)
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Returns ratio of circumscribed to inscribed circle or sphere
 for an element spanned by nodes at the given coordinates.
+Also sometimes refered as aspectratio of the element.
+
+Optimal ratios are equal to the respective dimension of the element.
+Hence, the result can be normed with a factor 1/dim.
 """
 function elementratio(coords::Array{Array{Float64,1},1})
     dim = length(coords)-1
     if dim == 1
         return 1
     elseif dim == 2
-        return circleratio(coords)
+        return circumscribedball2d(coords) / inscribedball2d(coords)
+    elseif dim == 3
+        return circumscribedball3d(coords) / inscribedball3d(coords)
     else
-        throw(ErrorException("Element ratio for 3D currently not supported."))
+        throw(ArgumentError("Unsuitable set of coordinates to span element."))
     end
 end
 
@@ -1699,83 +2025,6 @@ end
 """
 $(TYPEDSIGNATURES)
     
-Returns the outer normal vector at the ii-th boundary of the
-dim-dimensional reference element. 
-"""
-function outernormalvector(
-    dim::Int64,
-    ii::Int64
-)
-    if ii == dim+1
-        return ones(Float64, dim) ./ sqrt(dim)
-    else
-        eta = zeros(Float64, dim)
-        eta[dim+1-ii] = -1
-        return eta
-    end
-end
-
-"""
-$(TYPEDSIGNATURES)
-    
-Returns the outer normal vector at a boundary element of the given mesh using a
-pre-computed jacobian transformation matrix of the parent element.
-"""
-function outernormalvector(
-    mesh::Mesh,
-    boundaryElement::Int64,
-    J::AbstractMatrix{Float64}
-)
-    refNormal = outernormalvector(mesh.d, mesh.ParentBoundaries[boundaryElement])
-    
-    mesh.d == 1 && return refNormal
-
-    orth = J * refNormal
-    return orth ./ norm(orth,2)
-end
-
-"""
-$(TYPEDSIGNATURES)
-    
-Returns the outer normal vector at the given boundary element of the given mesh.
-"""
-function outernormalvector(
-    mesh::Mesh,
-    boundaryElement::Int64
-)
-    _, J = jacobian(mesh, mesh.Elements[mesh.ParentElements[boundaryElement]])
-    return outernormalvector(mesh, boundaryElement, J)
-end
-
-"""
-    outernormalvector(
-        mesh::Mesh;
-        boundaryElements::Set{Int64} = Set{Int64}()
-    ) -> Vector{Float64}
-    
-Returns coefficient vector of outer normal vectors at all or specified boundary elements
-of the given mesh.
-"""
-function outernormalvector(
-    mesh::Mesh;
-    boundaryElements::Set{Int64} = Set{Int64}()
-)
-    if isempty(boundaryElements)
-        boundaryElements = Set{Int64}(1 : mesh.nboundelems)
-    end
-    
-    eta = zeros(Float64, mesh.d * mesh.nboundelems)
-    
-    for bel in boundaryElements
-        eta[mesh.d*(bel-1)+1 : mesh.d*bel] += outernormalvector(mesh, bel)
-    end
-
-    return eta
-end
-
-"""
-$(TYPEDSIGNATURES)
-    
 Returns the d-dimenional volume of the domain definded by the mesh. 
 """
 function volume(mesh::Mesh)
@@ -1818,7 +2067,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Return width L of a strip that the meshed domain fits into.
+Returns width L of a strip that the meshed domain fits into.
 """
 function stripwidth(mesh::Mesh)
     points = boundingbox(mesh)
@@ -1828,7 +2077,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Return two nodes which span the bounding box of the mesh.
+Returns two nodes which span the bounding box of the mesh.
 """
 function boundingbox(mesh::Mesh)
     min = Inf .* ones(mesh.d)

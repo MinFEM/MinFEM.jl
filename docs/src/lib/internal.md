@@ -52,7 +52,12 @@ sort_boundaryelement
 ## Mesh Utility
 ```@docs
 base_jacobian
-circleratio
+circumscribedball1d
+circumscribedball2d
+circumscribedball3d
+inscribedball1d
+inscribedball2d
+inscribedball3d
 ```
 
 ## FEM Utility
