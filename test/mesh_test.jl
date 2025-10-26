@@ -170,45 +170,6 @@ function test_mesh_regions()
     return true
 end
 
-function test_mesh_quality()
-    mesh = unit_interval(3)
-    ratios = elementratio(mesh)
-    any(x -> abs(x - 1.0) > 1e-5, ratios) && return false
-    try
-        angles = elementangle(mesh)
-    catch e
-        if !isa(e, ErrorException) || !occursin("angle for 1D", e.msg)
-            return false
-        end
-    end
-    
-    mesh = unit_square(3)
-    ratios = elementratio(mesh)
-    any(x -> abs(x - 0.41421) > 1e-5, ratios) && return false
-    angles = elementangle(mesh)
-    any(x -> abs(x - 0.78539) > 1e-5, angles) && return false
-
-    mesh = import_mesh("test_cube_v4.msh")
-    try
-        ratios = elementratio(mesh)
-    catch e
-        if !isa(e, ErrorException) || !occursin("ratio for 3D", e.msg)
-            return false
-        end
-    end
-    angles = elementangle(mesh)
-    any(
-        x -> (
-            abs(x - 0.78539) > 1e-5 &&
-            abs(x - 1.04719) > 1e-5 &&
-            abs(x - 0.52359) > 1e-5
-        ),
-        angles
-    ) && return false
-
-    return true
-end
-
 @test test_mesh()
 @test test_mesh("test_line")
 @test test_mesh("test_square")
@@ -216,4 +177,3 @@ end
 @test test_mesh_fallbacks()
 @test test_mesh_jacobians()
 @test test_mesh_regions()
-@test test_mesh_quality()

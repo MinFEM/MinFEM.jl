@@ -51,6 +51,7 @@ module MinFEM
             outernormalvector,
             stripwidth,
             boundingbox,
+            circumscribedball,
             inscribedball,
             gridsize,
             shaperegularity,

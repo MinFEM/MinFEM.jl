@@ -1620,17 +1620,23 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Returns ratio of inscribed to circumscribed circle or sphere
+Returns ratio of circumscribed to inscribed circle or sphere
 for an element spanned by nodes at the given coordinates.
+Also sometimes refered as aspectratio of the element.
+
+Optimal ratios are equal to the respective dimension of the element.
+Hence, the result can be normed with a factor 1/dim.
 """
 function elementratio(coords::Array{Array{Float64,1},1})
     dim = length(coords)-1
     if dim == 1
         return 1
     elseif dim == 2
-        return circleratio(coords)
+        return circumscribedball2d(coords) / inscribedball2d(coords)
+    elseif dim == 3
+        return circumscribedball3d(coords) / inscribedball3d(coords)
     else
-        throw(ErrorException("Element ratio for 3D currently not supported."))
+        throw(ArgumentError("Unsuitable set of coordinates to span element."))
     end
 end
 
@@ -1849,6 +1855,69 @@ end
 """
 $(TYPEDSIGNATURES)
 
+Returns the radius of the circumscribed ball of the one-dimenional element
+spanned by two one-dimensional coords. In one dimension, 
+this reduces to half the elements length. 
+"""
+function circumscribedball1d(coords::Array{Array{Float64,1},1})
+    return abs(coords[2][1] - coords[1][1]) / 2
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Returns the radius of the circumscribed ball of the two-dimenional element
+spanned by three two-dimensional coords.
+"""
+function circumscribedball2d(coords::Array{Array{Float64,1},1})
+    l12 = norm(coords[2] - coords[1])
+    l13 = norm(coords[3] - coords[1])
+    l23 = norm(coords[3] - coords[2])
+
+    lc = 0.5 * (l12+l13+l23)
+    area = sqrt(lc*(lc-l12)*(lc-l13)*(lc-l23))
+
+    return l12*l13*l23 / (4*area)
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Returns the radius of the circumscribed ball of the three-dimenional element
+spanned by four three-dimensional coords.
+"""
+function circumscribedball3d(coords::Array{Array{Float64,1},1})
+    e12 = coords[2]-coords[1]
+    e13 = coords[3]-coords[1]
+    e14 = coords[4]-coords[1]
+    
+    J = [e12 e13 e14]
+    v = [norm(e12)^2, norm(e13)^2, norm(e14)^2]
+
+    return 0.5 * norm(inv(J)' * v)
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Returns the radius of the circumscribed ball for an element spanned by the given coordinates.
+"""
+function circumscribedball(coords::Array{Array{Float64,1},1})
+    dim = length(coords)-1
+    if dim == 1
+        return circumscribedball1d(coords)
+    elseif dim == 2
+        return circumscribedball2d(coords)
+    elseif dim == 3
+        return circumscribedball3d(coords)
+    else
+        throw(ArgumentError("Unsuitable set of coordinates to span element."))
+    end
+end
+
+"""
+$(TYPEDSIGNATURES)
+
 Returns the radius of the inscribed ball in the one-dimenional element
 spanned by two one-dimensional coords. In one dimension, 
 this reduces to half the elements length. 
@@ -1864,16 +1933,14 @@ Returns the radius of the inscribed ball in the two-dimenional element
 spanned by three two-dimensional coords.
 """
 function inscribedball2d(coords::Array{Array{Float64,1},1})
-    l3 = norm(coords[1]-coords[2])
-    l2 = norm(coords[1]-coords[3])
-    l1 = norm(coords[2]-coords[3])
+    l12 = norm(coords[2] - coords[1])
+    l13 = norm(coords[3] - coords[1])
+    l23 = norm(coords[3] - coords[2])
 
-    lc = 0.5 * (l1+l2+l3)
-    area = sqrt(lc*(lc-l1)*(lc-l2)*(lc-l3))
+    lc = 0.5 * (l12+l13+l23)
+    area = sqrt(lc*(lc-l12)*(lc-l13)*(lc-l23))
 
-    radius_inscribed = area / lc
-
-    return radius_inscribed
+    return area / lc
 end
 
 """
@@ -1893,10 +1960,10 @@ function inscribedball3d(coords::Array{Array{Float64,1},1})
     s124 = 0.5 * norm(cross(e12, e14))
     s134 = 0.5 * norm(cross(e13, e14))
     s234 = 0.5 * norm(cross(e23, e24))
-
     surface = s123 + s124 + s134 + s234
 
-    volume =  det(base_jacobian(coords)) * elementvolume(3)
+    J = [e12 e13 e14]
+    volume =  det(J) * elementvolume(3)
 
     radius_inscribed = 3 * volume / surface
 
