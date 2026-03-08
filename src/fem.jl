@@ -164,7 +164,7 @@ end
 Returns the discrete derivative matrix for all elements of mesh and qdim components.
 """
 function assemble_derivativematrix(mesh::Mesh; qdim::Int64=1)   
-    AA = zeros(Float64, mesh.d * qdim * mesh.nelems * (mesh.d+1))
+    AA = zeros(Float64, mesh.nelems * mesh.d * (mesh.d+1) * qdim)
     II = zeros(Int64, length(AA))
     JJ = zeros(Int64, length(AA))
     n = 0
@@ -208,7 +208,7 @@ function assemble_laplacian(
     mesh::Mesh;
     qdim::Int64 = 1
 )
-    AA = zeros(Float64, qdim^2 * mesh.nelems * (mesh.d+1)^2)
+    AA = zeros(Float64, mesh.nelems * (mesh.d+1)^2 * qdim)
     II = zeros(Int64, length(AA))
     JJ = zeros(Int64, length(AA))
     n = 0
@@ -287,7 +287,7 @@ function assemble_derivativematrix_boundary(
         boundaryElements = Set{Int64}(1 : mesh.nboundelems)
     end
 
-    AA = zeros(Float64, mesh.d * qdim * mesh.nboundelems * (mesh.d+1))
+    AA = zeros(Float64, mesh.nboundelems * mesh.d * (mesh.d+1) * qdim)
     II = zeros(Int64, length(AA))
     JJ = zeros(Int64, length(AA))
     n = 0
@@ -341,7 +341,7 @@ function assemble_normalderivativematrix(
     if isempty(boundaryElements)
         boundaryElements = Set{Int64}(1 : mesh.nboundelems)
     end
-    AA = zeros(Float64, qdim * mesh.nboundelems * (mesh.d+1))
+    AA = zeros(Float64, length(boundaryElements) * (mesh.d+1) * qdim)
     II = zeros(Int64, length(AA))
     JJ = zeros(Int64, length(AA))
     n = 0
@@ -391,7 +391,7 @@ function assemble_basismatrix(
     quadX = quadrature_points(mesh.d, order)
     xle = length(quadX)
     
-    AA = zeros(Float64, xle * qdim * mesh.nelems * (mesh.d+1))
+    AA = zeros(Float64, mesh.nelems * xle * (mesh.d+1) * qdim)
     II = zeros(Int64, length(AA))
     JJ = zeros(Int64, length(AA))
     n = 0
@@ -437,7 +437,7 @@ function assemble_massmatrix(
     qdim::Int64 = 1,
     order::Int64 = 3
 )
-    AA = zeros(Float64, qdim^2 * mesh.nelems * (mesh.d+1)^2)
+    AA = zeros(Float64, mesh.nelems * qdim * (mesh.d+1)^2)
     II = zeros(Int64, length(AA))
     JJ = zeros(Int64, length(AA))
     n = 0
@@ -518,7 +518,7 @@ function assemble_basismatrix_boundary(
     quadX = quadrature_points_boundary(mesh.d, order)
     xle = length(quadX)
     
-    AA = zeros(Float64, xle * qdim * mesh.nboundelems * mesh.d)
+    AA = zeros(Float64, length(boundaryElements) * xle * mesh.d * qdim)
     II = zeros(Int64, length(AA))
     JJ = zeros(Int64, length(AA))
     n = 0
@@ -570,7 +570,7 @@ function assemble_massmatrix_boundary(
         boundaryElements = Set{Int64}(1 : mesh.nboundelems)
     end
 
-    AA = zeros(Float64, qdim^2 * mesh.nelems * (mesh.d)^2)
+    AA = zeros(Float64, length(boundaryElements) * qdim * (mesh.d)^2)
     II = zeros(Int64, length(AA))
     JJ = zeros(Int64, length(AA))
     n = 0
@@ -825,7 +825,7 @@ function assemble_elasticity(
 )
     qdim = mesh.d
 
-    AA = zeros(Float64, mesh.nelems * qdim^2 * (mesh.d+1)^2)
+    AA = zeros(Float64, mesh.nelems * (mesh.d+1)^2 * qdim^2)
     II = zeros(Int64, length(AA))
     JJ = zeros(Int64, length(AA))
     n = 0
