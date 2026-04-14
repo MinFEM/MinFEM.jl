@@ -21,6 +21,7 @@ module MinFEM
     export  Mesh,
             Boundary,
             Domain,
+            Entity,
             PDESystem
 
     export  unit_square,
