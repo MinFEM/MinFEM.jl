@@ -480,9 +480,12 @@ end
 $(TYPEDSIGNATURES)
     
 Returns highest quadrature order archived by using n points in d dimensions.
+Computes this based on the order of the underlying one dimensional element
+and the shift introduced for the Cartesian product in higher dimension.
 """
 function quadrature_order(d::Int64, n::Int64)
-    return 2 * trunc(Int64, n^(1/d)) - 1
+    o1 = 2 * trunc(Int64, n^(1/d)) - 1 
+    return o1 - (d-1)
 end
 
 """
