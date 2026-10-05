@@ -428,11 +428,17 @@ function import_mesh1(f::IOStream)
         end
         push!(Entities[d+1][el[3]].Elements, i)
     end
+
+    nodeElements = nodeelements(Elements, nnodes)
   
     for (i,el) in enumerate(_Elements[d-1])
         _boundarynodes = copy(el[4:end])
 
-        ParentElements[i] = findfirst(x -> issubset(_boundarynodes, x), Elements)
+        candidates = nodeElements[_boundarynodes[1]]
+        ParentElements[i] = candidates[
+            findfirst(x -> issubset(_boundarynodes, Elements[x]), candidates)
+        ]
+
         ParentBoundaries[i] = parentboundary(
             _boundarynodes, 
             Elements[ParentElements[i]]
@@ -573,11 +579,17 @@ function import_mesh2(f::IOStream)
         end
         push!(Entities[d+1][el[3]].Elements, i)
     end
+
+    nodeElements = nodeelements(Elements, nnodes)
   
     for (i,el) in enumerate(_Elements[d])
         _boundarynodes = copy(el[4:end])
 
-        ParentElements[i] = findfirst(x -> issubset(_boundarynodes, x), Elements)
+        candidates = nodeElements[_boundarynodes[1]]
+        ParentElements[i] = candidates[
+            findfirst(x -> issubset(_boundarynodes, Elements[x]), candidates)
+        ]
+
         ParentBoundaries[i] = parentboundary(
             _boundarynodes, 
             Elements[ParentElements[i]]
@@ -778,10 +790,16 @@ function import_mesh4(f::IOStream)
         push!(Entities[d+1][el[3]].Elements, i)
     end
 
+    nodeElements = nodeelements(Elements, nnodes)
+
     for (i, el) in enumerate(_BoundaryElements)
         _boundarynodes = [NodeNumbering[n] for n in el[4:end]]
 
-        ParentElements[i] = findfirst(x -> issubset(_boundarynodes, x), Elements)
+        candidates = nodeElements[_boundarynodes[1]]
+        ParentElements[i] = candidates[
+            findfirst(x -> issubset(_boundarynodes, Elements[x]), candidates)
+        ]
+
         ParentBoundaries[i] = parentboundary(
             _boundarynodes, 
             Elements[ParentElements[i]]
@@ -932,6 +950,23 @@ function gmsh_dimfromtype(t::Int64)
                                 "Only first order tetrahedral and corresponing" *
                                 "lower dimensional types are supported."))
     end
+end
+
+"""
+$(TYPEDSIGNATURES)
+    
+Returns a list, which features for each node the indices of elements containing it.
+"""
+function nodeelements(elements::Array{Array{Int64,1},1}, nnodes::Int64)
+    list = [Array{Int64,1}() for k in 1:nnodes]
+
+    for (i, nodes) in enumerate(elements)
+        for node in nodes
+            push!(list[node], i)
+        end
+    end
+
+    return list    
 end
 
 """
