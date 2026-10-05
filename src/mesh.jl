@@ -1453,7 +1453,7 @@ Returns volume of the given element in the given mesh.
 """
 function elementvolume(mesh::Mesh, element::Int64)
     detJ = det(base_jacobian(mesh, element))
-    return detJ * elementvolume(mesh.d)
+    return abs(detJ) * elementvolume(mesh.d)
 end
 
 """
@@ -1467,7 +1467,7 @@ function elementvolume(mesh::Mesh)
 
     for el in eachindex(v)
         detJ = det(base_jacobian(mesh, el))
-        v[el] = detJ * ref_vol
+        v[el] = abs(detJ) * ref_vol
     end
 
     return v
@@ -1489,7 +1489,7 @@ Returns volume of the given boundary element in the given mesh.
 """
 function elementvolume_boundary(mesh::Mesh, element::Int64)
     detJ = jacobian_boundary(mesh, element)
-    return detJ * elementvolume(mesh.d-1)
+    return abs(detJ) * elementvolume(mesh.d-1)
 end
 
 """
@@ -1503,7 +1503,7 @@ function elementvolume_boundary(mesh::Mesh)
     
     for el in eachindex(v)
         detJ = jacobian_boundary(mesh, el)
-        v[el] = detJ * ref_vol
+        v[el] = abs(detJ) * ref_vol
     end
 
     return v
@@ -1824,7 +1824,7 @@ function inscribedball3d(coords::Array{Array{Float64,1},1})
     surface = s123 + s124 + s134 + s234
 
     J = [e12 e13 e14]
-    volume =  det(J) * elementvolume(3)
+    volume =  abs(det(J)) * elementvolume(3)
 
     return 3 * volume / surface
 end
@@ -2033,7 +2033,7 @@ function volume(mesh::Mesh)
 
     for el = 1:mesh.nelems
         detJ = det(base_jacobian(mesh, el))
-        v += detJ * ref_vol
+        v += abs(detJ) * ref_vol
     end
 
     return v

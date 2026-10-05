@@ -227,7 +227,7 @@ function assemble_laplacian(
                 end
             end
         end
-        elemMat *= detJ / factorial(mesh.d) 
+        elemMat *= abs(detJ) / factorial(mesh.d) 
 
         for i = 1:(mesh.d+1)
             for j = 1:(mesh.d+1)
@@ -452,7 +452,7 @@ function assemble_massmatrix(
         for i = 1:(mesh.d+1)
             for j = 1:(mesh.d+1)
                 for (q, x) in enumerate(quadX)
-                    elemMat[i,j] += phi(i, x) * phi(j, x) * quadW[q] * detJ
+                    elemMat[i,j] += phi(i, x) * phi(j, x) * quadW[q] * abs(detJ)
                 end
             end
         end
@@ -585,7 +585,7 @@ function assemble_massmatrix_boundary(
         for i = 1:mesh.d
             for j = 1:mesh.d
                 for (q, x) in enumerate(quadX)
-                    elemMat[i,j] += phi(i, x) * phi(j, x) * quadW[q] * detJ
+                    elemMat[i,j] += phi(i, x) * phi(j, x) * quadW[q] * abs(detJ)
                 end
             end
         end
@@ -658,7 +658,7 @@ function assemble_cubicterm(
 
         for i = 1:mesh.d+1
             for (q, x) in enumerate(quadX)
-                V[nodes[i]] += y_cubic[q] * phi(i, x) * quadW[q] * detJ
+                V[nodes[i]] += y_cubic[q] * phi(i, x) * quadW[q] * abs(detJ)
             end
         end
     end
@@ -706,7 +706,7 @@ function assemble_cubicderivativematrix(
             for j = 1:mesh.d+1
                 for (q, x) in enumerate(quadX)
                     elemMat[i,j] += 3.0 * y_quadratic[q] * 
-                                    phi(i, x) * phi(j, x) * quadW[q] * detJ
+                                    phi(i, x) * phi(j, x) * quadW[q] * abs(detJ)
                 end
             end
         end
@@ -767,7 +767,7 @@ function assemble_cubicsecondderivativematrix(
             for j = 1:mesh.d+1
                 for (q, x) in enumerate(quadX)
                     elemMat[i,j] += 6.0 * y_quad[q] * p_quad[q] *
-                                    phi(i, x) * phi(j, x) * quadW[q] * detJ
+                                    phi(i, x) * phi(j, x) * quadW[q] * abs(detJ)
                 end
             end
         end
@@ -848,7 +848,7 @@ function assemble_elasticity(
                 end
             end
         end
-        elemMat *= detJ / factorial(mesh.d)
+        elemMat *= abs(detJ) / factorial(mesh.d)
 
         for i = 1:(mesh.d+1)
             for j = 1:(mesh.d+1)
