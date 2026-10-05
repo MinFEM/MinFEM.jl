@@ -14,7 +14,7 @@ function norm_multivector(
         v::AbstractVector{Float64},
         length::Int64,
         qdim::Int64,
-        p::Float64 = 2
+        p::Float64 = 2.0
     )
 
     if isinf(p)
