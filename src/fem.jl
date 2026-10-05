@@ -426,7 +426,7 @@ end
     assemble_massmatrix(
         mesh::Mesh;
         qdim::Int64 = 1,
-        order::Int64 = 1
+        order::Int64 = 3
     ) -> SparseMatrixCSC{Float64, Int64}
 
 Returns the mass matrix with given local integration order for all elements 
@@ -554,7 +554,7 @@ end
         mesh::Mesh; 
         boundaryElements::Set{Int64} = Set{Int64}(), 
         qdim::Int64 = 1,
-        order::Int64 = 1
+        order::Int64 = 3
     ) -> SparseMatrixCSC{Float64, Int64}
 
 Returns the mass matrix with given local integration order 
@@ -962,9 +962,11 @@ end
     )
 
 Modify a right hand side according to the given Dirichlet conditions.
-Behaviour is similar to `assemble_dirichletcondition!(...)` however the system matrix A is
-not updated. Can be relevant for iterative algorithm, where the system matrix is constant
-and only the right hand side changes. Then one can store the modified matrix and
+Behaviour is similar to `assemble_dirichletcondition!(...)`,
+however the provided system matrix A is not updated.
+Can be relevant for iterative algorithm, where the system matrix is constant
+and only the right hand side changes. Then one can store both
+a copy of the original matrix and a copy of the modified matrix and then
 only assemble the right hand side in every iteration.
 
 DI has to be the set of node indices for which the condition should be active.
