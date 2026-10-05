@@ -2087,7 +2087,8 @@ function boundingbox(mesh::Mesh)
         for k = 1:mesh.d
             if v[k] < min[k]
                 min[k] = v[k]
-            elseif v[k] > max[k]
+            end
+            if v[k] > max[k]
                 max[k] = v[k]
             end
         end
