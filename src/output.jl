@@ -25,9 +25,9 @@ function write_to_vtk(
     for k in eachindex(x)
         iscelldata::Bool = false
         dimlength::Int64 = 0
-        if mod(length(x[k]), mesh.nnodes*qdim[k]) == 0
+        if length(x[k]) == mesh.nnodes*qdim[k]
             dimlength = mesh.nnodes
-        elseif mod(length(x[k]), mesh.nelems*qdim[k]) == 0
+        elseif length(x[k]) == mesh.nelems*qdim[k]
             dimlength = mesh.nelems
             iscelldata = true
         else
