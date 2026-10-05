@@ -745,10 +745,10 @@ function import_mesh4(f::IOStream)
 
             if elemType == boundaryElementType
                 append!(_BoundaryElements, [val])
-            elseif elementType == elementType
+            elseif elemType == elementType
                 append!(_Elements, [val])
             else
-                println("Not supported element tpye $elemType for $d-dimensional mesh.")
+                println("Not supported element type $elemType for $d-dimensional mesh.")
             end
         end
     end
