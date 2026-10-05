@@ -1391,14 +1391,10 @@ function outernormalvector(
     J::AbstractMatrix{Float64}
 )
     refNormal = outernormalvector(mesh.d, mesh.ParentBoundaries[boundaryElement])
-
+    
     orth = J * refNormal
 
-    if mesh.d == 1
-        return orth
-    else
-        return orth ./ norm(orth,2)
-    end
+    return orth ./ norm(orth,2)
 end
 
 """
