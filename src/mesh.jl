@@ -838,7 +838,7 @@ function export_mesh(mesh::Mesh, fileName::String)
                         length(findall(x -> x.Name != "", mesh.Domains))
     if nPhysicalNames > 0
         write(f, "\$PhysicalNames\n")
-        write(f, "$(length(mesh.Boundaries)+length(mesh.Domains))\n")
+        write(f, "$(nPhysicalNames)\n")
         for (key,val) in sort(collect(pairs(mesh.Boundaries)), by=x->x[1])
             if val.Name != ""
                 write(f, "$(mesh.d-1) $key \"$(val.Name)\"\n")
