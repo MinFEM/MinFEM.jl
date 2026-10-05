@@ -524,7 +524,8 @@ function import_mesh2(f::IOStream)
         a = split(l, " ")
 
         elemDim = gmsh_dimfromtype(parse(Int64, a[2]))
-        val = parse.(Int64, a[3:(6+elemDim)])
+        ntags = parse(Int64, a[3])
+        val = parse.(Int64, [a[3:5]; a[(4+ntags):(4+ntags+elemDim)]])
         append!(_Elements[elemDim+1], [val])
     end
 
