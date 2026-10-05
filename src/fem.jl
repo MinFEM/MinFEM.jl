@@ -755,7 +755,7 @@ function assemble_cubicsecondderivativematrix(
         
         y_quad = zeros(length(quadW))
         p_quad = zeros(length(quadW))
-        for i = 1:3
+        for i = 1:mesh.d+1
             for (q, x) in enumerate(quadX)
                 y_quad[q] += y[nodes[i]] * phi(i, x)
                 p_quad[q] += p[nodes[i]] * phi(i, x)
