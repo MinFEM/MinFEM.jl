@@ -428,11 +428,17 @@ function import_mesh1(f::IOStream)
         end
         push!(Entities[d+1][el[3]].Elements, i)
     end
+
+    nodeElements = nodeelements(Elements, nnodes)
   
     for (i,el) in enumerate(_Elements[d-1])
         _boundarynodes = copy(el[4:end])
 
-        ParentElements[i] = findfirst(x -> issubset(_boundarynodes, x), Elements)
+        candidates = nodeElements[_boundarynodes[1]]
+        ParentElements[i] = candidates[
+            findfirst(x -> issubset(_boundarynodes, Elements[x]), candidates)
+        ]
+
         ParentBoundaries[i] = parentboundary(
             _boundarynodes, 
             Elements[ParentElements[i]]
@@ -524,7 +530,8 @@ function import_mesh2(f::IOStream)
         a = split(l, " ")
 
         elemDim = gmsh_dimfromtype(parse(Int64, a[2]))
-        val = parse.(Int64, a[3:(6+elemDim)])
+        ntags = parse(Int64, a[3])
+        val = parse.(Int64, [a[3:5]; a[(4+ntags):(4+ntags+elemDim)]])
         append!(_Elements[elemDim+1], [val])
     end
 
@@ -572,11 +579,17 @@ function import_mesh2(f::IOStream)
         end
         push!(Entities[d+1][el[3]].Elements, i)
     end
+
+    nodeElements = nodeelements(Elements, nnodes)
   
     for (i,el) in enumerate(_Elements[d])
         _boundarynodes = copy(el[4:end])
 
-        ParentElements[i] = findfirst(x -> issubset(_boundarynodes, x), Elements)
+        candidates = nodeElements[_boundarynodes[1]]
+        ParentElements[i] = candidates[
+            findfirst(x -> issubset(_boundarynodes, Elements[x]), candidates)
+        ]
+
         ParentBoundaries[i] = parentboundary(
             _boundarynodes, 
             Elements[ParentElements[i]]
@@ -745,10 +758,10 @@ function import_mesh4(f::IOStream)
 
             if elemType == boundaryElementType
                 append!(_BoundaryElements, [val])
-            elseif elementType == elementType
+            elseif elemType == elementType
                 append!(_Elements, [val])
             else
-                println("Not supported element tpye $elemType for $d-dimensional mesh.")
+                println("Not supported element type $elemType for $d-dimensional mesh.")
             end
         end
     end
@@ -777,10 +790,16 @@ function import_mesh4(f::IOStream)
         push!(Entities[d+1][el[3]].Elements, i)
     end
 
+    nodeElements = nodeelements(Elements, nnodes)
+
     for (i, el) in enumerate(_BoundaryElements)
         _boundarynodes = [NodeNumbering[n] for n in el[4:end]]
 
-        ParentElements[i] = findfirst(x -> issubset(_boundarynodes, x), Elements)
+        candidates = nodeElements[_boundarynodes[1]]
+        ParentElements[i] = candidates[
+            findfirst(x -> issubset(_boundarynodes, Elements[x]), candidates)
+        ]
+
         ParentBoundaries[i] = parentboundary(
             _boundarynodes, 
             Elements[ParentElements[i]]
@@ -838,7 +857,7 @@ function export_mesh(mesh::Mesh, fileName::String)
                         length(findall(x -> x.Name != "", mesh.Domains))
     if nPhysicalNames > 0
         write(f, "\$PhysicalNames\n")
-        write(f, "$(length(mesh.Boundaries)+length(mesh.Domains))\n")
+        write(f, "$(nPhysicalNames)\n")
         for (key,val) in sort(collect(pairs(mesh.Boundaries)), by=x->x[1])
             if val.Name != ""
                 write(f, "$(mesh.d-1) $key \"$(val.Name)\"\n")
@@ -931,6 +950,23 @@ function gmsh_dimfromtype(t::Int64)
                                 "Only first order tetrahedral and corresponing" *
                                 "lower dimensional types are supported."))
     end
+end
+
+"""
+$(TYPEDSIGNATURES)
+    
+Returns a list, which features for each node the indices of elements containing it.
+"""
+function nodeelements(elements::Array{Array{Int64,1},1}, nnodes::Int64)
+    list = [Array{Int64,1}() for k in 1:nnodes]
+
+    for (i, nodes) in enumerate(elements)
+        for node in nodes
+            push!(list[node], i)
+        end
+    end
+
+    return list    
 end
 
 """
@@ -1392,9 +1428,8 @@ function outernormalvector(
 )
     refNormal = outernormalvector(mesh.d, mesh.ParentBoundaries[boundaryElement])
     
-    mesh.d == 1 && return refNormal
-
     orth = J * refNormal
+
     return orth ./ norm(orth,2)
 end
 
@@ -1453,7 +1488,7 @@ Returns volume of the given element in the given mesh.
 """
 function elementvolume(mesh::Mesh, element::Int64)
     detJ = det(base_jacobian(mesh, element))
-    return detJ * elementvolume(mesh.d)
+    return abs(detJ) * elementvolume(mesh.d)
 end
 
 """
@@ -1467,7 +1502,7 @@ function elementvolume(mesh::Mesh)
 
     for el in eachindex(v)
         detJ = det(base_jacobian(mesh, el))
-        v[el] = detJ * ref_vol
+        v[el] = abs(detJ) * ref_vol
     end
 
     return v
@@ -1489,7 +1524,7 @@ Returns volume of the given boundary element in the given mesh.
 """
 function elementvolume_boundary(mesh::Mesh, element::Int64)
     detJ = jacobian_boundary(mesh, element)
-    return detJ * elementvolume(mesh.d-1)
+    return abs(detJ) * elementvolume(mesh.d-1)
 end
 
 """
@@ -1503,7 +1538,7 @@ function elementvolume_boundary(mesh::Mesh)
     
     for el in eachindex(v)
         detJ = jacobian_boundary(mesh, el)
-        v[el] = detJ * ref_vol
+        v[el] = abs(detJ) * ref_vol
     end
 
     return v
@@ -1824,7 +1859,7 @@ function inscribedball3d(coords::Array{Array{Float64,1},1})
     surface = s123 + s124 + s134 + s234
 
     J = [e12 e13 e14]
-    volume =  det(J) * elementvolume(3)
+    volume =  abs(det(J)) * elementvolume(3)
 
     return 3 * volume / surface
 end
@@ -2033,7 +2068,7 @@ function volume(mesh::Mesh)
 
     for el = 1:mesh.nelems
         detJ = det(base_jacobian(mesh, el))
-        v += detJ * ref_vol
+        v += abs(detJ) * ref_vol
     end
 
     return v
@@ -2087,7 +2122,8 @@ function boundingbox(mesh::Mesh)
         for k = 1:mesh.d
             if v[k] < min[k]
                 min[k] = v[k]
-            elseif v[k] > max[k]
+            end
+            if v[k] > max[k]
                 max[k] = v[k]
             end
         end

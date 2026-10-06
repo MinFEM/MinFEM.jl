@@ -6,7 +6,7 @@ function test_restriction()
     restrict_multivector(x, 4, 1, block=1) != [1.0, 2.0, 3.0, 4.0] && return false
     restrict_multivector(x, 2, 2, block=1) != [3.0, 7.0] && return false
     restrict_multivector(x, 2, 1, block=2) != [1.0, 2.0, 3.0, 4.0] && return false
-    restrict_multivector(x, 1, 2, block=2) != [3.0, 7.0] && return false
+    restrict_multivector(x, 1, 2, block=2) != [4.0, 6.0] && return false
 
     return true
 end
@@ -18,6 +18,25 @@ function test_prolongation()
     prolong_multivector(x, 2, 2, block=1) != [1.0, 1.0, 2.0, 2.0] && return false
     prolong_multivector(x, 2, 1, block=2) != [1.0, 2.0] && return false
     prolong_multivector(x, 1, 2, block=2) != [1.0, 2.0, 1.0, 2.0] && return false
+
+    return true
+end
+
+function test_restrictionprolongation()
+    x = [1.0, 2.0 , 3.0, 4.0]
+    qdim = 2
+
+    y = prolong_multivector(x, 4, qdim, block=1)
+    restrict_multivector(y, 4, qdim, block=1) != qdim .* x && return false
+
+    y = prolong_multivector(x, 2, qdim, block=2)
+    restrict_multivector(y, 2, qdim, block=2) != qdim .* x && return false
+
+    y = restrict_multivector(x, 2, qdim, block=1)
+    prolong_multivector(y, 2, qdim, block=1) != [3.0, 3.0, 7.0, 7.0] && return false
+
+    y = restrict_multivector(x, 1, qdim, block=2)
+    prolong_multivector(y, 1, qdim, block=2) != [4.0, 6.0, 4.0, 6.0] && return false
 
     return true
 end
@@ -161,6 +180,7 @@ end
 
 @test test_restriction()
 @test test_prolongation()
+@test test_restrictionprolongation()
 @test test_laplacian()
 @test test_derivative_boundary()
 @test test_derivative_normal()

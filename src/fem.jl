@@ -36,8 +36,12 @@ end
         block::Int64 = 1
     ) -> Vector{Float64}
     
-Restricts a multivector of qdim×block×m elements for qdim components 
+Restricts a multivector of size m×qdim×block elements for qdim components 
 to the regular vector of m blocks of size block.
+Note that the blocks are summed point-wise over the qdim components.
+Hence, block>1 serves as a workaround if qdim is not the innermost index of a vector.
+By usual construction in MinFEM, e.g., in `assemble_weightmultivector`, qdim is the
+innermost index and hence the default setting `block=1` does not have to be adjusted.
 """
 function restrict_multivector(
     x::AbstractVector{Float64},
@@ -56,9 +60,10 @@ function restrict_multivector(
     else
         v = zeros(block*m)
         for i = 1:m
+            elementoffset = qdim * block * (i-1) 
             for j = 1:qdim
-                v[block*(i-1) + j] = 
-                    sum(x[(qdim*block*(i-1)+(j-1)*block+1):(qdim*block*(i-1)+block*j)])
+                offset = elementoffset + (j-1) * block
+                v[block*(i-1)+1 : block*i] += x[offset+1 : offset+block]
             end
         end
         return v
@@ -74,7 +79,11 @@ end
     ) -> Vector{Float64}
     
 Prolongates a vector of m blocks of size block to a multivector 
-for qdim components of length qdim×block×m.
+for qdim components of length m×qdim×block.
+Note that the default setting `block=1` corresponds to the convention in MinFEM
+that the number of components qdim is the innermost index of multivectors.
+When treated with care, `block>1` can be used to construct vectors
+with blocks of size block for each component in workarounds.  
 """
 function prolong_multivector(
     x::AbstractVector{Float64},
@@ -227,7 +236,7 @@ function assemble_laplacian(
                 end
             end
         end
-        elemMat *= detJ / factorial(mesh.d) 
+        elemMat *= abs(detJ) / factorial(mesh.d) 
 
         for i = 1:(mesh.d+1)
             for j = 1:(mesh.d+1)
@@ -426,7 +435,7 @@ end
     assemble_massmatrix(
         mesh::Mesh;
         qdim::Int64 = 1,
-        order::Int64 = 1
+        order::Int64 = 3
     ) -> SparseMatrixCSC{Float64, Int64}
 
 Returns the mass matrix with given local integration order for all elements 
@@ -452,7 +461,7 @@ function assemble_massmatrix(
         for i = 1:(mesh.d+1)
             for j = 1:(mesh.d+1)
                 for (q, x) in enumerate(quadX)
-                    elemMat[i,j] += phi(i, x) * phi(j, x) * quadW[q] * detJ
+                    elemMat[i,j] += phi(i, x) * phi(j, x) * quadW[q] * abs(detJ)
                 end
             end
         end
@@ -499,7 +508,7 @@ end
         mesh::Mesh; 
         boundaryElements::Set{Int64} = Set{Int64}(),
         qdim::Int64 = 1,
-        order::Int64 = 1
+        order::Int64 = 3
     ) -> SparseMatrixCSC{Float64, Int64}
     
 Returns the discrete basis matrix with given local integration order
@@ -554,7 +563,7 @@ end
         mesh::Mesh; 
         boundaryElements::Set{Int64} = Set{Int64}(), 
         qdim::Int64 = 1,
-        order::Int64 = 1
+        order::Int64 = 3
     ) -> SparseMatrixCSC{Float64, Int64}
 
 Returns the mass matrix with given local integration order 
@@ -585,7 +594,7 @@ function assemble_massmatrix_boundary(
         for i = 1:mesh.d
             for j = 1:mesh.d
                 for (q, x) in enumerate(quadX)
-                    elemMat[i,j] += phi(i, x) * phi(j, x) * quadW[q] * detJ
+                    elemMat[i,j] += phi(i, x) * phi(j, x) * quadW[q] * abs(detJ)
                 end
             end
         end
@@ -658,7 +667,7 @@ function assemble_cubicterm(
 
         for i = 1:mesh.d+1
             for (q, x) in enumerate(quadX)
-                V[nodes[i]] += y_cubic[q] * phi(i, x) * quadW[q] * detJ
+                V[nodes[i]] += y_cubic[q] * phi(i, x) * quadW[q] * abs(detJ)
             end
         end
     end
@@ -706,7 +715,7 @@ function assemble_cubicderivativematrix(
             for j = 1:mesh.d+1
                 for (q, x) in enumerate(quadX)
                     elemMat[i,j] += 3.0 * y_quadratic[q] * 
-                                    phi(i, x) * phi(j, x) * quadW[q] * detJ
+                                    phi(i, x) * phi(j, x) * quadW[q] * abs(detJ)
                 end
             end
         end
@@ -755,7 +764,7 @@ function assemble_cubicsecondderivativematrix(
         
         y_quad = zeros(length(quadW))
         p_quad = zeros(length(quadW))
-        for i = 1:3
+        for i = 1:mesh.d+1
             for (q, x) in enumerate(quadX)
                 y_quad[q] += y[nodes[i]] * phi(i, x)
                 p_quad[q] += p[nodes[i]] * phi(i, x)
@@ -767,7 +776,7 @@ function assemble_cubicsecondderivativematrix(
             for j = 1:mesh.d+1
                 for (q, x) in enumerate(quadX)
                     elemMat[i,j] += 6.0 * y_quad[q] * p_quad[q] *
-                                    phi(i, x) * phi(j, x) * quadW[q] * detJ
+                                    phi(i, x) * phi(j, x) * quadW[q] * abs(detJ)
                 end
             end
         end
@@ -848,7 +857,7 @@ function assemble_elasticity(
                 end
             end
         end
-        elemMat *= detJ / factorial(mesh.d)
+        elemMat *= abs(detJ) / factorial(mesh.d)
 
         for i = 1:(mesh.d+1)
             for j = 1:(mesh.d+1)
@@ -962,9 +971,11 @@ end
     )
 
 Modify a right hand side according to the given Dirichlet conditions.
-Behaviour is similar to `assemble_dirichletcondition!(...)` however the system matrix A is
-not updated. Can be relevant for iterative algorithm, where the system matrix is constant
-and only the right hand side changes. Then one can store the modified matrix and
+Behaviour is similar to `assemble_dirichletcondition!(...)`,
+however the provided system matrix A is not updated.
+Can be relevant for iterative algorithm, where the system matrix is constant
+and only the right hand side changes. Then one can store both
+a copy of the original matrix and a copy of the modified matrix and then
 only assemble the right hand side in every iteration.
 
 DI has to be the set of node indices for which the condition should be active.

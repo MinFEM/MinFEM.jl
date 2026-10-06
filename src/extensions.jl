@@ -14,7 +14,7 @@ function norm_multivector(
         v::AbstractVector{Float64},
         length::Int64,
         qdim::Int64,
-        p::Float64 = 2
+        p::Float64 = 2.0
     )
 
     if isinf(p)
@@ -163,7 +163,12 @@ function pnorm_boundary(
     
     if length(v) == mesh.nnodes * qdim
         if isinf(p)
-            t = abs.(v)
+            nodes = Set{Int64}()
+            for bel in boundaryElements
+                union!(nodes, mesh.BoundaryElements[bel])
+            end
+            
+            t = abs.(evaluate_function(v, nodes, qdim=qdim))
             le = mesh.nnodes
         else
             E = assemble_basismatrix_boundary(
@@ -176,11 +181,16 @@ function pnorm_boundary(
             le = mesh.nboundelems * length(quadrature_weights_boundary(mesh.d, order))
         end
     elseif mod(length(v), mesh.nboundelems*qdim) == 0
-        t = abs.(v)
-
         nPoints = div(length(v), mesh.nboundelems * qdim)
         order = quadrature_order(mesh.d-1, nPoints)
         le = mesh.nboundelems * nPoints
+
+        t = zeros(Float64, length(v))
+        block = qdim*nPoints
+        for bel in boundaryElements
+            entries = block*(bel-1)+1 : block*bel
+            t[entries] = abs.(v[entries])
+        end
     else
         throw(ArgumentError("The vector v does not have a valid length."))
     end
