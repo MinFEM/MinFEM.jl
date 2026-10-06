@@ -36,8 +36,12 @@ end
         block::Int64 = 1
     ) -> Vector{Float64}
     
-Restricts a multivector of qdim×block×m elements for qdim components 
+Restricts a multivector of size m×qdim×block elements for qdim components 
 to the regular vector of m blocks of size block.
+Note that the blocks are summed point-wise over the qdim components.
+Hence, block>1 serves as a workaround if qdim is not the innermost index of a vector.
+By usual construction in MinFEM, e.g., in `assemble_weightmultivector`, qdim is the
+innermost index and hence the default setting `block=1` does not have to be adjusted.
 """
 function restrict_multivector(
     x::AbstractVector{Float64},
@@ -56,9 +60,10 @@ function restrict_multivector(
     else
         v = zeros(block*m)
         for i = 1:m
+            elementoffset = qdim * block * (i-1) 
             for j = 1:qdim
-                v[block*(i-1) + j] = 
-                    sum(x[(qdim*block*(i-1)+(j-1)*block+1):(qdim*block*(i-1)+block*j)])
+                offset = elementoffset + (j-1) * block
+                v[block*(i-1)+1 : block*i] += x[offset+1 : offset+block]
             end
         end
         return v
@@ -74,7 +79,11 @@ end
     ) -> Vector{Float64}
     
 Prolongates a vector of m blocks of size block to a multivector 
-for qdim components of length qdim×block×m.
+for qdim components of length m×qdim×block.
+Note that the default setting `block=1` corresponds to the convention in MinFEM
+that the number of components qdim is the innermost index of multivectors.
+When treated with care, `block>1` can be used to construct vectors
+with blocks of size block for each component in workarounds.  
 """
 function prolong_multivector(
     x::AbstractVector{Float64},
