@@ -233,5 +233,22 @@ function test_quadrature_base()
     return true
 end
 
+function test_quadrature_order()
+    for d = 1:3
+        quadrature_order(d, 1) != 1 && return false
+    end
+
+    for d = 1:3
+        for order = 0:7
+            le = length(quadrature_points(d, order))
+            quadrature_points(d, quadrature_order(d, le)) != quadrature_points(d, order) &&
+                return false
+        end
+    end
+    return true
+
+end
+
 @test test_quadrature()
 @test test_quadrature_base()
+@test test_quadrature_order()
